@@ -2,9 +2,9 @@
 
 > The book this repository is for is undergoing active development. As such, this repository is not to be considered stable.
 
-This repository stores the code for the book entitled PhoneGap Enterprise published by Packt Publishing. You can purchase the book at [Pack's Site]. If you obtained this code package from Packt, you may wish to download the package from GitHub in order receive the most recent changes. The package is available at [...]().
+This repository stores the code for the book entitled PhoneGap Enterprise published by Packt Publishing. You can purchase the book at [Pack's Site]. If you obtained this code package from Packt, you may wish to download the package from GitHub in order receive the most recent changes. The package is available at <https://github.com/kerrishotts/PhoneGap-Enterprise-Code-Bundle>.
 
-Note: This book does not cover the basics of PhoneGap, rather it covers issues specific to the enterprise. If you need to learn about the basics of PhoneGap, you migh want to puchase Phonegap 3.x Mobile Application Develoment from [Packt's](http://www.packtpub.com/phonegap-3-x-mobile-application-development-hotshot/book).
+Note: This book does not cover the basics of PhoneGap, rather it covers issues specific to the enterprise. If you need to learn about the basics of PhoneGap, you migh want to puchase Phonegap 3.x Mobile Application Develoment from [Packt](http://www.packtpub.com/phonegap-3-x-mobile-application-development-hotshot/book).
 
 There are several directories within this project -- each representing the specific tier of development. For database-related content, see the `database` directory. For middle-tier content, see the `middle-tier` directory. For the demo PhoneGap app, see `tasker`.  The code therein is not a complete Cordova project. The build artifacts (namely the `platforms`, `plugins`, etc., directories) are ignored. Only the `www` directory and `config.xml` file for each project is provided. In order to execute any of these projects, you'll need to create a new Cordova project and copy the relevant files from this repository into your project.
 
