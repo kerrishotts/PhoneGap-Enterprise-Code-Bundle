@@ -1,0 +1,30 @@
+{
+  "name": "tasker-srv",
+  "description": "Tasker Server for PhoneGap Enterprise book",
+  "version": "0.0.1",
+  "author": "Kerri Shotts <kerrishotts@gmail.com> (http://www.photokandy.com)",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "test": "mocha tests",
+    "lint": "./node_modules/jshint/bin/jshint ."
+  },
+  "dependencies": {
+    "express": "~4.2.0",
+    "static-favicon": "~1.0.0",
+    "morgan": "~1.0.0",
+    "cookie-parser": "~1.0.1",
+    "body-parser": "~1.0.0",
+    "debug": "~0.7.4",
+    "jade": "~1.3.0",
+    "passport": "0.2.0"
+  },
+  "devDependencies": {
+    "chai": "*",
+    "mocha": "*",
+    "supertest": "*",
+    "chai-as-promised": "*",
+    "jshint": "~2.5.1"
+  }
+}

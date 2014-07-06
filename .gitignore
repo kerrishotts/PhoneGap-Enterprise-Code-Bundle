@@ -1,0 +1,6 @@
+node_modules/*
+*/node_modules/*
+/self-signed-certificates
+*.swp
+*/platforms
+*/plugins
