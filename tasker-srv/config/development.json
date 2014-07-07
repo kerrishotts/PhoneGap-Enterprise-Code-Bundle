@@ -1,0 +1,10 @@
+{
+	"express": {
+		"port": 4443
+	},
+	"ssl": {
+		"keyFile": "./_certs/tasker1.key",
+		"certFile": "./_certs/tasker1.cer",
+		"caFile": "./_certs/ssca.cer"
+	}
+}

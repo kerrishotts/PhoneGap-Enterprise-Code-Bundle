@@ -1,0 +1,20 @@
+{
+	"express": {
+		"port": 4443
+	},
+	"morgan": {
+		"target": "./logs/server.log"
+	},
+	"winston": {
+		"filename": "./logs/output.log",
+		"level": "silly",
+		"maxsize": 1048576,
+		"maxFiles": 3
+	},
+	"ssl": {
+		"keyFile": "./_certs/tasker1.key",
+		"certFile": "./_certs/tasker1.cer",
+		"caFile": "./_certs/ssca.cer"
+	}
+
+}
