@@ -146,7 +146,38 @@ Based on part from <https://www.digitalocean.com/community/tutorials/how-to-comp
 8. In order to use `node` or `npm` with `sudo`, `visudo` and add `/usr/local/bin` to the `Defaults secure_path=...`
 9. Install `n`: `npm install -g n`
 10. To update, you can use `sudo n stable`
-11. `npm install -g grunt-cli`
+
+## Install Oracle Instant Client
+
+In order for us to use Node.js and Oracle, we need to install the Oracle Instant Client. The following is based on instructions at <https://github.com/joeferner/node-oracle/blob/master/INSTALL.md>.
+
+1. Download the Oracle Instant Client for your machine from <http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html>. Download either the Basic or Basic Lite package as well as the SDK package. Ensure that you select the proper architecture for your system.
+2. As `tasker`:
+	```
+	sudo rpm -ivh oracle-instantclient12.1-basic-12.1.0.1.0-1.x86_64.rpm
+	sudo rpm -ivh oracle-instantclient12.1-devel-12.1.0.1.0-1.x86_64.rpm
+	``` 
+3. Link libraries (may already exist) (in `/usr/lib/oracle/12.1/client64/lib`):
+	```
+	ln -s libclntsh.so.12.1 libclntsh.so
+	ln -s libocci.so.12.1 libocci.so
+	``` 
+4. Add the shared objects to the ld cache:
+	```
+	echo '/usr/lib/oracle/12.1/client64/lib/' | sudo tee -a /etc/ld.so.conf.d/oracle_instant_client.conf
+	sudo ldconfig
+	``` 
+5. Set up `.bash_profile` for `tasker` to point to Oracle Instant Client:
+	```
+	export OCI_HOME=/usr/lib/oracle/12.1/client64/lib
+	export OCI_LIB_DIR=$OCI_HOME
+	export OCI_INCLUDE_DIR=$OCI_HOME/sdk/include
+	export OCI_VERSION=12
+	export NLS_LANG=AMERICAN_AMERICA.UTF8
+	``` 
+6. 	
+
+
 
 
 
