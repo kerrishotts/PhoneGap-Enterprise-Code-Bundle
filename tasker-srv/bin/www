@@ -1,9 +1,18 @@
 #!/usr/bin/env node
 var debug = require('debug')('tasker-srv');
 var app = require('../app');
+var https = require('https');
+var fs = require('fs');
+var config = require('../config/config');
 
-app.set('port', process.env.PORT || 3000);
+var SSLOptions = {
+    key: fs.readFileSync (config.get('ssl:keyFile')),
+    cert: fs.readFileSync (config.get('ssl:certFile')),
+    ca: fs.readFileSync (config.get('ssl:caFile'))
+};
 
-var server = app.listen(app.get('port'), function() {
+app.set('port', config.get('express:port') );
+
+var server = https.createServer (SSLOptions, app).listen(app.get('port'), function() {
   debug('Express server listening on port ' + server.address().port);
 });
