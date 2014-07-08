@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.packtpub.taskerv1" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>TaskerV1</name>
+    <description>
+        Tasker is a simple app that demonstrates a simple enterprise-style app.
+    </description>
+    <author email="kerrishotts@gmail.com" href="http://www.photokandy.com">
+        Kerri Shotts
+    </author>
+    <content src="index.html" />
+    <access origin="https://pge-as.acmecorp.com" />
+</widget>
