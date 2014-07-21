@@ -1,0 +1,278 @@
+#%RAML 0.8
+title: Tasker Backend
+version: v1
+baseUri: https://pge-as.acmecorp.com/{version}
+mediaType: application/json
+protocols: [ HTTPS ]
+securitySchemes:
+		- tasker-auth:
+				description: |
+					Tasker uses a very simple authentication mechanism: upon login a token is
+					generated, which is then provided to the client. This token is expected at
+					the next request, and if it matches, the request is accepted. Upon completion
+					of the request, a new token is then returned to the client, which is expected
+					upon the next request. Upon a request, tokens are expired immediately, but
+					until the next request, a token may be valid for quite some time (depending
+					upon the database settings). Even so, the client needs to handle an expired
+					token by prompting the user for a fresh login (so a new token can be generated)
+				type: x-custom
+				describedBy:
+						headers:
+								auth_token:
+										description: |
+											 Authorization token obtained from authentication or from any other
+											 request after a valid token has been provided.
+										example: 194849382948CF3929730E8210ABCC3919E81FDC
+										type: string
+						responses:
+								401:
+										description: |
+												Bad or expired token. This can occur if the user has not been
+												properly authenticated, or if the user's authenticated token
+												has been revoked or expired. Prompt for the user's authorization
+												and record the response token.
+				settings:
+					authenticationUri: /login
+schemas:
+ - loginRequest: |
+		{
+			"type": "object",
+			"$schema": "http://json-schema.org/draft-03/schema",
+			"id": "http://jsonschema.net",
+			"required": true,
+			"properties": {
+				"userId": {
+					"type": "string",
+					"required": true,
+					"maxLength": 32
+				},
+				"candidatePassword": {
+					"type": "string",
+					"required": true,
+					"maxLength": 255,
+					"minLength": 8
+				}
+			}
+		}
+ - person: |
+		{
+			"type": "object",
+			"$schema": "http://json-schema.org/draft-03/schema",
+			"id": "http://jsonschema.net",
+			"required": true,
+			"properties": {
+				"personId": {
+					"type": "integer",
+					"required": false
+				},
+				"userId": {
+					"type": "string",
+					"required": true,
+					"maxLength": 32
+				},
+				"firstName": {
+					"type": "string",
+					"required": true,
+					"maxLength": 255
+				},
+				"middleName": {
+					"type": "string",
+					"required": false,
+					"maxLength": 255
+				},
+				"lastName": {
+					"type": "string",
+					"required": false,
+					"maxLength": 255
+				},
+				"administratorId": {
+					"type": "integer",
+					"required": false
+				},
+				"changeDate": {
+					"type": "date",
+					"required": true
+				},
+				"changeUser": {
+					"type": "string",
+					"required": true,
+					"maxLength": 32
+				}
+			}
+		}
+securedBy: [ tasker-auth ]    
+traits:
+ - pageable:
+		queryParameters:
+			page:
+				description: Desired page to retrieve
+				example: 12
+			pageSize:
+				description: Number of items on a page
+				example: 25
+resourceTypes:
+ - collection:
+		description: Available <<resourcePathName>> in Tasker database
+		get?:
+			description: Get a list of <<resourcePathName>>.
+			responses:
+				200:
+					body:
+						application/json:
+							example: |
+								{ 
+								"authToken" : "...",
+								"data" : <<exampleCollection>>
+								}
+		post?:
+			description: Add a new <<resourcePathName|!singularize>> to Tasker
+			body:
+				application/json:
+					schema: <<resourcePathName|!singularize>>
+					example: |
+						<<exampleItem>>
+			responses:
+				200:
+					body:
+						application/json:
+							example: | 
+								{ "message": "<<resourcePathName|!singularize>> has been created.",
+									"authToken": "..." }
+ - collectionItem:
+		description: Entity representing <<resourcePathName|!singularize>>. <<description>>
+		get?:
+			description: |
+				Get the Entity <<resourcePathName|!singularize>> with <<resourcePathName|!singularize>>Id = 
+				{<<resourcePathName|!singularize>>Id}
+			responses:
+				200:
+					body:
+						application/json:
+							example: |
+								{
+								"authToken": "...",
+								"data": <<exampleItem>>
+								}
+				404:
+					body:
+						application/json:
+							example: |
+								{ "message": "<<resourcePathName|!singularize>> not found.",
+									"authToken": "..." }
+		put?:
+			description: Update <<resourcePathName|!singularize>> <<description>>
+			responses:
+				200:
+					body:
+						application/json:
+							example: |
+								{ "message": "<<resourcePathName|!singularize>> has been updated." }
+				404:
+					body:
+						application/json:
+							example: |
+								{ "message": "<<resourcePathName|!singularize>> not found." }
+		patch?:
+		delete?:        
+/person:
+	type: 
+		collection:
+			exampleCollection: |
+				[
+					{ "personId" : 1,
+						"userId" : "jdoe",
+						"firstName" : "John",
+						"lastName" : "Doe",
+						"changeDate" : "Sun, 06 Nov 1994 08:49:37 GMT",
+						"changeUser" : "SYSADMIN"
+					},
+					{ "personId" : 2
+						"userId" : "bsmith",
+						"firstName" : "Bob",
+						"middleName" : "A",
+						"lastName" : "Smith",
+						"administratorId" : 1
+						"changeDate" : "Sun, 06 Nov 1994 08:49:37 GMT",
+						"changeUser" : "SYSADMIN"
+					}
+				]
+			exampleItem: |
+				{ "personId" : 2
+					"userId" : "bsmith",
+					"firstName" : "Bob",
+					"middleName" : "A",
+					"lastName" : "Smith",
+					"administratorId" : 1
+					"changeDate" : "Sun, 06 Nov 1994 08:49:37 GMT",
+					"changeUser" : "SYSADMIN"
+				}
+	get:
+		is: [ pageable ]
+		queryParameters:
+			personId:
+				description: The unique identifier for the individual
+				required: false
+				type: integer
+				example: 2
+			userId:
+				description: The user id for the individual (login name)
+				required: false
+				type: string
+				example: bsmith
+			administeredBy:
+				description: The specific administrator in question
+				required: false
+				type: integer
+				example: 1
+	/{personId}:
+		type:
+			collectionItem:
+				exampleItem: |
+					{ "personId" : 2
+						"userId" : "bsmith",
+						"firstName" : "Bob",
+						"middleName" : "A",
+						"lastName" : "Smith",
+						"administratorId" : 1
+						"changeDate" : "Sun, 06 Nov 1994 08:49:37 GMT",
+						"changeUser" : "SYSADMIN"
+					}
+		uriParameters:
+			personId:
+				type: integer
+				required: true
+		get:
+		put:
+		patch:
+		delete:
+/auth:
+	post:
+		description: |
+			Authenticate a user in order to obtain the first authorization token.
+		securedBy: [ null ]
+		body:
+			application/json:
+				schema: loginRequest
+		responses:
+			200:
+				body:
+					application/json:
+						example: |
+							{ "message": "User successfully authenticated.",
+								"authToken": "C5e328473918391C19384FDEC9381CCF231028491"
+							}
+			401:
+				body:
+					application/json:
+						example: |
+							{ "message": "Invalid username or password; access denied." }
+	delete:
+		description: |
+			Log a user out, based on their authentication token. The token is immediately
+			rendered invalid, and future requests must be re-authenticated.
+		responses:
+			200:
+				body:
+					application/json:
+						example: |
+							{ "message": "User logged out." }
