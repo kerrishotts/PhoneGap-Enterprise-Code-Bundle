@@ -1,0 +1,22 @@
+    description: Available <<resourcePathName>> in Tasker database
+    get?:
+      description: Get a list of <<resourcePathName>>.
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                <<exampleCollection>>
+    post?:
+      description: Add a new <<resourcePathName|!singularize>>
+      body:
+        application/json:
+          schema: <<resourcePathName|!singularize>>
+          example: |
+            <<exampleItem>>
+      responses:
+        201:
+          body:
+            application/json:
+              example: | 
+                { "message": "<<resourcePathName|!singularize>> has been created." }

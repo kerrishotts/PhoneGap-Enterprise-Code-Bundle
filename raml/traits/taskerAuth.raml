@@ -1,0 +1,42 @@
+      responses:
+        200?: !include ./auth_token.raml
+        201?: !include ./auth_token.raml
+        204?: !include ./auth_token.raml
+        304?: !include ./auth_token.raml
+        404?: !include ./auth_token.raml
+        401:
+          description: |
+            *Not Authorized*
+            
+            Returned when the `auth_token` does not match what the server expects. If it has been awhile
+            since the token was issued, it might instead be expired, in which case, log in again, obtain
+            the new token, and attempt the request again.
+            
+            The response includes the location and method one should use in order to log in again.
+          body:
+            application/json:
+              example: |
+                { "message": "Invalid authorization token. Please log in again.",
+                  "authURI": "/auth",
+                  "authMethod": "GET",
+                  "code": "EA001" }
+        403: 
+          description: |
+            *Forbidden*
+            
+            Returned when the user does not have adequate access to perform the requested operation. The
+            operation itself was properly formed, but the user does not have proper security clearance.
+            
+            This is not an issue with authentication: logging in again will not help. Do not repeat the
+            action.
+          headers:
+            auth_token:
+              description: |
+                Authorization token to use on next request. If this token is not utilized, the request will always fail.
+              example: |
+                C483918E193FBCAA2391038E103850F10389AAC9481C938999A          
+          body:
+            application/json:
+              example: |
+                { "message": "Access denied.",
+                  "code": "EA101" }

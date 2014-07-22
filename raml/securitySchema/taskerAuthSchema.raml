@@ -1,0 +1,27 @@
+        description: |
+          Tasker uses a very simple authentication mechanism: upon login a token is
+          generated, which is then provided to the client. This token is expected at
+          the next request, and if it matches, the request is accepted. Upon completion
+          of the request, a new token is then returned to the client, which is expected
+          upon the next request. Upon a request, tokens are expired immediately, but
+          until the next request, a token may be valid for quite some time (depending
+          upon the database settings). Even so, the client needs to handle an expired
+          token by prompting the user for a fresh login (so a new token can be generated)
+        type: x-custom
+        describedBy:
+            headers:
+                auth_token:
+                    description: |
+                       Authorization token obtained from authentication or from any other
+                       request after a valid token has been provided.
+                    example: 194849382948CF3929730E8210ABCC3919E81FDC
+                    type: string
+            responses:
+                401:
+                    description: |
+                        Bad or expired token. This can occur if the user has not been
+                        properly authenticated, or if the user's authenticated token
+                        has been revoked or expired. Prompt for the user's authorization
+                        and record the response token.
+        settings:
+          authenticationUri: /auth

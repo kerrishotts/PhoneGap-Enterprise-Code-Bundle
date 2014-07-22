@@ -1,0 +1,51 @@
+{
+	"type": "object",
+	"$schema": "http://json-schema.org/draft-03/schema",
+	"id": "http://jsonschema.net",
+	"required": true,
+	"properties": {
+		"taskId": {
+			"type": "integer",
+			"required": false
+		},
+		"title": {
+			"type": "string",
+			"required": true,
+			"maxLength": 255
+		},
+		"description": {
+			"type": "string",
+			"required": true,
+			"maxLength": 4000
+		},
+		"status": {
+			"type": "string",
+			"required": true,
+			"maxLength": 1,
+			"minLength": 1,
+			"default": "I"
+		},
+		"pct_complete": {
+			"type": "number",
+			"required": true,
+			"default": 0
+		},
+		"owner": {
+			"type": "integer",
+			"required": true
+		},
+		"assigned_to": {
+			"type": "integer",
+			"required": false
+		},
+		"changeDate": {
+			"type": "date",
+			"required": true
+		},
+		"changeUser": {
+			"type": "string",
+			"required": true,
+			"maxLength": 32
+		}
+	}
+}

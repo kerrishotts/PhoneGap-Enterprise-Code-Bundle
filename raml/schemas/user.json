@@ -1,0 +1,28 @@
+{
+	"type": "object",
+	"$schema": "http://json-schema.org/draft-03/schema",
+	"id": "http://jsonschema.net",
+	"required": true,
+	"properties": {
+		"userId": {
+			"type": "string",
+			"required": true,
+			"maxLength": 32
+		},
+		"status": {
+			"type": "string",
+			"required": true,
+			"minLength": 1,
+			"maxLength": 1
+		},
+		"changeDate": {
+			"type": "date",
+			"required": true
+		},
+		"changeUser": {
+			"type": "string",
+			"required": true,
+			"maxLength": 32
+		}
+	}
+}

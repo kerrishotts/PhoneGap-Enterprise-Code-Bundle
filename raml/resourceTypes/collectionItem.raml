@@ -1,0 +1,34 @@
+    description: Entity representing <<resourcePathName|!singularize>>. <<description>>
+    get?:
+      description: |
+        Get the Entity <<resourcePathName|!singularize>> with <<resourcePathName|!singularize>>Id = 
+        {<<resourcePathName|!singularize>>Id}
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                <<exampleItem>>
+        404:
+          body:
+            application/json:
+              example: |
+                { "message": "<<resourcePathName|!singularize>> not found.",
+                  "code": "NF001" }
+    put?:
+      description: Update <<resourcePathName|!singularize>> <<description>>
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                { "message": "<<resourcePathName|!singularize>> has been updated.",
+                  "code": "OK001" }
+        404:
+          body:
+            application/json:
+              example: |
+                { "message": "<<resourcePathName|!singularize>> not found.",
+                  "code": "NF001" }
+    patch?:
+    delete?:        
