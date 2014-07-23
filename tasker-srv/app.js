@@ -15,6 +15,9 @@ var routes = require('./routes/index');
 var users = require('./routes/users');
 var heartbeat = require('./routes/heartbeat'); 
 
+var apiDef = require ("./api-def");
+var apiUtils = require ("./api-utils");
+
 var app = express();
 var config = require('./config/config');
 
@@ -67,7 +70,8 @@ app.use(session( {
 // csrf security
 app.use(csrf());
 app.use(function (req, res, next) {  
-    res.locals.csrftoken = req.session._csrf;  
+    res.locals.csrftoken = req.csrfToken();  
+//    winston.error ("hi", res.locals.csrftoken);
     next();  
   });
   
@@ -75,9 +79,14 @@ app.use(function (req, res, next) {
 app.use(express.static(path.join(__dirname, 'public')));
 
 // routes
-app.use('/', routes);
-app.use('/users', users);
-app.use('/heartbeat', heartbeat);
+//app.use('/', routes);
+//app.use('/users', users);
+//app.use('/heartbeat', heartbeat);
+
+app.use ( "/", apiUtils.createRouterForApi(apiDef));
+
+// and set the pretty API as a global variable so our discover method can find it.
+app.set ( "x-api-discovery", apiUtils.generateHypermediaForApi(apiDef));
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
