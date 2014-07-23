@@ -6,3 +6,5 @@ node_modules/*
 */plugins
 */logs
 */_certs
+
+tasker-srv/npm-debug.log
