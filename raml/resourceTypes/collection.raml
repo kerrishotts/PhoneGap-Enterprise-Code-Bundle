@@ -16,7 +16,12 @@
             <<exampleItem>>
       responses:
         201:
+          headers:
+            location:
+              example: |
+                /<<resourcePathName>>/{<<resourcePathName>>Id}
           body:
             application/json:
               example: | 
-                { "message": "<<resourcePathName|!singularize>> has been created." }
+                { "message": "<<resourcePathName|!singularize>> has been created.",
+                  "code": OK000" }

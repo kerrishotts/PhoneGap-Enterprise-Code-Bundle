@@ -3,8 +3,8 @@ title: Tasker Backend
 documentation:
     - title: "About Tasker Backend API"
       content: |
-        The Tasker Backend API is a simple example of how to build a backend using RAML,
-        Node.JS, Express, Connect, Hammer, and Osprey. 
+        The Tasker Backend API is a simple example of how to build a backend using RAML
+        and Node.JS, connected to an Oracle Database back-end.
     - title: "License"
       content: |
           Copyright (c) 2014 Packt Publishing
@@ -24,8 +24,7 @@ documentation:
           LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
           OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
           OTHER DEALINGS IN THE SOFTWARE.
-version: v1
-baseUri: https://pge-as.acmecorp.com/{version}
+baseUri: https://pge-as.acmecorp.com
 mediaType: application/json
 protocols: [ HTTPS ]
 securitySchemes:
@@ -43,6 +42,103 @@ traits:
 resourceTypes:
    - collection: !include ./resourceTypes/collection.raml
    - collectionItem: !include ./resourceTypes/collectionItem.raml
+/:
+  securedBy: [null]
+  description: |
+    This endpoint the discovery point for the API in order to reflect the hypermedia API.
+    The links that are returned in the request indicate the authorization point and any
+    other endpoints that might be of use.
+  get:
+    securedBy: [null]
+    description: |
+      Returns the links that might be interesting as well as the authorization point.
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              {
+                "_links": {
+                  "authorize": {
+                    "template": "/auth",
+                    "type": "application/json",
+                    "accept": "application/json",
+                    "allow": "POST",
+                    "title": "Authorize" },
+                  "deauthorize": {
+                    "template": "/auth",
+                    "type": "application/json",
+                    "accept": "application/json",
+                    "allow": "DELETE",
+                    "title": "Deauthorize" },
+                  "get-people-list": {
+                    "template": "/person{?personId,userId,administeredBy}",
+                    "type": "application/json",
+                    "accept": "application/json",
+                    "allow": "GET",
+                    "title": "Get People" },
+                  "add-person": {
+                    "template": "/person",
+                    "type": "application/json",
+                    "accept": "application/json",
+                    "allow": "POST",
+                    "title": "Add person" },
+                  "get-person": {
+                    "template": "/person/{personId}",
+                    "type": "application/json",
+                    "accept": "application/json",
+                    "allow": "GET",
+                    "title": "Person Profile" },
+                  "update-person": {
+                    "template": "/person/{personId}",
+                    "type": "application/json",
+                    "accept": "application/json",
+                    "allow": "PUT",
+                    "title": "Update Person Profile" },
+                  "get-tasks": {
+                    "template": "/task{?ownedBy,assignedTo,status,lowestCompletion,highestCompletion}",
+                    "type": "application/json",
+                    "accept": "application/json",
+                    "allow": "GET",
+                    "title": "Tasks" },
+                  "add-task": {
+                    "template": "/task",
+                    "type": "application/json",
+                    "accept": "application/json",
+                    "allow": "POST",
+                    "title": "Add Task" },
+                  "get-task": {
+                    "template": "/task/{taskId}",
+                    "type": "application/json",
+                    "accept": "application/json",
+                    "allow": "GET",
+                    "title": "Task Details" },
+                  "update-task": {
+                    "template": "/task/{taskId}",
+                    "type": "application/json",
+                    "accept": "application/json",
+                    "allow": "PUT,PATCH",
+                    "title": "Modify Task Details" },
+                  "get-task-comments": {
+                    "template": "/task/{taskId}/comments",
+                    "type": "application/json",
+                    "accept": "application/json",
+                    "allow": "GET",
+                    "title": "Task Comments" },
+                  "add-task-comment": {
+                    "template": "/task/{taskId}/comments",
+                    "type": "application/json",
+                    "accept": "application/json",
+                    "allow": "POST",
+                    "title": "Add Comment to Task" },
+                  "get-task-comment": {
+                    "template": "/task/{taskId}/comments/{commentId}",
+                    "type": "application/json",
+                    "accept": "application/json",
+                    "allow": "GET",
+                    "title": "Task Comment" }
+                }
+              }
 /person:
   is: [secured]
   description: |
@@ -223,6 +319,15 @@ resourceTypes:
         description: |
           Create a new comment for the given task. If the user does not have access to 
           `COMMENT_ON_ANY|OWN|ASSIGNED_TASK`, 403 is returned.
+      /{commentId}:
+        is: [secured]
+        type:
+          collectionItem:
+            exampleItem: !include ./examples/taskCommentExample.json
+        get:
+          is: [secured]
+          description: |
+            Returns the comment for the specified task with the specified comment ID.
 /auth:
   description: |
     Session management. Send a `post` to request an authorization token that can be
