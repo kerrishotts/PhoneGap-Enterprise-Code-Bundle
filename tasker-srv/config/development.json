@@ -6,5 +6,12 @@
 		"keyFile": "./_certs/tasker1.key",
 		"certFile": "./_certs/tasker1.cer",
 		"caFile": "./_certs/ssca.cer"
+	},
+	"oracle": {
+		"hostname": "localhost",
+		"port": 40000,
+		"database": "xe",
+		"user": "tasker",
+		"password": "Gerry98_PacificEquator"
 	}
 }
