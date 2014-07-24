@@ -25,7 +25,8 @@
     "express-session": "~1.6.3",
     "nconf": "~0.6.9",
     "winston": "~0.7.3",
-    "oracle": "~0.3.7"
+    "oracle": "~0.3.7",
+    "generic-pool": "~2.1.1"
   },
   "devDependencies": {
     "chai": "*",
