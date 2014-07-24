@@ -1,6 +1,65 @@
+/******************************************************************************
+*
+* Tasker Server (PhoneGap Enterprise Book)
+* ----------------------------------------
+*
+* @author Kerri Shotts
+* @version 0.1.0
+* @license MIT
+*
+* Copyright (c) 2014 Packt Publishing
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this
+* software and associated documentation files (the "Software"), to deal in the Software
+* without restriction, including without limitation the rights to use, copy, modify,
+* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+* permit persons to whom the Software is furnished to do so, subject to the following
+* conditions:
+* The above copyright notice and this permission notice shall be included in all copies
+* or substantial portions of the Software.
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+* PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+* LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
+* OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+* OTHER DEALINGS IN THE SOFTWARE.
+*
+******************************************************************************/
+
+//
+// dependencies
+//
 var express = require("express");
 
+// return utility methods for dealing with api definitions
 module.exports = {
+	/**
+	 * Creates routes for a given API definition. An API is of the form:
+	 *
+	 * [ { route: "<route>",
+	 *     params: [
+	 *       { "name": "name of parameter in route",
+	 *         "handler": function ( req, res, next, value ) { ... }
+	 *       },
+	 *     actions: [
+	 *       { "action": "name of action",
+	 *         "verb": "get",
+	 *         "description": {
+	 *           "title": "title of action",
+	 *           "href": "URI", // optional
+	 *           "template": "/some/{variable}{?queryParameters}", // optional
+	 *           "accept": "types", // like application/json, optional
+	 *           "type": "types", // like applicaiton/json, optional
+	 *         },
+	 *         "handler": function ( req, res, next ) {
+	 *           res.json ( 200, "ok" );  // handle request
+	 *         }
+	 *       }, ...
+	 *     ]
+	 *   }, ...
+	 * ]
+	 *
+	 * @param api {array} 
+	 */
   createRouterForApi:function (api) {
 		var router = express.Router();
 		// process each route in the api; a route consists of the uri (route) and a series of verbs (get, post, etc.)
@@ -29,6 +88,23 @@ module.exports = {
 		});
 		return router;
 	},
+	/**
+	 *
+	 * Create a hypermedia representation for a given API action. The end result looks like this:
+	 *
+	 * { "<action.action>": 
+	 *   {
+	 *     "title": "<action.description.title>",
+	 *     "type": "<action.description.type>",
+	 *     "accept: "<action.description.accept>",
+	 *     "href": "<action.description.href>",
+	 *     "template": "<action.description.template>"
+	 *   }
+	 * }
+	 *
+	 * If parent is supplied, the data is appended to parent object, otherwise the above data is
+	 * returned
+	 */               
   generateHypermediaForAction: function ( action, parent ) {
 		var hm = {};
 		hm.allow = action.verb;
@@ -49,6 +125,11 @@ module.exports = {
 			return parent;
 		}
 	},
+	/**
+	 *
+	 * Generates a hypermedia representation for an entire API.
+	 *
+	 */
   generateHypermediaForApi: function ( api ) {
 		var hm = {};
 		var self = this;
