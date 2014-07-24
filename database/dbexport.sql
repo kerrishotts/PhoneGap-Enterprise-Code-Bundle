@@ -1,46 +1,9 @@
-  /*******************************************************************************
-  *
-  * DATABASE EXPORT
-  * @author Kerri Shotts
-  * @version 0.1.0
-  * @license MIT
-  *
-  * Copyright (c) 2014 Packt Publishing
-  * Permission is hereby granted, free of charge, to any person obtaining a copy of this
-  * software and associated documentation files (the "Software"), to deal in the Software
-  * without restriction, including without limitation the rights to use, copy, modify,
-  * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
-  * permit persons to whom the Software is furnished to do so, subject to the following
-  * conditions:
-  * The above copyright notice and this permission notice shall be included in all copies
-  * or substantial portions of the Software.
-  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-  * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-  * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
-  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-  * OTHER DEALINGS IN THE SOFTWARE.
-  *
-  ******************************************************************************/
-
 --------------------------------------------------------
---  File created - Sunday-July-20-2014   
+--  File created - Thursday-July-24-2014   
 --------------------------------------------------------
--- Unable to render TYPE DDL for object TASKER.SYS_PLSQL_20041_65_1 with DBMS_METADATA attempting internal generator.
-CREATE TYPE          SYS_PLSQL_20041_65_1 as object ("ID" NUMBER,
-"USER_ID" VARCHAR2(32),
-"FIRST_NAME" VARCHAR2(255),
-"MIDDLE_NAME" VARCHAR2(255),
-"LAST_NAME" VARCHAR2(255),
-"ADMINISTRATOR_ID" NUMBER,
-"CHANGE_DATE" DATE,
-"CHANGE_USER" VARCHAR2(32),
-"AVATAR" BLOB);
--- Unable to render TYPE DDL for object TASKER.SYS_PLSQL_20041_DUMMY_1 with DBMS_METADATA attempting internal generator.
-CREATE TYPE          SYS_PLSQL_20041_DUMMY_1 as table of number;
 -- Unable to render TYPE DDL for object TASKER.SYS_PLSQL_20044_62_1 with DBMS_METADATA attempting internal generator.
 CREATE TYPE          SYS_PLSQL_20044_62_1 as object ("ID" NUMBER,
-"TITLE" VARCHAR2(20),
+"TITLE" VARCHAR2(4000),
 "DESCRIPTION" VARCHAR2(4000),
 "PCT_COMPLETE" NUMBER,
 "STATUS" VARCHAR2(1),
@@ -73,7 +36,7 @@ CREATE TYPE          SYS_PLSQL_22246_DUMMY_1 as table of number;
 --  DDL for Sequence PERSON_SEQ
 --------------------------------------------------------
 
-   CREATE SEQUENCE  "TASKER"."PERSON_SEQ"  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 NOCACHE  NOORDER  NOCYCLE ;
+   CREATE SEQUENCE  "TASKER"."PERSON_SEQ"  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 4 NOCACHE  NOORDER  NOCYCLE ;
 --------------------------------------------------------
 --  DDL for Sequence SESSIONS_SEQ
 --------------------------------------------------------
@@ -88,7 +51,7 @@ CREATE TYPE          SYS_PLSQL_22246_DUMMY_1 as table of number;
 --  DDL for Sequence TASK_SEQ
 --------------------------------------------------------
 
-   CREATE SEQUENCE  "TASKER"."TASK_SEQ"  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 NOCACHE  NOORDER  NOCYCLE ;
+   CREATE SEQUENCE  "TASKER"."TASK_SEQ"  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 3 NOCACHE  NOORDER  NOCYCLE ;
 --------------------------------------------------------
 --  DDL for Table PERSON
 --------------------------------------------------------
@@ -163,7 +126,7 @@ CREATE TYPE          SYS_PLSQL_22246_DUMMY_1 as table of number;
 
   CREATE TABLE "TASKER"."TASK" 
    (	"ID" NUMBER, 
-	"TITLE" VARCHAR2(20 BYTE), 
+	"TITLE" VARCHAR2(4000 BYTE), 
 	"DESCRIPTION" VARCHAR2(4000 BYTE), 
 	"PCT_COMPLETE" NUMBER, 
 	"STATUS" VARCHAR2(1 BYTE), 
@@ -204,8 +167,8 @@ CREATE TYPE          SYS_PLSQL_22246_DUMMY_1 as table of number;
    (	"ID" VARCHAR2(32 BYTE), 
 	"EXTERNAL_AUTH_SYS" NUMBER, 
 	"EXTERNAL_AUTH_ID" VARCHAR2(255 BYTE), 
-	"PASSWORD" VARCHAR2(255 BYTE), 
-	"SALT" VARCHAR2(255 BYTE), 
+	"PASSWORD" VARCHAR2(256 BYTE), 
+	"SALT" VARCHAR2(256 BYTE), 
 	"STATUS" VARCHAR2(1 BYTE), 
 	"CHANGE_DATE" DATE, 
 	"CHANGE_USER" VARCHAR2(32 BYTE), 
@@ -238,6 +201,8 @@ CREATE TYPE          SYS_PLSQL_22246_DUMMY_1 as table of number;
   TABLESPACE "TASKER" ;
 REM INSERTING into TASKER.PERSON
 SET DEFINE OFF;
+Insert into TASKER.PERSON (ID,USER_ID,FIRST_NAME,MIDDLE_NAME,LAST_NAME,ADMINISTRATOR_ID,CHANGE_DATE,CHANGE_USER) values (2,'JDOE','John',null,'Doe',null,to_date('07/24/2014 01:15:20','MM/DD/YYYY HH24:MI:SS'),'SYSADMIN');
+Insert into TASKER.PERSON (ID,USER_ID,FIRST_NAME,MIDDLE_NAME,LAST_NAME,ADMINISTRATOR_ID,CHANGE_DATE,CHANGE_USER) values (3,'BSMITH','Bob','A','Smith',2,to_date('07/24/2014 01:17:48','MM/DD/YYYY HH24:MI:SS'),'SYSADMIN');
 REM INSERTING into TASKER.ROLES
 SET DEFINE OFF;
 Insert into TASKER.ROLES (ID,PRIVILEGE,GRANTED) values ('SYSADMIN','CAN_CHANGE_ANY_USER_PWD','Y');
@@ -263,6 +228,8 @@ Insert into TASKER.ROLES (ID,PRIVILEGE,GRANTED) values ('SYSADMIN','CAN_UPD_PROG
 Insert into TASKER.ROLES (ID,PRIVILEGE,GRANTED) values ('SYSADMIN','CAN_UPD_STATUS_ON_ASGND_TASK','Y');
 Insert into TASKER.ROLES (ID,PRIVILEGE,GRANTED) values ('HELPDESK','CAN_UNLOCK_USER','Y');
 Insert into TASKER.ROLES (ID,PRIVILEGE,GRANTED) values ('SYSADMIN','CAN_UNLOCK_USER','Y');
+Insert into TASKER.ROLES (ID,PRIVILEGE,GRANTED) values ('SYSADMIN','CAN_CREATE_PERSON','Y');
+Insert into TASKER.ROLES (ID,PRIVILEGE,GRANTED) values ('SYSADMIN','CAN_MODIFY_PERSON','Y');
 REM INSERTING into TASKER.SESSIONS
 SET DEFINE OFF;
 REM INSERTING into TASKER.SETTINGS
@@ -271,14 +238,22 @@ Insert into TASKER.SETTINGS (ID,VALUE) values ('MAX_FAILED_LOGINS','10');
 Insert into TASKER.SETTINGS (ID,VALUE) values ('TOKEN_EXPIRY','7');
 REM INSERTING into TASKER.TASK
 SET DEFINE OFF;
+Insert into TASKER.TASK (ID,TITLE,DESCRIPTION,PCT_COMPLETE,STATUS,OWNER,ASSIGNED_TO,CHANGE_DATE,CHANGE_USER) values (2,'Push new version of website','Shouldn''t take too long. Let me know if you have problems',0,'I',2,3,to_date('07/24/2014 01:24:30','MM/DD/YYYY HH24:MI:SS'),'JDOE');
 REM INSERTING into TASKER.TASK_COMMENTS
 SET DEFINE OFF;
 REM INSERTING into TASKER.USERS
 SET DEFINE OFF;
-Insert into TASKER.USERS (ID,EXTERNAL_AUTH_SYS,EXTERNAL_AUTH_ID,PASSWORD,SALT,STATUS,CHANGE_DATE,CHANGE_USER,FAILED_LOGIN_ATTEMPTS) values ('SYSADMIN',null,null,'1','1','A',to_date('07/16/2014 23:31:36','MM/DD/YYYY HH24:MI:SS'),'SYSADMIN',null);
+Insert into TASKER.USERS (ID,EXTERNAL_AUTH_SYS,EXTERNAL_AUTH_ID,PASSWORD,SALT,STATUS,CHANGE_DATE,CHANGE_USER,FAILED_LOGIN_ATTEMPTS) values ('BSMITH',null,null,'896604A5C1128AE80247246FAEFE458669A122272709EC655F5160A47F337208E8CE82C5EE67FB76B4FAEFF239827998C25A521CE86BCCC8F49AE7B13125A8C49778BFBAB25AE499AD67BA7960B5023659EFEF3BAA377EAE7EB15FEB2B079B99DC54E0D7DB1BE048A30A1B9FA3A07013F55E6F571706B0B830879C63C8C678CB','CIbPQLkGaWCUufBnvx0/RfPM3W6CNySLOMBBBtvCq0zGnenxEF66r6eJRKWrwl8u
+','A',to_date('07/24/2014 01:08:02','MM/DD/YYYY HH24:MI:SS'),'SYSADMIN',null);
+Insert into TASKER.USERS (ID,EXTERNAL_AUTH_SYS,EXTERNAL_AUTH_ID,PASSWORD,SALT,STATUS,CHANGE_DATE,CHANGE_USER,FAILED_LOGIN_ATTEMPTS) values ('JDOE',null,null,'27372FC47ED9FF98A615249C20F661A26C289573A3F0F3C2FCC3073D22E261B8C873CEEFC49625906097C72188A059EA28BAF64FE541CDCE8BC45670285919A6AD5FF41AB461E6B845743C4046BBB5FD21C714D93EEC726B336211CE7F402BCA9EF85D775133DCE6A2605BE784AC7B86458B8B44FE7127E445651015B2DA8C25','U5tFM2Ns/0AeXj7usqlZR5OAvFlrUbxEGphjPcpUxDQwmE6xOgFvyKpS32TrBymj
+','A',to_date('07/24/2014 01:12:57','MM/DD/YYYY HH24:MI:SS'),'SYSADMIN',null);
+Insert into TASKER.USERS (ID,EXTERNAL_AUTH_SYS,EXTERNAL_AUTH_ID,PASSWORD,SALT,STATUS,CHANGE_DATE,CHANGE_USER,FAILED_LOGIN_ATTEMPTS) values ('SYSADMIN',null,null,'9B81DC653084F94A57CB620E4F295D1FFB53B65B2F7AAB3AEC139B258EF9D4AFF208A07A04526C8B45162757C50D501B3220E84E44BABF6D65B482469079A027506422D077770D3FCD1DD8F1AB62069E5CC7724E80495F8E8E11199F06DD24D711FD475E1F15F9F96513EF3938E266864A921841FF844E57E6C5909DAFBD80F1','r943lWQcU8gCPCHIbWh0XycldB1jCvPH7wj1CAHAbdT9TMYUIY4nXFcAa/gPJV5N
+','A',to_date('07/24/2014 01:10:30','MM/DD/YYYY HH24:MI:SS'),'SYSADMIN',null);
 REM INSERTING into TASKER.USER_ROLES
 SET DEFINE OFF;
 Insert into TASKER.USER_ROLES (USER_ID,ROLE_ID,CHANGE_DATE,CHANGE_USER) values ('SYSADMIN','SYSADMIN',to_date('07/16/2014 23:34:16','MM/DD/YYYY HH24:MI:SS'),'SYSADMIN');
+Insert into TASKER.USER_ROLES (USER_ID,ROLE_ID,CHANGE_DATE,CHANGE_USER) values ('BSMITH','USER',to_date('07/24/2014 05:20:39','MM/DD/YYYY HH24:MI:SS'),'SYSADMIN');
+Insert into TASKER.USER_ROLES (USER_ID,ROLE_ID,CHANGE_DATE,CHANGE_USER) values ('JDOE','USER',to_date('07/24/2014 05:20:55','MM/DD/YYYY HH24:MI:SS'),'SYSADMIN');
 --------------------------------------------------------
 --  DDL for Index PERSON_PK
 --------------------------------------------------------
@@ -358,8 +333,6 @@ Insert into TASKER.USER_ROLES (USER_ID,ROLE_ID,CHANGE_DATE,CHANGE_USER) values (
   TABLESPACE "TASKER"  ENABLE;
   ALTER TABLE "TASKER"."PERSON" MODIFY ("CHANGE_USER" NOT NULL ENABLE);
   ALTER TABLE "TASKER"."PERSON" MODIFY ("CHANGE_DATE" NOT NULL ENABLE);
-  ALTER TABLE "TASKER"."PERSON" MODIFY ("LAST_NAME" NOT NULL ENABLE);
-  ALTER TABLE "TASKER"."PERSON" MODIFY ("MIDDLE_NAME" NOT NULL ENABLE);
   ALTER TABLE "TASKER"."PERSON" MODIFY ("FIRST_NAME" NOT NULL ENABLE);
   ALTER TABLE "TASKER"."PERSON" MODIFY ("USER_ID" NOT NULL ENABLE);
   ALTER TABLE "TASKER"."PERSON" MODIFY ("ID" NOT NULL ENABLE);
@@ -815,6 +788,10 @@ IS
       p_id      NUMBER,
       p_status  VARCHAR2,
       p_as_user VARCHAR2 );
+  FUNCTION get_task(
+      p_task_id NUMBER,
+      p_as_user VARCHAR2 )
+    RETURN task_set pipelined;
   FUNCTION get_tasks(
       p_assigned_to          NUMBER DEFAULT NULL,
       p_owned_by             NUMBER DEFAULT NULL,
@@ -937,18 +914,11 @@ AS
   ******************************************************************************/
   /******************************************************************************
   *
-  * FAUX CONSTANTS
-  *
-  ******************************************************************************/
-  FUNCTION E_ACCESS_DENIED_CODE
-    RETURN INTEGER;
-  FUNCTION E_ACCESS_DENIED_MSG
-    RETURN VARCHAR2;
-  /******************************************************************************
-  *
   * PUBLIC METHODS
   *
   ******************************************************************************/
+  PROCEDURE E_ACCESS_DENIED;
+  PROCEDURE E_NOT_FOUND;
   FUNCTION get_user_id_from_person_id(
       p_person_id INTEGER )
     RETURN VARCHAR2;
@@ -1106,7 +1076,6 @@ AS
   pragma autonomous_transaction;
   new_id INTEGER;
 BEGIN
-  new_id := person_seq.nextval();
   IF tasker.security.can_user ( p_as_user, CAN_CREATE_PERSON() ) THEN
     INSERT
     INTO person
@@ -1121,19 +1090,22 @@ BEGIN
       )
       VALUES
       (
-        new_id,
+        person_seq.nextval,
         p_from_user_id,
         p_first_name,
         p_middle_name,
         p_last_name,
         sysdate,
         p_as_user
-      );
+      )
+    RETURNING id
+    INTO new_id;
     COMMIT;
     RETURN new_id;
   ELSE
-    RAISE_APPLICATION_ERROR ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+    tasker.utils.E_ACCESS_DENIED();
   END IF;
+  RETURN new_id;
 END create_person;
 /**
 * assign_administrator
@@ -1150,6 +1122,7 @@ PROCEDURE assign_administrator
     p_as_user          VARCHAR2
   )
 AS
+  pragma autonomous_transaction;
 BEGIN
   IF tasker.security.can_user ( p_as_user, CAN_MODIFY_PERSON() ) THEN
     UPDATE person
@@ -1157,8 +1130,9 @@ BEGIN
       change_date        = sysdate,
       change_user        = p_as_user
     WHERE id             = p_to_person;
+    COMMIT;
   ELSE
-    RAISE_APPLICATION_ERROR ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+    tasker.utils.E_ACCESS_DENIED();
   END IF;
 END assign_administrator;
 /**
@@ -1176,6 +1150,7 @@ PROCEDURE update_avatar_for_person(
     p_avatar BLOB,
     p_as_user VARCHAR2 )
 AS
+  pragma autonomous_transaction;
 BEGIN
   IF tasker.security.can_user ( p_as_user, CAN_MODIFY_PERSON() ) THEN
     UPDATE person
@@ -1183,8 +1158,9 @@ BEGIN
       change_date = sysdate,
       change_user = p_as_user
     WHERE id      = p_person_id;
+    COMMIT;
   ELSE
-    RAISE_APPLICATION_ERROR ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+    tasker.utils.E_ACCESS_DENIED();
   END IF;
 END update_avatar_for_person;
 /**
@@ -1527,11 +1503,10 @@ begin
     insert into sessions ( id, user_id, token, expiry )
                   values ( session_id, p_user_id, db_token, sysdate + to_number(tasker.app_settings.get('TOKEN_EXPIRY')) );
     
-    -- return the token
-    return client_token;
   else
-    RAISE_APPLICATION_ERROR ( -20001, 'Access denied.' );
+    tasker.utils.E_ACCESS_DENIED();
   end if;
+  return client_token;
 end;
 
 function verify_token ( 
@@ -1586,13 +1561,11 @@ begin
     update sessions
        set token = db_token,
            expiry = sysdate + to_number(tasker.app_settings.get('TOKEN_EXPIRY'))
-     where id = session_id;
-        
-    -- return the token
-    return client_token;
+     where id = session_id;        
   else
     RAISE_APPLICATION_ERROR (-20002, 'Token mismatch');
   end if;
+    return client_token;
 end;
 
 
@@ -1743,11 +1716,10 @@ BEGIN
   user_person_id     := tasker.utils.get_person_id_from_user_id ( p_as_user );
   IF (user_person_id != p_owned_by) THEN
     IF NOT tasker.security.can_user ( p_as_user, CAN_CREATE_ANY_TASK() ) THEN
-      raise_application_error ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+      tasker.utils.E_ACCESS_DENIED();
     END IF;
   END IF;
   IF tasker.security.can_user ( p_as_user, CAN_CREATE_OWN_TASK() ) OR tasker.security.can_user ( p_as_user, CAN_CREATE_ANY_TASK() ) THEN
-    return_id := tasker.task_seq.nextval();
     INSERT
     INTO tasker.task
       (
@@ -1763,7 +1735,7 @@ BEGIN
       )
       VALUES
       (
-        return_id,
+        tasker.task_seq.NEXTVAL,
         p_title,
         p_description,
         0,
@@ -1772,11 +1744,13 @@ BEGIN
         NULL,
         sysdate,
         p_as_user
-      );
+      )
+    RETURNING id
+    INTO return_id;
     COMMIT;
     RETURN return_id;
   ELSE
-    raise_application_error ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+    tasker.utils.E_ACCESS_DENIED();
   END IF;
   RETURN NULL;
 END create_task;
@@ -1803,26 +1777,15 @@ AS
   task tasker.task%rowtype;
 BEGIN
   user_person_id := tasker.utils.get_person_id_from_user_id ( p_as_user );
-  SELECT ID ,
-    TITLE ,
-    DESCRIPTION ,
-    PCT_COMPLETE ,
-    STATUS ,
-    OWNER ,
-    ASSIGNED_TO ,
-    CHANGE_DATE ,
-    CHANGE_USER
-  INTO task
-  FROM tasker.task
-  WHERE id               = p_id;
+  SELECT * INTO task FROM tasker.task WHERE id = p_id;
   IF task.owner         != user_person_id THEN
     IF task.assigned_to != user_person_id THEN
       IF NOT tasker.security.can_user ( p_as_user, CAN_MODIFY_ANY_TASK() ) THEN
-        raise_application_error ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+        tasker.utils.E_ACCESS_DENIED();
       END IF;
     ELSE
       IF NOT tasker.security.can_user ( p_as_user, CAN_UPD_PROGRESS_ON_ASGND_TASK() ) THEN
-        raise_application_error ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+        tasker.utils.E_ACCESS_DENIED();
       END IF;
     END IF;
   END IF;
@@ -1834,7 +1797,7 @@ BEGIN
     WHERE id         = p_id;
     COMMIT;
   ELSE
-    raise_application_error ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+    tasker.utils.E_ACCESS_DENIED();
   END IF;
 END update_task_percentage;
 /**
@@ -1858,26 +1821,15 @@ AS
   task tasker.task%rowtype;
 BEGIN
   user_person_id := tasker.utils.get_person_id_from_user_id ( p_as_user );
-  SELECT ID ,
-    TITLE ,
-    DESCRIPTION ,
-    PCT_COMPLETE ,
-    STATUS ,
-    OWNER ,
-    ASSIGNED_TO ,
-    CHANGE_DATE ,
-    CHANGE_USER
-  INTO task
-  FROM tasker.task
-  WHERE id               = p_id;
+  SELECT * INTO task FROM tasker.task WHERE id = p_id;
   IF task.owner         != user_person_id THEN
     IF task.assigned_to != user_person_id THEN
       IF NOT tasker.security.can_user ( p_as_user, CAN_MODIFY_ANY_TASK() ) THEN
-        raise_application_error ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+        tasker.utils.E_ACCESS_DENIED();
       END IF;
     ELSE
       IF NOT tasker.security.can_user ( p_as_user, CAN_UPD_STATUS_ON_ASGND_TASK() ) THEN
-        raise_application_error ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+        tasker.utils.E_ACCESS_DENIED();
       END IF;
     END IF;
   END IF;
@@ -1889,9 +1841,36 @@ BEGIN
     WHERE id      = p_id;
     COMMIT;
   ELSE
-    raise_application_error ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+    tasker.utils.E_ACCESS_DENIED();
   END IF;
 END update_task_status;
+/**
+* get_task
+*
+* returns a task given an id #, assuming the user has rights to see the data
+*
+* @param p_task_id:integer      the task id
+* @return table of tasks
+*
+*/
+FUNCTION get_task(
+    p_task_id NUMBER,
+    p_as_user VARCHAR2 )
+  RETURN task_set pipelined
+AS
+  user_person_id INTEGER;
+  task tasker.task%rowtype;
+BEGIN
+  user_person_id := tasker.utils.get_person_id_from_user_id ( p_as_user );
+  SELECT *
+  INTO task
+  FROM tasker.task
+  WHERE id         = p_task_id;
+  IF ((task.owner != user_person_id) OR (task.assigned_to != user_person_id)) AND NOT tasker.security.can_user ( p_as_user, CAN_SEE_ANY_TASK() ) THEN
+    tasker.utils.E_ACCESS_DENIED();
+  END IF;
+  pipe row (task);
+END get_task;
 /**
 * get_tasks
 *
@@ -1919,19 +1898,12 @@ FUNCTION get_tasks(
 AS
   user_person_id         INTEGER;
   can_see_any_task_cache BOOLEAN;
+  allowed_to_see         BOOLEAN := false;
 BEGIN
   user_person_id         := tasker.utils.get_person_id_from_user_id ( p_as_user );
   can_see_any_task_cache := tasker.security.can_user ( p_as_user, CAN_SEE_ANY_TASK() );
-  FOR r IN
-  (SELECT ID ,
-    TITLE ,
-    DESCRIPTION ,
-    PCT_COMPLETE ,
-    STATUS ,
-    OWNER ,
-    ASSIGNED_TO ,
-    CHANGE_DATE ,
-    CHANGE_USER
+  FOR r  IN
+  (SELECT *
   FROM tasker.task
   WHERE assigned_to = NVL(p_assigned_to, assigned_to)
   AND owner         = NVL(p_owned_by, owner)
@@ -1939,7 +1911,14 @@ BEGIN
   AND pct_complete BETWEEN p_with_completion_low AND p_with_completion_high
   )
   LOOP
-    IF ((r.owner != user_person_id) OR (r.assigned_to != user_person_id)) AND NOT can_see_any_task_cache THEN
+    allowed_to_see   := can_see_any_task_cache;
+    IF (r.owner       = user_person_id) THEN
+      allowed_to_see := true;
+    END IF;
+    IF (r.assigned_to = user_person_id) THEN
+      allowed_to_see := true;
+    END IF;
+    IF NOT allowed_to_see THEN
       CONTINUE;
     END IF;
     pipe row (r);
@@ -1968,31 +1947,19 @@ AS
   return_id INTEGER;
 BEGIN
   user_person_id := tasker.utils.get_person_id_from_user_id ( p_as_user );
-  SELECT ID ,
-    TITLE ,
-    DESCRIPTION ,
-    PCT_COMPLETE ,
-    STATUS ,
-    OWNER ,
-    ASSIGNED_TO ,
-    CHANGE_DATE ,
-    CHANGE_USER
-  INTO task
-  FROM tasker.task
-  WHERE id               = p_task_id;
+  SELECT * INTO task FROM tasker.task WHERE id = p_task_id;
   IF task.owner         != user_person_id THEN
     IF task.assigned_to != user_person_id THEN
       IF NOT tasker.security.can_user ( p_as_user, CAN_MODIFY_ANY_TASK() ) THEN
-        raise_application_error ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+        tasker.utils.E_ACCESS_DENIED();
       END IF;
     ELSE
       IF NOT tasker.security.can_user ( p_as_user, CAN_COMMENT_ON_ASSIGNED_TASK() ) THEN
-        raise_application_error ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+        tasker.utils.E_ACCESS_DENIED();
       END IF;
     END IF;
   END IF;
   IF tasker.security.can_user ( p_as_user, CAN_COMMENT_ON_OWN_TASK() ) OR tasker.security.can_user ( p_as_user, CAN_MODIFY_ANY_TASK() ) OR tasker.security.can_user ( p_as_user, CAN_COMMENT_ON_ASSIGNED_TASK() ) THEN
-    return_id := tasker.task_comment_seq.nextval();
     INSERT
     INTO tasker.task_comments
       (
@@ -2005,17 +1972,19 @@ BEGIN
       )
       VALUES
       (
-        return_id,
+        tasker.task_comment_seq.NEXTVAL,
         p_task_id,
         p_comment,
         sysdate,
         p_as_user,
         p_as_user
-      );
+      )
+    RETURNING id
+    INTO return_id;
     COMMIT;
     RETURN return_id;
   ELSE
-    raise_application_error ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+    tasker.utils.E_ACCESS_DENIED();
   END IF;
   RETURN NULL;
 END create_task_comment;
@@ -2149,13 +2118,14 @@ FUNCTION create_user(
     p_as_user  VARCHAR2 )
   RETURN VARCHAR2
 AS
-  salt VARCHAR2(4000);
-  hash VARCHAR2(4000);
+pragma autonomous_transaction;
+  new_salt VARCHAR2(4000);
+  new_hash VARCHAR2(4000);
 BEGIN
   -- generate a salt
-  salt := tasker.security.gen_salt();
+  new_salt := tasker.security.gen_salt();
   -- and hash the password with it
-  hash := tasker.security.gen_hash( p_password, salt );
+  new_hash := tasker.security.gen_hash( p_password, new_salt );
   -- Verify the user has actual rights to create users
   IF tasker.security.can_user( p_as_user, CAN_CREATE_USER() ) THEN
     -- create the user
@@ -2172,15 +2142,17 @@ BEGIN
       VALUES
       (
         p_user_id,
-        hash,
-        salt,
+        new_hash,
+        new_salt,
         'A',
         sysdate,
         p_as_user
       );
+      commit;
   ELSE
-    RAISE_APPLICATION_ERROR ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+    tasker.utils.E_ACCESS_DENIED();
   END IF;
+  return p_user_id;
 END create_user;
 /******************************************************************************
 *
@@ -2200,6 +2172,7 @@ PROCEDURE change_user_status
     p_as_user VARCHAR2
   )
 AS
+pragma autonomous_transaction;
 BEGIN
   -- Verify the user has actual rights to modify users
   IF tasker.security.can_user( p_as_user, CAN_MODIFY_USER() ) THEN
@@ -2209,8 +2182,9 @@ BEGIN
       change_date = sysdate,
       change_user = p_as_user
     WHERE id      = p_user_id;
+    commit;
   ELSE
-    RAISE_APPLICATION_ERROR ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+    tasker.utils.E_ACCESS_DENIED();
   END IF;
 END change_user_status;
 /**
@@ -2233,15 +2207,15 @@ PROCEDURE change_user_password(
     p_as_user     VARCHAR2)
 AS
   pragma autonomous_transaction;
-  salt VARCHAR2(4000);
-  hash VARCHAR2(4000);
+  new_salt VARCHAR2(4000);
+  new_hash VARCHAR2(4000);
 BEGIN
-  salt := tasker.security.gen_salt();
-  hash := tasker.security.gen_hash( p_newPassword, salt );
+  new_salt := tasker.security.gen_salt();
+  new_hash := tasker.security.gen_hash( p_newPassword, new_salt );
   IF tasker.security.can_user ( p_as_user, tasker.security.CAN_CHANGE_ANY_USER_PWD ) THEN
     UPDATE users
-    SET password  = hash,
-      salt        = salt,
+    SET password  = new_hash,
+      salt        = new_salt,
       change_date = sysdate,
       change_user = p_as_user
     WHERE id      = p_user_id;
@@ -2250,17 +2224,17 @@ BEGIN
     IF p_user_id = p_as_user THEN
       IF tasker.security.verify_password( p_user_id, p_oldPassword ) THEN
         UPDATE users
-        SET password  = hash,
-          salt        = salt,
+        SET password  = new_hash,
+          salt        = new_salt,
           change_date = sysdate,
           change_user = p_as_user
         WHERE id      = id;
         COMMIT;
       ELSE
-        RAISE_APPLICATION_ERROR ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+    tasker.utils.E_ACCESS_DENIED();
       END IF;
     ELSE
-      RAISE_APPLICATION_ERROR ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+    tasker.utils.E_ACCESS_DENIED();
     END IF;
   END IF;
 END change_user_password;
@@ -2281,7 +2255,7 @@ BEGIN
     UPDATE users SET failed_login_attempts = 0 WHERE id = p_user_id;
     COMMIT;
   ELSE
-    RAISE_APPLICATION_ERROR ( tasker.utils.E_ACCESS_DENIED_CODE(), tasker.utils.E_ACCESS_DENIED_MSG() );
+    tasker.utils.E_ACCESS_DENIED();
   END IF;
 END unlock_user;
 END USER_MGMT;
@@ -2322,26 +2296,19 @@ AS
   ******************************************************************************/
   /******************************************************************************
   *
-  * FAUX CONSTANTS
+  * PUBLIC METHODS
   *
   ******************************************************************************/
-FUNCTION E_ACCESS_DENIED_CODE
-  RETURN INTEGER
+PROCEDURE E_ACCESS_DENIED
 AS
 BEGIN
-  RETURN -22001;
-END E_ACCESS_DENIED_CODE;
-FUNCTION E_ACCESS_DENIED_MSG
-  RETURN VARCHAR2
+  raise_application_error ( -20403, 'Forbidden.' );
+END E_ACCESS_DENIED;
+PROCEDURE E_NOT_FOUND
 AS
 BEGIN
-  RETURN 'Access Denied';
-END E_ACCESS_DENIED_MSG;
-/******************************************************************************
-*
-* PUBLIC METHODS
-*
-******************************************************************************/
+  raise_application_error ( -20404, 'No data found.' );
+END E_NOT_FOUND;
 /**
 * get_user_id_from_person_id
 *
@@ -2354,9 +2321,12 @@ FUNCTION get_user_id_from_person_id(
     p_person_id INTEGER )
   RETURN VARCHAR2
 AS
-  return_id VARCHAR2(32);
+  return_id VARCHAR2(32) := NULL;
 BEGIN
   SELECT user_id INTO return_id FROM tasker.person WHERE id = p_person_id;
+  IF return_id IS NULL THEN
+    E_NOT_FOUND();
+  END IF;
   RETURN return_id;
 END get_user_id_from_person_id;
 /**
@@ -2374,6 +2344,9 @@ AS
   return_id INTEGER;
 BEGIN
   SELECT id INTO return_id FROM tasker.person WHERE user_id = p_user_id;
+  IF return_id IS NULL THEN
+    E_NOT_FOUND();
+  END IF;
   RETURN return_id;
 END get_person_id_from_user_id;
 END UTILS;
