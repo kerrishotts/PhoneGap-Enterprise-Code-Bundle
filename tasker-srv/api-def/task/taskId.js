@@ -35,19 +35,24 @@ var DBUtils = require("../../db-utils");
 var param = {
 	"name": "taskId",
 	"handler": function (req, res, next, taskId) {
+		if (!req.user) {
+			var err = new Error ("Forbidden");
+			err.status = 403;
+			return next(err);
+		}	
 		var dbUtil = new DBUtils( req.app.get ( "client-pool" ) );
-			dbUtil.query ( "SELECT * FROM table(tasker.task_mgmt.get_task(:1,:2))", [taskId, "JDOE"],
+			dbUtil.query ( "SELECT * FROM table(tasker.task_mgmt.get_task(:1,:2))", [taskId, req.user.userId],
 				function ( err, results ) {
 					if (err) {
-						next(new Error (err));
+						return next(new Error (err));
 					}
 					if (results.length === 0) {
 						var err = new Error ("Not Found");
 						err.status = 404;
-						next(err);
+						return next(err);
 					}
 					req.task = results[0];
-					next();
+					return next();
 				});
 	}
 };
