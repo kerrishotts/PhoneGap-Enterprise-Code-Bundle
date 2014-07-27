@@ -41,4 +41,6 @@ DBUtils.prototype.query = function ( sql, bindParameters, cb) {
 	});
 };
 
+DBUtils.prototype.execute = DBUtils.prototype.query;
+
 module.exports = DBUtils;
