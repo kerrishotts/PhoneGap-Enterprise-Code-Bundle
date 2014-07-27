@@ -28,21 +28,24 @@
 //
 // Dependencies
 //
-var fs = require('fs');
-var express = require('express');
-var helmet = require('helmet');
-var morgan = require('morgan');
-var winston = require('winston');
-var path = require('path');
-var favicon = require('static-favicon');
-var logger = require('morgan');
+var fs           = require('fs');
+var express      = require('express');
+var helmet       = require('helmet');
+var morgan       = require('morgan');
+var winston      = require('winston');
+var path         = require('path');
+var favicon      = require('static-favicon');
+var logger       = require('morgan');
 var cookieParser = require('cookie-parser');
-var session = require('express-session');
-var bodyParser = require('body-parser');
-var csrf = require('csurf');
-var oracle = require ('oracle');
-var pool = require ('generic-pool');
+var session      = require('express-session');
+var bodyParser   = require('body-parser');
+var csrf         = require('csurf');
+var oracle       = require('oracle');
+var pool         = require('generic-pool');
+var passport     = require('passport');
+var ReqStrategy  = require('passport-req').Strategy;
 
+var DBUtils      = require('./db-utils');
 //
 // routes are defined by our API definition
 //
@@ -145,8 +148,78 @@ process.on("exit", function () {
 
 app.set ( "client-pool", clientPool );
 
+passport.use ( new ReqStrategy ( 
+  function ( req, done ) {
+    // header will have auth token in x-auth-token
+    winston.info ( "in strategy");
+    var authToken = req.headers["x-auth-token"];
+    if (typeof authToken !== "undefined") {
+      winston.info ( "authorization token:", authToken);
+      var dbUtil = new DBUtils ( clientPool );
+      winston.info ( "Call Oracle");  
+      dbUtil.query ( "CALL tasker.security.verify_token (:1, :2, :3, :4) INTO :5",
+                   [ authToken, // authorization token 
+                     new oracle.OutParam(oracle.OCCISTRING, {size:32}), // user name
+                     new oracle.OutParam(oracle.OCCISTRING, {size:4000}),   // session id
+                     new oracle.OutParam(oracle.OCCISTRING, {size:4000}),            // next token
+                     new oracle.OutParam(oracle.OCCISTRING, {size:1}) ],          // success Y/N
+                   function ( err, results ) {
+                     winston.info ( err );
+                     winston.info ( results );
+                     if (err) { return done(err); }
+                     if (results.returnParam3 === "N") { return done( null, false ); }
+                     return done(null, { userId: results.returnParam, sessionId: results.returnParam1,
+                                         nextToken: results.returnParam2 });
+                   });  
+    } else {
+      winston.info ( 'No auth token header' );
+      return done ( null, false);
+    }
+  }
+));
 
 
+// set up passport and our athentication strategy
+app.use ( passport.initialize() );
+// app.use ( passport.session() ); // we don't use persistent passport sessions simply because
+                                   // tokens are continually regenerated, and must be verified on
+                                   // each request. If you don't use this strategy, leave session
+                                   // support on.
+
+// parse authentication each time through
+/*app.use ( function ( req, res, next) {
+  winston.info ( "trying to authenticate");
+  passport.authenticate ( "req" )(req, res, next);
+});*/
+
+app.use ( function ( req, res, next) {
+  winston.info ( "checking if we have an auth header");
+  var authToken = req.headers["x-auth-token"];
+  if (typeof authToken !== "undefined") {
+    winston.info ( "authorization token:", authToken);
+    var dbUtil = new DBUtils ( clientPool );
+    winston.info ( "Call Oracle");  
+    dbUtil.query ( "CALL tasker.security.verify_token (:1, :2, :3, :4) INTO :5",
+                 [ authToken, // authorization token 
+                   new oracle.OutParam(oracle.OCCISTRING, {size:32}), // user name
+                   new oracle.OutParam(oracle.OCCISTRING, {size:4000}),   // session id
+                   new oracle.OutParam(oracle.OCCISTRING, {size:4000}),            // next token
+                   new oracle.OutParam(oracle.OCCISTRING, {size:1}) ],          // success Y/N
+                 function ( err, results ) {
+                   winston.info ( err );
+                   winston.info ( results );
+                   if (err) { return next(err); }
+                   if (results.returnParam3 === "Y") {
+                    req.user = { userId: results.returnParam, sessionId: results.returnParam1,
+                                       nextToken: results.returnParam2 };
+                   }
+                   if (next) { return next(); }
+               });  
+  } else {
+    winston.info ( 'No auth token header' );
+    if (next) { return next(); }
+  }
+});
 
 // tie our API to /
 app.use ( "/", apiUtils.createRouterForApi(apiDef));
