@@ -48,6 +48,11 @@ var action = {
 		var links = {};
 		apiUtils.generateHypermediaForAction ( require ("./getTaskList"), links );
 	
+		if (!req.user) {
+		  var err = new Error ("Forbidden");
+		  err.status = 403;
+		  next(err);
+		}
 		res.json ( 200, { content: req.task,
 			                  links: links } );	
 	}
