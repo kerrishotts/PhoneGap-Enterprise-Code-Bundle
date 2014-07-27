@@ -7,6 +7,7 @@ SELECT *
   AND pct_complete BETWEEN 0 AND 100;
 */
 
+/*
 select * from table(tasker.task_mgmt.get_tasks( p_owned_by=>2, p_as_user=>'BSMITH' ));
 
 
@@ -24,6 +25,7 @@ begin
     dbms_output.put_line ( 'NO');
   end if;
 end;
+*/
 
 /*
 declare
@@ -45,3 +47,43 @@ begin
    null;
 end;
 */
+
+
+declare
+  next_token varchar2(4000);
+  curr_token varchar2(4000);
+  session_id integer;
+  strbool varchar2(1);
+  auth_user varchar2(32);
+begin
+  strbool := tasker.security.authenticate_user ( 'BSMITH', 'password', session_id, next_token );
+  dbms_output.put_line ( 'Auth Success? ' || strbool );
+  dbms_output.put_line ( '  Session ID: ' || to_char(session_id) );
+  dbms_output.put_line ( '       Token: ' || next_token );
+  if strbool = 'Y' then
+    curr_token := next_token;
+    strbool := tasker.security.verify_token ( curr_token, auth_user, session_id, next_token );
+    dbms_output.put_line ( 'Vrfy Success? ' || strbool );
+    dbms_output.put_line ( '  Session ID: ' || to_char(session_id) );
+    dbms_output.put_line ( '   Auth User: ' || auth_user );
+    dbms_output.put_line ( '       Token: ' || next_token );
+    curr_token := next_token;
+    strbool := tasker.security.verify_token ( curr_token, auth_user, session_id, next_token );
+    dbms_output.put_line ( 'Vrfy Success? ' || strbool );
+    dbms_output.put_line ( '  Session ID: ' || to_char(session_id) );
+    dbms_output.put_line ( '   Auth User: ' || auth_user );
+    dbms_output.put_line ( '       Token: ' || next_token );
+    curr_token := next_token;
+    strbool := tasker.security.verify_token ( curr_token, auth_user, session_id, next_token );
+    dbms_output.put_line ( 'Vrfy Success? ' || strbool );
+    dbms_output.put_line ( '  Session ID: ' || to_char(session_id) );
+    dbms_output.put_line ( '   Auth User: ' || auth_user );
+    dbms_output.put_line ( '       Token: ' || next_token );
+    curr_token := next_token;
+    strbool := tasker.security.verify_token ( curr_token, auth_user, session_id, next_token );
+    dbms_output.put_line ( 'Vrfy Success? ' || strbool );
+    dbms_output.put_line ( '  Session ID: ' || to_char(session_id) );
+    dbms_output.put_line ( '   Auth User: ' || auth_user );
+    dbms_output.put_line ( '       Token: ' || next_token );
+  end if;
+end;
