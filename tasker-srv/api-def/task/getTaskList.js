@@ -35,6 +35,7 @@ var apiUtils = require("../../api-utils");
 var action = {
 	"action": "get-task-list",
 	"verb": "get",
+	"securedBy": "token-auth",
 	"description": 
 	{
 		"title": "Get Task List",
