@@ -8,3 +8,5 @@ node_modules/*
 */_certs
 .idea/*
 tasker-srv/npm-debug.log
+
+*.espressostorage
