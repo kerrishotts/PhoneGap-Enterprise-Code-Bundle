@@ -46,6 +46,8 @@ var passport     = require('passport');
 var ReqStrategy  = require('passport-req').Strategy;
 
 var DBUtils      = require('./db-utils');
+var Session      = require('./models/session');
+var Errors       = require('./errors');
 //
 // routes are defined by our API definition
 //
@@ -150,34 +152,24 @@ app.set ( "client-pool", clientPool );
 
 passport.use ( new ReqStrategy ( 
   function ( req, done ) {
-    // header will have auth token in x-auth-token
-    winston.info ( "in strategy");
-    var authToken = req.headers["x-auth-token"];
-    if (typeof authToken !== "undefined") {
-      winston.info ( "authorization token:", authToken);
-      var dbUtil = new DBUtils ( clientPool );
-      winston.info ( "Call Oracle");  
-      dbUtil.query ( "CALL tasker.security.verify_token (:1, :2, :3, :4) INTO :5",
-                   [ authToken, // authorization token 
-                     new oracle.OutParam(oracle.OCCISTRING, {size:32}), // user name
-                     new oracle.OutParam(oracle.OCCISTRING, {size:4000}),   // session id
-                     new oracle.OutParam(oracle.OCCISTRING, {size:4000}),            // next token
-                     new oracle.OutParam(oracle.OCCISTRING, {size:1}) ],          // success Y/N
-                   function ( err, results ) {
-                     winston.info ( err );
-                     winston.info ( results );
-                     if (err) { return done(err); }
-                     if (results.returnParam3 === "N") { return done( null, false ); }
-                     return done(null, { userId: results.returnParam, sessionId: results.returnParam1,
-                                         nextToken: results.returnParam2 });
-                   });  
-    } else {
-      winston.info ( 'No auth token header' );
-      return done ( null, false);
-    }
+    var clientAuthToken = req.headers["x-auth-token"];
+
+    var session = new Session ( new DBUtils ( clientPool ) );
+    session.findSession ( clientAuthToken, function ( err, results) {
+      if (err) {
+        return done(err);
+      }
+      if (!results) {
+        return done(null, false);
+      }
+      done(null, results);
+    });
   }
 ));
 
+passport.serializeUser(function( user, done ) {
+  done (null, user);
+});
 
 // set up passport and our athentication strategy
 app.use ( passport.initialize() );
@@ -186,43 +178,23 @@ app.use ( passport.initialize() );
                                    // each request. If you don't use this strategy, leave session
                                    // support on.
 
-// parse authentication each time through
-/*app.use ( function ( req, res, next) {
-  winston.info ( "trying to authenticate");
-  passport.authenticate ( "req" )(req, res, next);
-});*/
-
-app.use ( function ( req, res, next) {
-  winston.info ( "checking if we have an auth header");
-  var authToken = req.headers["x-auth-token"];
-  if (typeof authToken !== "undefined") {
-    winston.info ( "authorization token:", authToken);
-    var dbUtil = new DBUtils ( clientPool );
-    winston.info ( "Call Oracle");  
-    dbUtil.query ( "CALL tasker.security.verify_token (:1, :2, :3, :4) INTO :5",
-                 [ authToken, // authorization token 
-                   new oracle.OutParam(oracle.OCCISTRING, {size:32}), // user name
-                   new oracle.OutParam(oracle.OCCISTRING, {size:4000}),   // session id
-                   new oracle.OutParam(oracle.OCCISTRING, {size:4000}),            // next token
-                   new oracle.OutParam(oracle.OCCISTRING, {size:1}) ],          // success Y/N
-                 function ( err, results ) {
-                   winston.info ( err );
-                   winston.info ( results );
-                   if (err) { return next(err); }
-                   if (results.returnParam3 === "Y") {
-                    req.user = { userId: results.returnParam, sessionId: results.returnParam1,
-                                       nextToken: results.returnParam2 };
-                   }
-                   if (next) { return next(); }
-               });  
-  } else {
-    winston.info ( 'No auth token header' );
-    if (next) { return next(); }
+/**
+ * Checks if we are authenticated (if a resource is secured), and if not
+ * it calls passport to authenticate us.
+ * @param req
+ * @param res
+ * @param next
+ * @returns {*}
+ */
+function checkAuth ( req, res, next ) {
+  if (req.isAuthenticated()) {
+    return next();
   }
-});
+  passport.authenticate ( "req" )(req, res, next);
+}
 
-// tie our API to /
-app.use ( "/", apiUtils.createRouterForApi(apiDef));
+// tie our API to / and enable secured resources to use the above method
+app.use ( "/", apiUtils.createRouterForApi(apiDef, checkAuth));
 
 // and set the pretty API as a global variable so our discover method can find it.
 app.set ( "x-api-discovery", apiUtils.generateHypermediaForApi(apiDef));
