@@ -10,3 +10,5 @@ node_modules/*
 tasker-srv/npm-debug.log
 
 *.espressostorage
+
+tasker-srv/cookies.txt
