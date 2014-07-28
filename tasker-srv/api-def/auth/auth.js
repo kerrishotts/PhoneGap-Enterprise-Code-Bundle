@@ -28,23 +28,38 @@
 //
 // dependencies
 //
-var express = require("express");
+var Session = require("../../models/session");
+var Errors = require("../../errors");
+var DBUtils = require("../../db-utils");
 
-// authorization action
+// authenticate action
 var action = 
 {
-	"action": "authorize",
+	"action": "authenticate",
 	"verb": "post",
 	"description": 
 	{
-		"title": "Authorization",
+		"title": "Authenticate",
 		"href": "/auth",	
 		"type": "application/json",
 		"accept": "application/json"
 	},
 	"handler": function ( req, res, next ) {
-		res.json ( 200, { "message": "Authorized.", code: "OK000",
-			                "links": req.app.get("x-api-discovery") } );
+
+    var session = new Session ( new DBUtils( req.app.get ( "client-pool" ) ) );
+    // username and password are contained in res
+    var username = req.body["userId"];
+    var password = req.body["candidatePassword"];
+    session.createSession ( username, password, function (err, results) {
+      if (err) {
+        return next(err);
+      }
+      if (!results) {
+        return next(Errors.HTTP_Forbidden());
+      }
+      res.json ( 200, { "message": "Authenticated.", "code": "OK000",
+                        "content": results, "links": req.app.get("x-api-discovery") } );
+    } );
 	}
 };
 
