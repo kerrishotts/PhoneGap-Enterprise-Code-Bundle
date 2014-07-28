@@ -32,11 +32,13 @@ var express = require("express");
 var apiUtils = require("../../api-utils");
 var DBUtils = require("../../db-utils");
 var winston = require("winston");
+var Errors = require ("../../errors");
 
 // get a specific task
 var action = {
 	"action": "get-task",
 	"verb": "get",
+  "securedBy": "tasker-auth",
 	"description": 
 	{
 		"title": "Get Task",
@@ -48,11 +50,8 @@ var action = {
 		var links = {};
 		apiUtils.generateHypermediaForAction ( require ("./getTaskList"), links );
 	
-		if (!req.user) {
-		  var err = new Error ("Forbidden");
-		  err.status = 403;
-		  next(err);
-		}
+		if (!req.user) { return next(Errors.HTTP_Forbidden()); }
+
 		res.json ( 200, { content: req.task,
 			                  links: links } );	
 	}
