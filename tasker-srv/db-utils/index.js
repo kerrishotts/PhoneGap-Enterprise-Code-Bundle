@@ -2,6 +2,7 @@
 // dependencies
 //
 var winston = require("winston");
+var oracle  = require("oracle");
 
 // DBUtils class provides useful methods for calling db functions without
 // having unnecessary code reuse
@@ -42,5 +43,16 @@ DBUtils.prototype.query = function ( sql, bindParameters, cb) {
 };
 
 DBUtils.prototype.execute = DBUtils.prototype.query;
+
+DBUtils.prototype.outInteger = function (options) { return new oracle.OutParam ( oracle.OCCIINT, options ); }
+DBUtils.prototype.outVarchar2 = function (options) { return new oracle.OutParam ( oracle.OCCISTRING, options ); }
+DBUtils.prototype.outDouble = function (options) { return new oracle.OutParam ( oracle.OCCIDOUBLE, options ); }
+DBUtils.prototype.outFloat = function (options) { return new oracle.OutParam ( oracle.OCCIFLOAT, options ); }
+DBUtils.prototype.outCursor = function (options) { return new oracle.OutParam ( oracle.OCCICURSOR, options ); }
+DBUtils.prototype.outClob = function (options) { return new oracle.OutParam ( oracle.OCCICLOB, options ); }
+DBUtils.prototype.outDate = function (options) { return new oracle.OutParam ( oracle.OCCIDATE, options ); }
+DBUtils.prototype.outTimestamp = function (options) { return new oracle.OutParam ( oracle.OCCITIMESTAMP, options ); }
+DBUtils.prototype.outBlob = function (options) { return new oracle.OutParam ( oracle.OCCIBLOB, options ); }
+DBUtils.prototype.outNumber = function (options) { return new oracle.OutParam ( oracle.OCCINUMBER, options ); }
 
 module.exports = DBUtils;
