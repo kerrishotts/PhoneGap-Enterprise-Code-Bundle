@@ -28,14 +28,16 @@
 //
 // dependencies
 //
-var express = require("express");
-var apiUtils = require("../../api-utils");
+var Errors = require ('../../errors');
+var DBUtils = require ('../../db-utils');
+var Session = require ('../../models/session');
 
 // de-authorize action
 var action =
 			{
 				"action": "deauthorize",
 				"verb": "delete",
+        "securedBy": "tasker-auth",
 				"description": 
 				{
 					"title": "Deauthorization",
@@ -43,8 +45,18 @@ var action =
 					"type": "application/json" 
 				},
 				"handler": function ( req, res, next ) {
-					res.json ( 200, { "message": "Logged out.", code: "OK000",
-					                  "links": req.app.get("x-api-discovery") } );
+
+          var session = new Session ( new DBUtils( req.app.get ( "client-pool" ) ) );
+
+          if (!req.user) { return next(Errors.HTTP_Forbidden()); };
+
+          session.endSession ( req.user.sessionId, function (err, results) {
+            if (err) {
+              return next(err);
+            }
+            res.json ( 200, { "message": "User logged out.", "code": "OK000",
+              "links": req.app.get("x-api-discovery") } );
+          } );
 				}
 			};
 
