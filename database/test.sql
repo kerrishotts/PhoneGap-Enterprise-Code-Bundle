@@ -5,10 +5,8 @@ SELECT *
   AND owner         = NVL(2, owner)
   AND status        = NVL(null, status)
   AND pct_complete BETWEEN 0 AND 100;
-*/
 
-/*
-select * from table(tasker.task_mgmt.get_tasks( p_owned_by=>2, p_as_user=>'BSMITH' ));
+select * from table(tasker.task_mgmt.get_task( 2, p_as_user=>'BSMITH' ));
 
 
 declare
@@ -52,38 +50,74 @@ end;
 declare
   next_token varchar2(4000);
   curr_token varchar2(4000);
+  session_salt varchar2(4000);
   session_id integer;
   strbool varchar2(1);
   auth_user varchar2(32);
 begin
-  strbool := tasker.security.authenticate_user ( 'BSMITH', 'password', session_id, next_token );
+  strbool := tasker.security.authenticate_user ( 'JDOE', 'password', session_id, next_token, session_salt );
   dbms_output.put_line ( 'Auth Success? ' || strbool );
   dbms_output.put_line ( '  Session ID: ' || to_char(session_id) );
+  dbms_output.put_line ( 'Session Salt: ' || session_salt );
   dbms_output.put_line ( '       Token: ' || next_token );
   if strbool = 'Y' then
     curr_token := next_token;
-    strbool := tasker.security.verify_token ( curr_token, auth_user, session_id, next_token );
+    curr_token := substr(curr_token,1,256) || 
+                  tasker.security.gen_hash( substr(curr_token,257,256) , session_salt , 256, 128 );
+    dbms_output.put_line ( 'Hashed Token: ' || curr_token );
+    strbool := tasker.security.verify_token ( session_id, curr_token, auth_user, next_token );
     dbms_output.put_line ( 'Vrfy Success? ' || strbool );
     dbms_output.put_line ( '  Session ID: ' || to_char(session_id) );
     dbms_output.put_line ( '   Auth User: ' || auth_user );
     dbms_output.put_line ( '       Token: ' || next_token );
     curr_token := next_token;
-    strbool := tasker.security.verify_token ( curr_token, auth_user, session_id, next_token );
+    curr_token := substr(curr_token,1,256) || 
+                  tasker.security.gen_hash( substr(curr_token,257,256) , session_salt , 256, 128 );
+    dbms_output.put_line ( 'Hashed Token: ' || curr_token );
+    strbool := tasker.security.verify_token ( session_id, curr_token, auth_user, next_token );
     dbms_output.put_line ( 'Vrfy Success? ' || strbool );
     dbms_output.put_line ( '  Session ID: ' || to_char(session_id) );
     dbms_output.put_line ( '   Auth User: ' || auth_user );
     dbms_output.put_line ( '       Token: ' || next_token );
     curr_token := next_token;
-    strbool := tasker.security.verify_token ( curr_token, auth_user, session_id, next_token );
+    curr_token := substr(curr_token,1,256) || 
+                  tasker.security.gen_hash( substr(curr_token,257,256) , session_salt , 256, 128 );
+    dbms_output.put_line ( 'Hashed Token: ' || curr_token );
+    strbool := tasker.security.verify_token ( session_id, curr_token, auth_user, next_token );
     dbms_output.put_line ( 'Vrfy Success? ' || strbool );
     dbms_output.put_line ( '  Session ID: ' || to_char(session_id) );
     dbms_output.put_line ( '   Auth User: ' || auth_user );
     dbms_output.put_line ( '       Token: ' || next_token );
     curr_token := next_token;
-    strbool := tasker.security.verify_token ( curr_token, auth_user, session_id, next_token );
+    curr_token := substr(curr_token,1,256) || 
+                  tasker.security.gen_hash( substr(curr_token,257,256) , session_salt , 256, 128 );
+    dbms_output.put_line ( 'Hashed Token: ' || curr_token );
+    strbool := tasker.security.verify_token ( session_id, curr_token, auth_user, next_token );
     dbms_output.put_line ( 'Vrfy Success? ' || strbool );
     dbms_output.put_line ( '  Session ID: ' || to_char(session_id) );
     dbms_output.put_line ( '   Auth User: ' || auth_user );
     dbms_output.put_line ( '       Token: ' || next_token );
+    curr_token := next_token;
+    curr_token := substr(curr_token,1,256) || 
+                  tasker.security.gen_hash( substr(curr_token,257,256) , session_salt , 256, 128 );
+    dbms_output.put_line ( 'Hashed Token: ' || curr_token );
+    strbool := tasker.security.verify_token ( session_id, curr_token, auth_user, next_token );
+    dbms_output.put_line ( 'Vrfy Success? ' || strbool );
+    dbms_output.put_line ( '  Session ID: ' || to_char(session_id) );
+    dbms_output.put_line ( '   Auth User: ' || auth_user );
+    dbms_output.put_line ( '       Token: ' || next_token );
+    curr_token := next_token;
+    curr_token := substr(curr_token,1,256) || 
+                  tasker.security.gen_hash( substr(curr_token,257,256) , session_salt , 256, 128 );
+    dbms_output.put_line ( 'Hashed Token: ' || curr_token );
+    strbool := tasker.security.verify_token ( session_id, curr_token, auth_user, next_token );
+    dbms_output.put_line ( 'Vrfy Success? ' || strbool );
+    dbms_output.put_line ( '  Session ID: ' || to_char(session_id) );
+    dbms_output.put_line ( '   Auth User: ' || auth_user );
+    dbms_output.put_line ( '       Token: ' || next_token );
+    curr_token := next_token;
+    curr_token := substr(curr_token,1,256) || 
+                  tasker.security.gen_hash( substr(curr_token,257,256) , session_salt , 256, 128 );
+    dbms_output.put_line ( 'Hashed Token: ' || curr_token );
   end if;
 end;
