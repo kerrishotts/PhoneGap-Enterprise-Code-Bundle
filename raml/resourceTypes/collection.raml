@@ -5,15 +5,23 @@
         200:
           body:
             application/json:
-              example:
-                <<exampleCollection>>
+              example: |
+                {
+                content: <<exampleCollection>>,
+                links: { ... }
+                }
+
     post?:
       description: Add a new <<resourcePathName|!singularize>>
       body:
         application/json:
           schema: <<resourcePathName|!singularize>>
           example: |
-            <<exampleItem>>
+            {
+            content: <<exampleItem>>,
+            links: { ... }
+            }
+
       responses:
         201:
           headers:
