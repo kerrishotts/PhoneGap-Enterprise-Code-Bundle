@@ -28,30 +28,27 @@
 //
 // dependencies
 //
-var express = require("express");
 var DBUtils = require("../../db-utils");
+var Errors = require("../../errors");
+var winston = require("winston");
 
 // obtain the task information
 var param = {
 	"name": "taskId",
+  "securedBy": "tasker-auth",
 	"handler": function (req, res, next, taskId) {
-		if (!req.user) {
-			var err = new Error ("Forbidden");
-			err.status = 403;
-			return next(err);
-		}	
+    winston.info ( "In taskId Handler");
+		if (!req.user) { return next(Errors.HTTP_Forbidden()); }
+
 		var dbUtil = new DBUtils( req.app.get ( "client-pool" ) );
 			dbUtil.query ( "SELECT * FROM table(tasker.task_mgmt.get_task(:1,:2))", [taskId, req.user.userId],
 				function ( err, results ) {
 					if (err) {
 						return next(new Error (err));
 					}
-					if (results.length === 0) {
-						var err = new Error ("Not Found");
-						err.status = 404;
-						return next(err);
-					}
+					if (results.length === 0) { return next(Errors.HTTP_NotFound()); }
 					req.task = results[0];
+          winston.info ("Tasks: ", req.task)
 					return next();
 				});
 	}
