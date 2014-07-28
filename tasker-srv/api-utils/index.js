@@ -60,15 +60,22 @@ module.exports = {
 	 *
 	 * @param api {array} 
 	 */
-  createRouterForApi:function (api) {
+  createRouterForApi:function (api, checkAuthFn) {
 		var router = express.Router();
 		// process each route in the api; a route consists of the uri (route) and a series of verbs (get, post, etc.)
 		api.forEach ( function ( apiRoute ) {
 				// add params
+				
 				if ( typeof apiRoute.params !== "undefined" )
 				{
 					apiRoute.params.forEach ( function ( param ) {
-						router.param( param.name, param.handler );
+            if (typeof param.securedBy !== "undefined" ) {
+              router.param( param.name, function ( req, res, next, v) {
+                return checkAuthFn( req, res, param.handler.bind(this,req, res, next, v) );
+              });
+            } else {
+              router.param(param.name, param.handler);
+            }
 					});
 				}
 				var uri = apiRoute.route;
@@ -81,7 +88,11 @@ module.exports = {
 						// and add the handler specified to the route (if it's a valid verb)
 						verbs.forEach ( function (verb) {
 								if (typeof route[verb] === "function") {
+									if (typeof action.securedBy !== "undefined") {
+										route[verb]( checkAuthFn, action.handler );
+									} else {
 										route[verb]( action.handler );
+									}
 								}
 						});
 				});
