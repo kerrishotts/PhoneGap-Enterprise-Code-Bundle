@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.packtpub.pgech5" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>TaskerCH5</name>
+    <description>
+        This is an example application for Chapter 5 of PhoneGap Enterprise, published by Packt Publishing.
+	Demonstrates communication with the back-end. Does require the back-end to be functioning in order
+	to work properly.
+    </description>
+    <author email="kerrishotts@gmail.com" href="http://www.photokandy.com">
+        Kerri Shotts
+    </author>
+    <content src="index.html" />
+    <!-- the below domain needs to be modified to the domain of your web server -->
+    <access origin="pge-as.acmecorp.com" />
+</widget>
