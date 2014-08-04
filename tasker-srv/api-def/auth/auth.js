@@ -51,6 +51,7 @@ var action =
     var username = req.body["userId"];
     var password = req.body["candidatePassword"];
     session.createSession ( username, password, function (err, results) {
+      console.log ( results );
       if (err) {
         return next(err);
       }
