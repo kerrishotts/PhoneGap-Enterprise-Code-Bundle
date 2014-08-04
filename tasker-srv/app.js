@@ -42,6 +42,7 @@ var bodyParser   = require('body-parser');
 var csrf         = require('csurf');
 var oracle       = require('oracle');
 var pool         = require('generic-pool');
+var cors         = require('cors');
 var passport     = require('passport');
 var ReqStrategy  = require('passport-req').Strategy;
 
@@ -113,6 +114,16 @@ app.use(session( {
     saveUninitialized: true 
 }));
 
+// cors setup
+var corsDelegate = function ( req, cb ) {
+  console.log ('in cors');
+  var corsOptions = { origin: true, credentials: true };
+  cb ( null, corsOptions );
+};
+app.use (cors ( corsDelegate ) );
+app.options ( '*', cors( corsDelegate ) ); // options preflight for all remaining routes
+
+
 // csrf security
 app.use(csrf());
 app.use(function (req, res, next) {  
@@ -171,6 +182,7 @@ passport.serializeUser(function( user, done ) {
   done (null, user);
 });
 
+
 // set up passport and our athentication strategy
 app.use ( passport.initialize() );
 // app.use ( passport.session() ); // we don't use persistent passport sessions simply because
@@ -193,11 +205,15 @@ function checkAuth ( req, res, next ) {
   passport.authenticate ( "req" )(req, res, next);
 }
 
+
+//app.use ( cors( corsDelegate ) );
+
 // tie our API to / and enable secured resources to use the above method
 app.use ( "/", apiUtils.createRouterForApi(apiDef, checkAuth));
 
 // and set the pretty API as a global variable so our discover method can find it.
 app.set ( "x-api-discovery", apiUtils.generateHypermediaForApi(apiDef));
+
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -212,6 +228,7 @@ app.use(function(req, res, next) {
 // will print stacktrace
 if (dev) {
     app.use(function(err, req, res, next) {
+        console.log ( res );
         winston.error ("message: ", err.message, err.stack);
         res.status(err.status || 500);
         res.render('error', {
