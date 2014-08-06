@@ -24,11 +24,32 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 *
 ******************************************************************************/
+var apiUtils = require("../../api-utils");
 
-//
-// dependencies
-//
-var express = require ("express");
+
+var discoverAction =
+{
+  "title": "API Discovery",
+  "action": "discover_api",
+  "description": "Returns all the valid API actions",
+  "verb": "get",
+  "href": "/",
+  "accepts": [ "application/hal+json", "application/json", "text/json" ],
+  "sends": [ "application/hal+json", "application/json", "text/json" ],
+  "handler": function ( req, res, next ) {
+
+    var o = {
+      _meta: JSON.parse(JSON.stringify(discoverAction)),
+      _links: {},
+      _embedded: {}
+    };
+
+    o._links = apiUtils.mergeAndClone ( { "self": JSON.parse ( JSON.stringify ( discoverAction ) ) },
+                                        req.app.get ( "x-api-root") );
+
+    res.json ( 200, o );
+  }
+};
 
 // define the route and action for discovery
 var routes =
@@ -37,19 +58,7 @@ var routes =
 		"route": "/",
 		"actions":
 		[
-			{
-				"action": "discover",
-				"verb": "get",
-				"handler": function ( req, res, next) {
-					// output the globally cached api object
-					res.json ( 200, req.app.get ("x-api-discovery") );
-				},
-				"description": {
-					"title": "API Discovery",
-					"href": "/",	
-					"type": "application/json"
-				}
-			}
+      discoverAction
 		]
 	}
 ];
