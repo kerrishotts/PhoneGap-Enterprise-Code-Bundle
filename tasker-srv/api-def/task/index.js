@@ -25,38 +25,16 @@
 *
 ******************************************************************************/
 
-//
-// dependencies
-//
-var express = require ("express");
-
-// actions
-var getTaskList = require ("./getTaskList");
-var getTask = require ("./getTask");
-
-// parameters
-var taskId = require ("./taskId");
-
-// construct our routes
-var routes = 
+var routes =
 [
 	{
-		"route": "/task",
-		"actions": 
-		[
-			getTaskList,
-		]
+		"route": "/tasks",
+		"actions": [ require ("./getTaskList") ]
 	},
 	{
 		"route": "/task/:taskId",
-		"params":
-		[
-			taskId
-		],
-		"actions":
-		[
-			getTask
-		]
+		"params": [ require ("./taskId") ],
+		"actions": [ require ("./getTask" ) ]
 	}
 ];
 
