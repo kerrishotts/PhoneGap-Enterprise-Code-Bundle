@@ -31,21 +31,14 @@
 var express = require ("express");
 
 // actions
-var auth = require ("./auth");
-var deauth = require ("./deauth");
-var getAuthToken = require ("./token");
+var allActions = [ require ("./login"), require ("./logout") ];
 
 // attach our actions to the route
 var routes = 
 [
 	{
 		"route": "/auth",
-		"actions": 
-		[
-			getAuthToken,
-			auth,
-			deauth
-		]
+		"actions": allActions
 	}
 ];
 
