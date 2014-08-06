@@ -25,31 +25,16 @@
 *
 ******************************************************************************/
 
-//
-// dependencies
-//
-var express = require("express");
-
 // load in our api definitions and handlers
-var apiDiscovery = require("./discovery");
-var apiAuth = require("./auth");
-var apiHeartbeat = require ("./heartbeat");
-var apiTask = require("./task");
+var allActionGroups = [ require ("./discovery"), require ("./token"),
+                        require ("./auth"),  require ("./heartbeat"),
+                        require ("./task") ];
 
 // our api starts life as a blank array
 var api = [];
 
-/**
- * pushes an API segment onto the API array.
- */
-var pushSegment = function ( segment) {
-	api.push ( segment);
-}
-
-// add all our segments to the api array
-var all = [ apiDiscovery, apiAuth, apiHeartbeat, apiTask ];
-all.forEach ( function ( segment ) {
-	segment.forEach ( pushSegment );
-});
+allActionGroups.forEach ( function ( actions ) {
+  actions.forEach ( function ( action ) { api.push ( action ) } );
+} );
 
 module.exports = api;
