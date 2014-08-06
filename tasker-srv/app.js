@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  *
  ******************************************************************************/
-
+"use strict";
 //
 // Dependencies
 //
@@ -145,7 +145,14 @@ var clientPool = pool.Pool( {
     })
   },
   destroy: function ( client ) {
-    client.close();
+    try
+    {
+      client.close();
+    }
+    catch (err)
+    {
+      // if we can't close... oh well
+    }
   },
   max: 5,
   min: 1,
@@ -212,7 +219,8 @@ function checkAuth ( req, res, next ) {
 app.use ( "/", apiUtils.createRouterForApi(apiDef, checkAuth));
 
 // and set the pretty API as a global variable so our discover method can find it.
-app.set ( "x-api-discovery", apiUtils.generateHypermediaForApi(apiDef));
+app.set ( "x-api-root", apiUtils.generateHypermediaForApi(apiDef));
+console.log ( apiUtils.generateHypermediaForApi(apiDef) );
 
 
 /// catch 404 and forward to error handler
