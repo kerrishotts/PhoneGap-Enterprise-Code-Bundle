@@ -117,13 +117,8 @@ module.exports = {
 	 * returned
 	 */               
   generateHypermediaForAction: function ( action, parent ) {
-		var hm = {};
+		var hm = JSON.parse ( JSON.stringify ( action ) );
 		hm.allow = action.verb;
-		if (typeof action.description.title !== "undefined" ) { hm.title = action.description.title; }
-		if (typeof action.description.type !== "undefined" ) { hm.type = action.description.type; }
-		if (typeof action.description.accept !== "undefined" ) { hm.accept = action.description.accept; }
-		if (typeof action.description.href !== "undefined" ) { hm.href = action.description.href; }
-		if (typeof action.description.template !== "undefined" ) { hm.template = action.description.template; }
 		if (typeof parent !== "undefined")
 		{
 			parent[action.action] = hm;
@@ -149,6 +144,23 @@ module.exports = {
 				self.generateHypermediaForAction( action, hm );
 			});
 		});
-		return { "links": hm };
-	}
+		return hm;
+	},
+  /**
+   * Merges the supplied objects into one new object. This isn't a deep clone -- so
+   * this is only usable in lists and the like
+   */
+  mergeAndClone: function () {
+    var o = {};
+    var prop;
+    var args = Array.prototype.slice.call(arguments, 0);
+    args.forEach ( function (arr) {
+      for ( prop in arr ) {
+        if (arr.hasOwnProperty(prop)) {
+          o[prop] = arr[prop];
+        }
+      }
+    });
+    return o;
+  }
 };
