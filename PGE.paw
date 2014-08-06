@@ -5,7 +5,7 @@
     <databaseInfo>
         <version>134481920</version>
         <UUID>13E8FAE1-2A86-4E36-9913-093DEE18B251</UUID>
-        <nextObjectID>116</nextObjectID>
+        <nextObjectID>123</nextObjectID>
         <metadata>
             <plist version="1.0">
                 <dict>
@@ -53,7 +53,7 @@
         </metadata>
     </databaseInfo>
     <object type="LMKEYVALUE" id="z102">
-        <attribute name="value" type="string">1033.868AC177B8F79444FDB70CD4D79F3D2C382F2F161B7EF62418BC347A866565233648E1454EC2B918A2CE8EA80C500F27449537B10916C2DC829E08CF4C0CF942EF66B4A4AE2437B7CC004B074DB3789952B56D636E4A57409FE1361BF262C11702BFB6296CECD333EBE551DC49CE2CCB125ED464626B28896A98F50928616CB1FDF45410980E7F02872D0D886148FDEA70A3EB6506359B65B861F321AC74632DC12195C671C37AFE22845DD666FC7C932EA9CAFB485E90B6C2B961C4CC4F58B630905F28F9E1953F07601B76C7BFCCE98189B6DFF4D00396358FB88A041468B4FCAA4D95741823D70F0E0EDB1EBE70869FFDA5261F21FDF556410BB5C60D851F</attribute>
+        <attribute name="value" type="string">1052.6EFE058AF354C851C9B66E63ED56BBC42FC4E8613897CBA2F7391C8ECA24061DB3BBB2D5989016F042F37E174D30D1F416828BE86C9C583DBC70E0E51E73E5753300DB81A6A73C0C030A8716ADBD43CD13AF4B9CD08559CBE72BBDB74B200E1674A729377AC3B5B83785B0EF8CD6E809100ACD77D22B45D9712BC0B19303376149DD10C902438EC6CFEC58EAD536F3119041BCAE6142E5AA1B0FFDE1723C5A9B750C7EACF7F98CA24A76B02655A76B1423B8F14C29352A02DC0E86563F386CE98F1B6BF8389C22CFEEA947902F792FEA1FEE41D91E3EDCD78626F271E7DAEF7F79AE85524079EE430803118D803A984939B5BDBE730EB5942AC1D625D8305576</attribute>
         <attribute name="order" type="int64">3</attribute>
         <attribute name="name" type="string">x-auth-token</attribute>
         <attribute name="enabled" type="bool">1</attribute>
@@ -71,11 +71,11 @@
         <attribute name="method" type="string">POST</attribute>
         <attribute name="followredirects" type="bool">0</attribute>
         <attribute name="body" type="string">["{\\"userId\\": \\"BSMITH\\",\\"candidatePassword\\": \\"password\\"}"]</attribute>
-        <attribute name="order" type="int64">0</attribute>
-        <attribute name="name" type="string">PGE: Authenticate</attribute>
+        <attribute name="order" type="int64">2</attribute>
+        <attribute name="name" type="string">PGE: Login</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM"></relationship>
         <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
-        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z110 z114 z105 z108 z115"></relationship>
+        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z110 z114 z105 z115"></relationship>
     </object>
     <object type="LMENVIRONMENT" id="z104">
         <attribute name="name" type="string">Default</attribute>
@@ -103,28 +103,18 @@
     </object>
     <object type="LMREQUEST" id="z107">
         <attribute name="uuid" type="string">3ED70A3C-2954-481A-B64B-17C8D4D1382C</attribute>
-        <attribute name="url" type="string">https://pge-as.acmecorp.com:4443/auth</attribute>
+        <attribute name="url" type="string">https://pge-as.acmecorp.com:4443/getToken</attribute>
         <attribute name="timeoutinterval" type="float">30</attribute>
         <attribute name="redirectmethod" type="bool">0</attribute>
         <attribute name="redirectauthorization" type="bool">0</attribute>
         <attribute name="method" type="string">GET</attribute>
         <attribute name="followredirects" type="bool">0</attribute>
         <attribute name="body" type="string">["{\\n   \\"username\\": \\"JDOE\\",\\n   \\"password\\": \\"password\\"\\n}"]</attribute>
-        <attribute name="order" type="int64">2</attribute>
+        <attribute name="order" type="int64">1</attribute>
         <attribute name="name" type="string">PGE: Get CSRF</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM"></relationship>
         <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
-        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z111 z106"></relationship>
-    </object>
-    <object type="LMKEYVALUE" id="z108">
-        <attribute name="value" type="string">1031.6707CDC33BEF8EA77E8077BA794F81E2431AF1E35A54882C7776D5CA96195A4E1D92476C2371C96689F79CF47F69103BA6489AA674734CD2348D663C820AB926D322584CBE5B67A9F843030925562C4861F51762BA8548E720BB2D724CBD645BE19C6137253933EED6C042F4217308A363C85CA86E277DBA04751433C1E327FF4577FE3B04A43E4D4591E063D0E390142F15E23E6AF73EA5BFFD9AC3E7C9CE11BCABFB598C4191BD952F37DB579C06D04DC7551BD79304399450925060A82ADD5663325AC7C187A5C738FBB5C7A7288BA54659BF450C2DB984F509E45D394BF15EAD5F458D529CDBCA91C3344335E9752581A8D4FF83FFC86E78629A2BDB5056</attribute>
-        <attribute name="order" type="int64">0</attribute>
-        <attribute name="name" type="string">x-auth-token</attribute>
-        <attribute name="enabled" type="bool">0</attribute>
-        <relationship name="groupforbodyparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
-        <relationship name="groupforheaders" type="0/1" destination="LMREQUESTGROUP"></relationship>
-        <relationship name="groupforurlparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
-        <relationship name="request" type="0/1" destination="LMREQUEST" idrefs="z103"></relationship>
+        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z106 z111"></relationship>
     </object>
     <object type="LMKEYVALUE" id="z109">
         <attribute name="value" type="string"></attribute>
@@ -157,7 +147,7 @@
         <relationship name="request" type="0/1" destination="LMREQUEST" idrefs="z107"></relationship>
     </object>
     <object type="LMKEYVALUE" id="z112">
-        <attribute name="value" type="string">sessionId=s%3Aj1HZzOaQV4JJeGuHyaZUeFmOi0P0iefv.04eUrQMCi1A4MtMZSmGf%2BmQtq9CUejzi7%2Bu60PmW6D4; Path=/; HttpOnly; Secure</attribute>
+        <attribute name="value" type="string">sessionId=s%3AZIkq4zeUx1-rhXyZyTUO76z6IyDQ005m.hrxy4ZOsftFZOgNYf0%2BpE7uU1v%2BhiCiCFS2CUKA65mE; Path=/; HttpOnly; Secure</attribute>
         <attribute name="order" type="int64">4</attribute>
         <attribute name="name" type="string">Cookie</attribute>
         <attribute name="enabled" type="bool">1</attribute>
@@ -168,7 +158,7 @@
     </object>
     <object type="LMREQUEST" id="z113">
         <attribute name="uuid" type="string">A9BD139B-C8AE-41EE-88DA-DE778FFD1C1D</attribute>
-        <attribute name="url" type="string">https://pge-as.acmecorp.com:4443/task</attribute>
+        <attribute name="url" type="string">https://pge-as.acmecorp.com:4443/tasks</attribute>
         <attribute name="timeoutinterval" type="float">30</attribute>
         <attribute name="redirectmethod" type="bool">0</attribute>
         <attribute name="redirectauthorization" type="bool">0</attribute>
@@ -179,10 +169,10 @@
         <attribute name="name" type="string">PGE: Get Tasks</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM"></relationship>
         <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
-        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z109 z112 z102 z116"></relationship>
+        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z102 z112 z116 z109"></relationship>
     </object>
     <object type="LMKEYVALUE" id="z114">
-        <attribute name="value" type="string">sessionId=s%3AKhtKSthzYIhJi9tZ6wLt_s04oY2TsiG-.fzHCvEux2FIGnNH%2FZB%2FapgNjBymo0Q1qBlDAnVJJPAo; Path=/; HttpOnly; Secure</attribute>
+        <attribute name="value" type="string">sessionId=s%3AZIkq4zeUx1-rhXyZyTUO76z6IyDQ005m.hrxy4ZOsftFZOgNYf0%2BpE7uU1v%2BhiCiCFS2CUKA65mE; Path=/; HttpOnly; Secure</attribute>
         <attribute name="order" type="int64">3</attribute>
         <attribute name="name" type="string">Cookie</attribute>
         <attribute name="enabled" type="bool">1</attribute>
@@ -192,7 +182,7 @@
         <relationship name="request" type="0/1" destination="LMREQUEST" idrefs="z103"></relationship>
     </object>
     <object type="LMKEYVALUE" id="z115">
-        <attribute name="value" type="string">W5MXz7jN-KU488ar8MD3ayjYZ5rDEZCeiqAk</attribute>
+        <attribute name="value" type="string">w3gzqf0d-JoifwI1zm7K-3VEhUy6EvO-plIw</attribute>
         <attribute name="order" type="int64">1</attribute>
         <attribute name="name" type="string">x-csrf-token</attribute>
         <attribute name="enabled" type="bool">1</attribute>
@@ -210,5 +200,84 @@
         <relationship name="groupforheaders" type="0/1" destination="LMREQUESTGROUP"></relationship>
         <relationship name="groupforurlparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
         <relationship name="request" type="0/1" destination="LMREQUEST" idrefs="z113"></relationship>
+    </object>
+    <object type="LMREQUEST" id="z117">
+        <attribute name="uuid" type="string">B1A17DBD-C077-4219-9504-55A8F2C72E77</attribute>
+        <attribute name="url" type="string">https://pge-as.acmecorp.com:4443/</attribute>
+        <attribute name="timeoutinterval" type="float">30</attribute>
+        <attribute name="redirectmethod" type="bool">0</attribute>
+        <attribute name="redirectauthorization" type="bool">0</attribute>
+        <attribute name="method" type="string">GET</attribute>
+        <attribute name="followredirects" type="bool">0</attribute>
+        <attribute name="order" type="int64">0</attribute>
+        <attribute name="name" type="string">PGE: API Root</attribute>
+        <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM"></relationship>
+        <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
+        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z118"></relationship>
+    </object>
+    <object type="LMKEYVALUE" id="z118">
+        <attribute name="value" type="string"></attribute>
+        <attribute name="order" type="int64">0</attribute>
+        <attribute name="name" type="string"></attribute>
+        <attribute name="enabled" type="bool">1</attribute>
+        <relationship name="groupforbodyparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="groupforheaders" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="groupforurlparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="request" type="0/1" destination="LMREQUEST" idrefs="z117"></relationship>
+    </object>
+    <object type="LMKEYVALUE" id="z119">
+        <attribute name="value" type="string">sessionId=s%3AZAoU0b7CbtbidXHv8OH0cP18NsMyYQai.mdvhOzwnAZd5CnwzGhvHYkpxHpW2M799oBibwpEYqjQ; Path=/; HttpOnly; Secure</attribute>
+        <attribute name="order" type="int64">4</attribute>
+        <attribute name="name" type="string">Cookie</attribute>
+        <attribute name="enabled" type="bool">1</attribute>
+        <relationship name="groupforbodyparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="groupforheaders" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="groupforurlparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="request" type="0/1" destination="LMREQUEST" idrefs="z120"></relationship>
+    </object>
+    <object type="LMREQUEST" id="z120">
+        <attribute name="uuid" type="string">882AD18E-DF44-40A5-9613-46EF6BD303A9</attribute>
+        <attribute name="url" type="string">https://pge-as.acmecorp.com:4443/task/2</attribute>
+        <attribute name="timeoutinterval" type="float">30</attribute>
+        <attribute name="redirectmethod" type="bool">0</attribute>
+        <attribute name="redirectauthorization" type="bool">0</attribute>
+        <attribute name="method" type="string">GET</attribute>
+        <attribute name="followredirects" type="bool">0</attribute>
+        <attribute name="body" type="string">["{\\n   \\"username\\": \\"JDOE\\",\\n   \\"password\\": \\"password\\"\\n}"]</attribute>
+        <attribute name="order" type="int64">4</attribute>
+        <attribute name="name" type="string">PGE: Get Task 2</attribute>
+        <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM"></relationship>
+        <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
+        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z122 z119 z123 z121"></relationship>
+    </object>
+    <object type="LMKEYVALUE" id="z121">
+        <attribute name="value" type="string">1050.654B329F59DE742536BF9A44D0DB2AE0BF45ECD8354AAB67D716B15705349CA627B81AF0D498A0B29CAA841D842062A319A14A669AACC1E7DF45C05B9F6FFECAB3490BC34630739C153D2B0A97882BF354D94D3706A8DC1C52E2CF2CE1E8D17AB97B9AC8A1D1E7800A8086345785B47CC815992E9582CAAF147607253656616E6F58598994337F80B10C309B5F9D5E7E65074A6A73E7C84884C2078454306519E669675B4C050B6B23E7A73C17CD9E3FB3FCF3AB278775A7483ECFD5EF6EFF3C08E4955A072935AB59B6DCCF8D93C45ED25D4F007A8760F4A13D8C6D71284FB2F1BC1A82E437064A772CE8E20B0E64B9FE1FFD59F6E2FA8A6BD692AA0C804CD1</attribute>
+        <attribute name="order" type="int64">3</attribute>
+        <attribute name="name" type="string">x-auth-token</attribute>
+        <attribute name="enabled" type="bool">1</attribute>
+        <relationship name="groupforbodyparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="groupforheaders" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="groupforurlparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="request" type="0/1" destination="LMREQUEST" idrefs="z120"></relationship>
+    </object>
+    <object type="LMKEYVALUE" id="z122">
+        <attribute name="value" type="string"></attribute>
+        <attribute name="order" type="int64">5</attribute>
+        <attribute name="name" type="string"></attribute>
+        <attribute name="enabled" type="bool">1</attribute>
+        <relationship name="groupforbodyparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="groupforheaders" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="groupforurlparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="request" type="0/1" destination="LMREQUEST" idrefs="z120"></relationship>
+    </object>
+    <object type="LMKEYVALUE" id="z123">
+        <attribute name="value" type="string">application/json</attribute>
+        <attribute name="order" type="int64">2</attribute>
+        <attribute name="name" type="string">Content-Type</attribute>
+        <attribute name="enabled" type="bool">1</attribute>
+        <relationship name="groupforbodyparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="groupforheaders" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="groupforurlparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
+        <relationship name="request" type="0/1" destination="LMREQUEST" idrefs="z120"></relationship>
     </object>
 </database>
