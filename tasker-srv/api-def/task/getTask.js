@@ -28,33 +28,40 @@
 //
 // dependencies
 //
-var express = require("express");
 var apiUtils = require("../../api-utils");
-var DBUtils = require("../../db-utils");
-var winston = require("winston");
 var Errors = require ("../../errors");
 
 // get a specific task
-var action = {
+var getTaskAction = {
+  "title": "Task",
 	"action": "get-task",
+  "description": "Return a task with a specific ID. Returns 403 if the user is not authorized.",
 	"verb": "get",
+  "href": "/task/{taskId}",
+  "templated": true,
+  "accepts": [ "application/hal+json", "application/json", "text/json" ],
+  "sends": [ "application/hal+json", "application/json", "text/json" ],
   "securedBy": "tasker-auth",
-	"description": 
-	{
-		"title": "Get Task",
-		"template": "/task/{taskId}",
-		"type": "application/json",
-		"accept": "application/json"
-	},
 	"handler": function ( req, res, next ) {
-		var links = {};
-		apiUtils.generateHypermediaForAction ( require ("./getTaskList"), links );
-	
-		if (!req.user) { return next(Errors.HTTP_Forbidden()); }
 
-		res.json ( 200, { content: req.task,
-			                  links: links } );	
+    if (!req.user) { return next(Errors.HTTP_Forbidden()); }
+
+    var o = apiUtils.mergeAndClone ({
+      _meta:     JSON.parse(JSON.stringify(getTaskAction)),
+      _links:    {},
+      _embedded: {}
+    }, req.task, {
+      nextToken: req.user.nextToken
+    });
+
+    o._links["self"]  = apiUtils.mergeAndClone( JSON.parse (JSON.stringify (getTaskAction)),
+                                                { "href": "/task/" + req.task.ID } );
+/*  [ require("../task/getTask") ].forEach ( function ( apiAction ) {
+      o._links[ apiAction.action ] = JSON.parse ( JSON.stringify ( apiAction ) );
+    } ); */
+
+		res.json ( 200, o );
 	}
 };
 
-module.exports = action;
+module.exports = getTaskAction;
