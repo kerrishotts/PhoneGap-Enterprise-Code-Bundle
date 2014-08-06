@@ -32,32 +32,41 @@ var Errors = require ('../../errors');
 var DBUtils = require ('../../db-utils');
 var Session = require ('../../models/session');
 
-// de-authorize action
-var action =
+var logoutAction  =
 			{
-				"action": "deauthorize",
-				"verb": "delete",
+        "title": "Log Out",
+        "action": "logout",
+        "description": "Logs out a user and disables their associated token. Returns 403 is the user is " +
+                       "not authenticated.",
+        "verb": "delete",
+        "href": "/auth",
+        "accepts": [ "application/hal+json", "application/json", "text/json" ],
+        "sends": [ "application/hal+json", "application/json", "text/json" ],
+        "requires": [ "get-token" ],
+        "template": null,
         "securedBy": "tasker-auth",
-				"description": 
-				{
-					"title": "Deauthorization",
-					"href": "/auth",
-					"type": "application/json" 
-				},
 				"handler": function ( req, res, next ) {
 
           var session = new Session ( new DBUtils( req.app.get ( "client-pool" ) ) );
 
-          if (!req.user) { return next(Errors.HTTP_Forbidden()); };
+          if (!req.user) { return next(Errors.HTTP_Forbidden()); }
 
           session.endSession ( req.user.sessionId, function (err, results) {
             if (err) {
               return next(err);
             }
-            res.json ( 200, { "message": "User logged out.", "code": "OK000",
-              "links": req.app.get("x-api-discovery") } );
+
+            var o = {
+              message: "User logged out.",
+              _meta:       JSON.parse(JSON.stringify(logoutAction)),
+              _links:      {},
+              _embedded:   {}
+            };
+            o._links["self"] = JSON.parse ( JSON.stringify ( logoutAction ) );
+            o._links["root"] = req.app.get("x-api-root");
+            res.json ( 200, o );
           } );
 				}
 			};
 
-module.exports = action;
+module.exports = logoutAction;
