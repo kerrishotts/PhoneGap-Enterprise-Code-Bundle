@@ -28,27 +28,73 @@
 //
 // dependencies
 //
-var express = require("express");
 var apiUtils = require("../../api-utils");
 
-// get a task list
-var action = {
-	"action": "get-task-list",
+var getTaskListAction  = {
+  "title": "Tasks",
+	"action": "get-tasks",
 	"verb": "get",
-	"securedBy": "token-auth",
-	"description": 
-	{
-		"title": "Get Task List",
-		"href": "/task",
-		"type": "application/json",
-		"accept": "application/json"
-	},
+	"securedBy": "tasker-auth",
+  "description": "Returns the tasks that the authenticated user is authorized to see.",
+	"href": "/tasks",
+  "accepts": [ "application/hal+json", "application/json", "text/json" ],
+  "sends": [ "application/hal+json", "application/json", "text/json" ],
+  "queryParameters": {
+    "owned-by":           {
+      "title":    "Owner",
+      "key":      "ownedBy",
+      "type":     "integer",
+      "required": false
+    },
+    "assigned-to":        {
+      "title":    "Assigned to",
+      "key":      "assignedTo",
+      "type":     "integer",
+      "required": false
+    },
+    "with-status":        {
+      "title":    "Status",
+      "key":      "withStatus",
+      "type":     "string",
+      "required": false,
+      "enum":     [
+        { title: "In Progress", value: "I" },
+        { title: "On Hold", value: "H" },
+        { title: "Complete", value: "C" },
+        { title: "Deleted", value: "X" }
+      ]
+    },
+    "min-completion-pct": {
+      "title":    "Minimum Completion Percentage",
+      "key":      "minCompletion",
+      "type":     "number",
+      "min":      0,
+      "max":      100,
+      "required": false
+    },
+    "max-completion-pct": {
+      "title":    "Maximum Completion Percentage",
+      "key":      "maxCompletion",
+      "type":     "number",
+      "min":      0,
+      "max":      100,
+      "required": false
+    }
+  },
 	"handler": function ( req, res, next ) {
-		var links = {};
-		apiUtils.generateHypermediaForAction ( require ("./getTask"), links );
-		res.json ( 200, { "tasks": "something", code: "OK000",
-											"links": links } );
+
+    var o = {
+      _meta:     JSON.parse(JSON.stringify(getTaskListAction)),
+      _links:    {},
+      _embedded: {}
+    };
+    o._links["self"] = JSON.parse ( JSON.stringify ( getTaskListAction ) );
+    [ require("../task/getTask") ].forEach ( function ( apiAction ) {
+      o._links[ apiAction.action ] = JSON.parse ( JSON.stringify ( apiAction ) );
+    } );
+
+    res.json ( 200, o );
 	}
 };
 
-module.exports = action;
+module.exports = getTaskListAction;
