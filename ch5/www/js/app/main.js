@@ -38,17 +38,62 @@
          onevar:false 
  */
 /*global define*/
-define( [ "yasmf", "app/lib/rest" ], function( _y, REST ) {
+define( [ "yasmf", "app/lib/xhr", "app/models/session" ], function( _y, XHR, Session ) {
+  "use strict";
   // define our app object
   var APP = {};
   APP.start = function() {
-    REST.baseURI = "https://localhost:4445";
+    var baseURI = "https://pge-as.acmecorp.com:4443";
+    var session;
+
+    XHR.send ( "GET", baseURI + "/")
+      .then ( function ( r ) {
+      console.log (r);
+      return XHR.send ( "GET", baseURI + r._links["get-token"].href );
+    })
+      .then ( function ( r) {
+      console.log (r);
+      var postData = {};
+      postData[r._links["login"].template["user-id"].key] = "JDOE";
+      postData[r._links["login"].template["candidate-password"].key] = "password";
+      return XHR.send ( "POST", baseURI + r._links["login"].href, {
+        data: postData,
+        headers: [{ headerName: "x-csrf-token",
+                    headerValue: r.token }]
+      } );
+    }).then ( function ( r ) {
+      console.log (r);
+      session = new Session ( r );
+      return XHR.send ( "GET", baseURI + r._links["get-task"].href.replace("{taskId}","2"),
+       {headers: [{ headerName: "x-auth-token",
+                    headerValue: "" + session.sessionId + "." + session.computeNextToken()
+         }]
+       });
+    }).then ( function ( r ) {
+      console.log ( r);
+      session.nextIncompleteToken = r.nextToken;
+      return XHR.send ( "GET", baseURI + r._links["self"].href,
+                        {headers: [{ headerName: "x-auth-token",
+                                     headerValue: "" + session.sessionId + "." + session.computeNextToken()
+                                   }]
+                        });
+    }).then ( function ( r ) {
+      console.log ( r );
+      session.nextIncompleteToken = r.nextToken;
+    }).done();;
+
+
+
+
+    /*
     REST.post( "/auth", {
+
       "userId": "JDOE",
       "candidatePassword": "password"
     }).then ( function (r) {
       console.log (r);
     });
+  */
   };
   return APP;
 } );
