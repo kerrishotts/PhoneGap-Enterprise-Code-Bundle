@@ -1,4 +1,5 @@
 define ( ["Q"], function ( Q ) {
+  "use strict";
 
   var DEBUG = true;
 
@@ -230,8 +231,19 @@ define ( ["Q"], function ( Q ) {
     return deferred.promise;
   }
 
+  var XHR = {
+    send: _xhr,
+    TimeoutError: TimeoutError,
+    MaxRetryAttemptsReached: MaxRetryAttemptsReached,
+    HTTPError: HTTPError,
+    JSONParseError: JSONParseError,
+    XHRError: XHRError
+  };
+
+  return XHR;
+
   var REST = {
-    baseURI: "https://localhost:4443",             // prepended to all URIs
+    baseURI: "https://pge-as.acmecorp.com:4443",             // prepended to all URIs
     csrfTokenURI: "/auth",                         // URI that returns a CSRF token for GET
     /**
      * GET a URI
