@@ -32,20 +32,35 @@ var Session = require("../../models/session");
 var Errors = require("../../errors");
 var DBUtils = require("../../db-utils");
 
-// authenticate action
-var action = 
+var loginAction =
 {
-	"action": "authenticate",
+  "title": "Authenticate User",
+  "action": "login",
+  "description": "Authenticates a user and returns session information if user was authenticated. " +
+                 "Session ID, Salt, User ID, and Partial Token is returned within the `content` " +
+                 "object. Should authentication fail, 403 Forbidden is returned.",
 	"verb": "post",
-	"description": 
-	{
-		"title": "Authenticate",
-		"href": "/auth",	
-		"type": "application/json",
-		"accept": "application/json"
-	},
+  "href": "/auth",
+  "accepts": [ "application/hal+json", "application/json", "text/json" ],
+  "sends": [ "application/hal+json", "application/json", "text/json" ],
+  "requires": [ "get-token" ] ,
+  "template": {
+    "user-id":            {
+      "title":     "User Name",
+      "key":       "userId",
+      "type":      "string",
+      "required":  true,
+      "maxLength": 32
+    },
+    "candidate-password": {
+      "title":     "Password",
+      "key":       "candidatePassword",
+      "type":      "string",
+      "required":  true,
+      "maxLength": 255
+    }
+  },
 	"handler": function ( req, res, next ) {
-
     var session = new Session ( new DBUtils( req.app.get ( "client-pool" ) ) );
     // username and password are contained in res
     var username = req.body["userId"];
@@ -58,10 +73,24 @@ var action =
       if (!results) {
         return next(Errors.HTTP_Forbidden());
       }
-      res.json ( 200, { "message": "Authenticated.", "code": "OK000",
-                        "content": results, "links": req.app.get("x-api-discovery") } );
+
+      var o = {
+        sessionId:   results.sessionId,
+        sessionSalt: results.sessionSalt,
+        userId:      results.userId,
+        nextToken:   results.nextToken,
+        _meta:       JSON.parse(JSON.stringify(loginAction)),
+        _links:      {},
+        _embedded:   {}
+      };
+      o._links["self"] = JSON.parse ( JSON.stringify ( loginAction ) );
+      [ require("../task/getTask") ].forEach ( function ( apiAction ) {
+        o._links[ apiAction.action ] = JSON.parse ( JSON.stringify ( apiAction ) );
+      } );
+
+      res.json ( 200, o );
     } );
 	}
 };
 
-module.exports = action;
+module.exports = loginAction;
