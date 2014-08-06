@@ -28,7 +28,8 @@
     "oracle": "~0.3.7",
     "generic-pool": "~2.1.1",
     "passport-req": "~0.1.1",
-    "cors": "~2.4.1"
+    "cors": "~2.4.1",
+    "nor-hal": "0.0.6"
   },
   "devDependencies": {
     "chai": "*",
