@@ -39,7 +39,16 @@ var discoverAction =
   "handler": function ( req, res, next ) {
 
     var o = {
-      _meta: JSON.parse(JSON.stringify(discoverAction)),
+      "version": "Tasker API v0.1",
+      "toPOST1": "In order to POST, you'll need to get a token via get-token. You'll also",
+      "toPOST2": "need to support cookies in order to support CSRF tokens.",
+      "toAUTH1": "In order to authenticate, first get a token from get-token, then",
+      "toAUTH2": "call login with the user id and candidate password. If invalid 403",
+      "toAUTH3": "is returned, otherwise a session is returned. Use nextToken and compute",
+      "toAUTH4": "based on the session salt in order to send requests that are secured.",
+      "info1": "This API is a sample API for the PhoneGap Enterprise book published",
+      "info2": "by Packt Publishing and written by Kerri Shotts. For more information",
+      "info3": "please visit the website for the book at http://www.photokandy.com/books/phonegap-enterprise",
       _links: {},
       _embedded: {}
     };
