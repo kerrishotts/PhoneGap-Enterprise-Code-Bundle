@@ -58,7 +58,6 @@ var logoutAction  =
 
             var o = {
               message: "User logged out.",
-              _meta:       JSON.parse(JSON.stringify(logoutAction)),
               _links:      {},
               _embedded:   {}
             };

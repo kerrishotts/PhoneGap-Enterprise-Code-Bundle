@@ -84,7 +84,6 @@ var getTaskListAction  = {
 	"handler": function ( req, res, next ) {
 
     var o = {
-      _meta:     JSON.parse(JSON.stringify(getTaskListAction)),
       _links:    {},
       _embedded: {}
     };
