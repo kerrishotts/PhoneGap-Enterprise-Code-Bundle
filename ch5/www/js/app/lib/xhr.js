@@ -136,7 +136,7 @@ define ( ["Q"], function ( Q ) {
      */
     function sendRequest() {
       var xhr = new XMLHttpRequest();
-      xhr.open( method, uri, opt.async, opt.username, opt.password );
+      xhr.open( method.toUpperCase(), uri, opt.async, opt.username, opt.password );
 
       xhr.withCredentials = opt.withCredentials;
       xhr.timeout = opt.timeout;
@@ -231,8 +231,46 @@ define ( ["Q"], function ( Q ) {
     return deferred.promise;
   }
 
+  function _checkIfSecure ( server, fingerprints ) {
+    var deferred = Q.defer();
+    try {
+      var args = [];
+      // success
+      args.push ( function success( message ) {
+        deferred.resolve ( message );
+      });
+
+      // failure
+      args.push ( function failure ( message ) {
+        deferred.reject ( message );
+      });
+
+      // server
+      args.push ( server );
+
+      // fingerprints
+      for (var i=0; i<fingerprints.length;i++) {
+        args.push (fingerprints[i]);
+      }
+
+      window.plugins.sslCertificateChecker.check.apply( this, args );
+
+    }
+    catch (err) {
+      // if window.plugins isn't defined, we'll go ahead and resolve instead
+      if (typeof window.plugins === "undefined") {
+        deferred.resolve ("");
+      }
+      else {
+        deferred.reject (err);
+      }
+    }
+    return deferred.promise;
+  }
+
   var XHR = {
     send: _xhr,
+    checkIfSecure: _checkIfSecure,
     TimeoutError: TimeoutError,
     MaxRetryAttemptsReached: MaxRetryAttemptsReached,
     HTTPError: HTTPError,
@@ -242,93 +280,4 @@ define ( ["Q"], function ( Q ) {
 
   return XHR;
 
-  var REST = {
-    baseURI: "https://pge-as.acmecorp.com:4443",             // prepended to all URIs
-    csrfTokenURI: "/auth",                         // URI that returns a CSRF token for GET
-    /**
-     * GET a URI
-     * @param uri {string}  URI of resource
-     * @param options {*}
-     * @returns {*}
-     */
-    get: function ( uri, options ) {
-      return _xhr( "GET", this.baseURI + uri, options );
-    },
-
-    /**
-     * In order to send a PUT, DELETE, or POST, we need first to
-     * request a CSRF token. This private method creates the first
-     * portion of the promise chain that performs that request.
-     *
-     * @param method {string}    HTTP method
-     * @param uri {string}       URI
-     * @param data {*}           Data to send
-     * @param options {*}        Options
-     * @returns {*}              Promise
-     * @private
-     */
-    _csrfMethod: function ( method, uri, data, options ) {
-      var baseURI = this.baseURI;
-      return this.get ( this.csrfTokenURI, options )
-        .then ( function ( response ) {
-        var csrfToken = response.token;
-        var newOptions = options;
-        if (typeof newOptions === "undefined") {
-          newOptions = {};
-        }
-        newOptions.data = data;
-        if (typeof newOptions.headers === "undefined") {
-          newOptions.headers = [];
-        }
-        newOptions.headers.push ( { headerName: "x-csrf-token",
-                                    headerValue: csrfToken } );
-        return newOptions;
-      })
-        .then ( function ( options ) {
-        return _xhr ( method, baseURI + uri, options );
-      });
-    },
-
-    /**
-     * Send a POST
-     * @param uri {string}
-     * @param data {*}
-     * @param options {*}
-     * @returns {*} Promise
-     */
-    post: function ( uri, data, options ) {
-      return this._csrfMethod( "POST", uri, data, options );
-    },
-
-    /**
-     * Send a PUT
-     * @param uri {string}
-     * @param data {*}
-     * @param options {*}
-     * @returns {*} Promise
-     */
-    put: function ( uri, data, options ) {
-      return this._csrfMethod( "PUT", uri, data, options );
-    },
-
-    /**
-     * Send a DELETE
-     * @param uri {string}
-     * @param data {*}
-     * @param options {*}
-     * @returns {*} Promise
-     */
-    del: function ( uri, data, options ) {
-      return this._csrfMethod ( "DELETE", uri, data, options );
-    }
-
-  };
-
-  // make sure we pass out the error types as well
-  REST.TimeoutError = TimeoutError;
-  REST.MaxRetryAttemptsReached = MaxRetryAttemptsReached;
-  REST.HTTPError = HTTPError;
-  REST.JSONParseError = JSONParseError;
-  REST.XHRError = XHRError;
-  return REST;
 });
