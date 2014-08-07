@@ -22,9 +22,9 @@
   -->
 <html>
   <head>
-    <meta http-equiv="Security-Content-Policy" content="default-src 'self' https://pge-as.acmecorp.com:*"/>
-    <meta http-equiv="X-Security-Content-Policy" content="default-src 'self' https://pge-as.acmecorp.com:*"/>
-    <meta http-equiv="X-WebKit-CSP" content="default-src 'self' https://pge-as.acmecorp.com:*"/>
+    <meta http-equiv="Security-Content-Policy" content="default-src 'self' https://pge-as.acmecorp.com:* wss://pge-as.acmecorp.com:* gap://*"/>
+    <meta http-equiv="X-Security-Content-Policy" content="default-src 'self' https://pge-as.acmecorp.com:* wss://pge-as.acmecorp.com:* gap://*"/>
+    <meta http-equiv="X-WebKit-CSP" content="default-src 'self' https://pge-as.acmecorp.com:* wss://pge-as.acmecorp.com:* gap://*"/>
     <meta charset="utf-8" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
@@ -34,8 +34,10 @@
     <title>Template</title>
   </head>
   <body>
+    <div id="console"></div>
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="js/lib/Blob.js"></script>
-    <script type="text/javascript" src="js/lib/require.js" data-main="js/app.js"></script>
+<!--    <script type="text/javascript" src="js/lib/socket.io.js"></script>-->
+    <script type="text/javascript" src="js/lib/require.js" data-main="js/app.js?D"></script>
   </body>
 </html>
