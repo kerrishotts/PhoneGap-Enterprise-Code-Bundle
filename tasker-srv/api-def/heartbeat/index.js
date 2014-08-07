@@ -25,10 +25,24 @@
 *
 ******************************************************************************/
 
-//
-// dependencies
-//
-var express = require ("express");
+var heartbeatAction = {
+  "title": "Heartbeat",
+  "action": "heartbeat",
+  "verb": "get",
+  "description": "Returns 200 OK",
+  "href": "/heartbeat",
+  "accepts": [ "application/hal+json", "application/json", "text/json" ],
+  "sends": [ "application/hal+json", "application/json", "text/json" ],
+  "handler": function (req, res, next) {
+    var o = {
+      _message: "OK",
+      _links: {},
+      _embedded: {}
+    };
+    o._links["self"] = JSON.parse ( JSON.stringify ( heartbeatAction ) );
+    res.json ( 200, o );
+  }
+};
 
 // this route doesn't do anything other than spit back OK
 var routes = 
@@ -36,21 +50,7 @@ var routes =
 	{
 		"route": "/heartbeat",
 		"actions": 
-		[
-			{
-				"action": "heartbeat",
-				"verb": "get",
-				"handler": function (req, res, next) {
-					res.json ( 200, "OK" );
-				},
-				"description": 
-				{
-					"title": "Heartbeat",
-					"href": "/heartbeat",	
-					"type": "application/json"
-				}
-			}
-		]
+		[ heartbeatAction	]
 	}
 ];
 
