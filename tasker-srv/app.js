@@ -105,7 +105,16 @@ app.use(bodyParser.json());        // we need to be able to parse JSON
 app.use(bodyParser.urlencoded());  // and url-encoded content
 app.use(cookieParser());           // we need cookies for CSRF on the browser
 
-// set up a session
+// Set up a session (needed for csrf support)
+//
+// Secret can be anything you want
+// The key is probably a bit obvious here (but this is a demo). If you want
+// to be a little more cryptic, use something random or non-sensical.
+// Make sure the cookie has httpOnly: true and secure: true -- otherwise
+// any security provided by CSRF and sessions is lost
+// resave should be true to ensure the session information is resaved
+// even when no change. saveUninitialized ensures that a session is saved
+// when it is new (even if it hasn't been modified).
 app.use(session( {
     secret: "a(3hvs23fhOHvi3hwouhS_vh24fuhefoh89Q#",
     key: "sessionId",
@@ -115,23 +124,36 @@ app.use(session( {
 }));
 
 // cors setup
+//
+// We have a corsDelegate in case we ever need to be more choosy about
+// the options we return based on the request and such. For now we just
+// indicate that the origin returned should be the requesting origin
+// (can't use * if we require credentials) and that the browser should
+// send credentials (cookies).
 var corsDelegate = function ( req, cb ) {
-  console.log ('in cors');
   var corsOptions = { origin: true, credentials: true };
   cb ( null, corsOptions );
 };
+
+// cors will be used for every route -- if this doesn't make sense
+// for your server, you can attach it to specific routes instead
+//     app.get ( "/", cors( corsDelegate ), handler )
 app.use (cors ( corsDelegate ) );
-app.options ( '*', cors( corsDelegate ) ); // options preflight for all remaining routes
+
+// Make sure CORS is there for preflight OPTIONS requests
+app.options ( '*', cors( corsDelegate ) );
 
 
 // csrf security
+//
+// depends on having a session initialized above
 app.use(csrf());
 app.use(function (req, res, next) {  
     res.locals.csrftoken = req.csrfToken();  
     next();  
   });
   
-// static content
+// static content -- if you have it
 app.use(express.static(path.join(__dirname, 'public')));
 
 //
@@ -145,6 +167,8 @@ var clientPool = pool.Pool( {
     })
   },
   destroy: function ( client ) {
+    // try...catch in case the client can't be properly closed (as in an
+    // unexpected termination of the connection) Without it, the server dies.
     try
     {
       client.close();
@@ -156,18 +180,31 @@ var clientPool = pool.Pool( {
   },
   max: 5,
   min: 1,
-  idleTimeoutMillis: 30000
+  idleTimeoutMillis: 30000   // 30 seconds
 });
 
-// need to ensure that the pool can drain
+// need to ensure that the pool can drain or shutdowns are slow or may
+// never occur
 process.on("exit", function () {
   clientPool.drain( function () {
     clientPool.destroyAllNow();
   });
 });
 
+// make the client pool available to the entire app
 app.set ( "client-pool", clientPool );
 
+//
+// passport security
+//
+// we're using the ReqStrategy, which is similar to the hash or other
+// local strategies. In this case, we expect a token to be provided
+// in the header (x-auth-token). The token is compared against the
+// database, and if it matches, the session is serialized and req.user
+// contains the session information (including nextToken)
+//
+// The token is of the form SESSION_ID.NEXT_TOKEN_HASHED_WITH_SALT
+//
 passport.use ( new ReqStrategy ( 
   function ( req, done ) {
     var clientAuthToken = req.headers["x-auth-token"];
@@ -185,12 +222,13 @@ passport.use ( new ReqStrategy (
   }
 ));
 
+//
+// if passport finds the session, serialize it
 passport.serializeUser(function( user, done ) {
   done (null, user);
 });
 
-
-// set up passport and our athentication strategy
+// set up passport and our authentication strategy
 app.use ( passport.initialize() );
 // app.use ( passport.session() ); // we don't use persistent passport sessions simply because
                                    // tokens are continually regenerated, and must be verified on
@@ -200,10 +238,6 @@ app.use ( passport.initialize() );
 /**
  * Checks if we are authenticated (if a resource is secured), and if not
  * it calls passport to authenticate us.
- * @param req
- * @param res
- * @param next
- * @returns {*}
  */
 function checkAuth ( req, res, next ) {
   if (req.isAuthenticated()) {
@@ -212,15 +246,11 @@ function checkAuth ( req, res, next ) {
   passport.authenticate ( "req" )(req, res, next);
 }
 
-
-//app.use ( cors( corsDelegate ) );
-
 // tie our API to / and enable secured resources to use the above method
 app.use ( "/", apiUtils.createRouterForApi(apiDef, checkAuth));
 
 // and set the pretty API as a global variable so our discover method can find it.
 app.set ( "x-api-root", apiUtils.generateHypermediaForApi(apiDef));
-console.log ( apiUtils.generateHypermediaForApi(apiDef) );
 
 
 /// catch 404 and forward to error handler
@@ -236,7 +266,6 @@ app.use(function(req, res, next) {
 // will print stacktrace
 if (dev) {
     app.use(function(err, req, res, next) {
-        console.log ( res );
         winston.error ("message: ", err.message, err.stack);
         res.status(err.status || 500);
         res.render('error', {
