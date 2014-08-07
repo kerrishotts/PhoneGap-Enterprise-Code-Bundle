@@ -56,7 +56,8 @@ requirejs.config( {
   paths: {
     'app': '../app',
     'html': '../../html',
-    'Q': 'q'
+    'Q': 'q' //,
+    // 'socketio': './socket.io/socket.io'
   },
   urlArgs: "bust=" + ( new Date() ).getTime(),
   shim: {
@@ -65,7 +66,10 @@ requirejs.config( {
     "Q": {
       exports: "Q"
     },
-    "yasmf": [ "Q" ]
+    "yasmf": [ "Q" ] //,
+    //"socketio": {
+    //  exports: "io"
+    //}
   }
 } );
 /**
