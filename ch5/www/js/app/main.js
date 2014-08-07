@@ -38,62 +38,150 @@
          onevar:false 
  */
 /*global define*/
-define( [ "yasmf", "app/lib/xhr", "app/models/session" ], function( _y, XHR, Session ) {
+define( [ "yasmf", "app/lib/xhr",
+                   "app/lib/objUtils",
+                   "app/lib/hateoas",
+                   "app/models/session",
+                   "socket.io"], function( _y, XHR, ObjUtils, Hateoas, Session, io ) {
   "use strict";
+  // private methods
+  // syntax highlight & pretty print from http://stackoverflow.com/a/7220510/741043
+  function syntaxHighlight(json) {
+    if (typeof json != 'string') {
+      json = JSON.stringify(json, undefined, 4);
+    }
+    try
+    {
+      json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match)
+      {
+        var cls = 'number';
+        if (/^"/.test(match))
+        {
+          if (/:$/.test(match))
+          {
+            cls = 'key';
+          } else
+          {
+            cls = 'string';
+          }
+        } else if (/true|false/.test(match))
+        {
+          cls = 'boolean';
+        } else if (/null/.test(match))
+        {
+          cls = 'null';
+        }
+        return '<span class="' + cls + '">' + match + '</span>';
+      });
+    } catch (err) {
+      return json;
+    }
+  }
+
+  function log ( msg ) {
+    var logMsg = msg,
+      console;
+    if (typeof msg !== "string") {
+      logMsg = syntaxHighlight (msg);
+    }
+    var e = document.createElement("div");
+    e.innerHTML = "Logged on: " + (new Date()).toString();
+    var pre = document.createElement("pre");
+    pre.innerHTML = logMsg;
+    e.appendChild(pre);
+
+    console = document.getElementById ("console");
+    console.insertBefore (e, console.firstChild);
+    //.appendChild (e);
+  }
+
+  function logMore () {
+    for (var i = 0; i<arguments.length; i++) {
+      log ( arguments[i] );
+    }
+  }
+
   // define our app object
   var APP = {};
   APP.start = function() {
     var baseURI = "https://pge-as.acmecorp.com:4443";
     var session;
+    var context = {};
 
-    XHR.send ( "GET", baseURI + "/")
+    console.log = logMore;
+
+    // to be really secure, this should be checked before EVERY XHR. For the demo, once is sufficient.
+    XHR.checkIfSecure ( baseURI, ["27 02 A5 EB 95 91 41 66 C3 9F 82 D3 59 14 13 0E 13 B5 13 9E"])
+      .then ( function ( msg ) {
+      // example straight from http://socket.io/docs/
+      var socket = io('https://pge-as.acmecorp.com:4443');
+      socket.on('news', function (data) {
+        console.log(data);
+        socket.emit('my other event', { my: 'data' });
+      });
+
+      return XHR.send ( "GET", baseURI + "/");
+    })
       .then ( function ( r ) {
-      console.log (r);
-      return XHR.send ( "GET", baseURI + r._links["get-token"].href );
+      console.log ("Response from API Discovery", r);
+      return XHR.send (r._links["get-token"].verb, baseURI + r._links["get-token"].href );
     })
       .then ( function ( r) {
-      console.log (r);
-      var postData = {};
-      postData[r._links["login"].template["user-id"].key] = "JDOE";
-      postData[r._links["login"].template["candidate-password"].key] = "password";
-      return XHR.send ( "POST", baseURI + r._links["login"].href, {
-        data: postData,
-        headers: [{ headerName: "x-csrf-token",
-                    headerValue: r.token }]
-      } );
+      console.log ("Response from CSRF token request", r);
+
+      Hateoas.storeResponseToContext( r, context );
+
+      // create post response based upon the template
+      var loginAction = r._links["login"];
+      var postData = Hateoas.crossWalk ({
+                                        "user-id":            "JDOE",
+                                        "candidate-password": "password"
+                                      }, loginAction.template );
+
+      // build response headers
+      var headers = Hateoas.buildHeadersAttachment( loginAction.attachments.headers, context );
+
+      // send request
+      return XHR.send ( r._links["login"].verb, baseURI + r._links["login"].href, { data: postData, headers: headers } );
     }).then ( function ( r ) {
-      console.log (r);
-      session = new Session ( r );
-      return XHR.send ( "GET", baseURI + r._links["get-task"].href.replace("{taskId}","2"),
-       {headers: [{ headerName: "x-auth-token",
-                    headerValue: "" + session.sessionId + "." + session.computeNextToken()
-         }]
-       });
+      console.log (r, "Response from AUTH POST");
+      Hateoas.storeResponseToContext ( r, context );
+      console.log ( context, "Context after storing" );
+      session = new Session ( { sessionId: context["session-id"],
+                                sessionSalt: context["session-salt"],
+                                userId: context["user-id"],
+                                nextIntermediateToken: context["next-token"]
+                              } );
+      console.log ( session, "Session after pulling from context" );
+      context["next-token"] = session.computeNextToken();
+
+      var headers = Hateoas.buildHeadersAttachment ( r._links["get-task"].attachments.headers, context );
+
+      var URI = baseURI + ObjUtils.interpolate (r._links["get-task"].href, { "taskId": 2 } );
+
+      return XHR.send ( r._links["get-task"].verb, URI, { headers: headers });
     }).then ( function ( r ) {
-      console.log ( r);
-      session.nextIncompleteToken = r.nextToken;
-      return XHR.send ( "GET", baseURI + r._links["self"].href,
-                        {headers: [{ headerName: "x-auth-token",
-                                     headerValue: "" + session.sessionId + "." + session.computeNextToken()
-                                   }]
-                        });
+      console.log ( r, "Response from GET task");
+      Hateoas.storeResponseToContext( r, context );
+      session.nextIntermediateToken = context["next-token"];
+      context["next-token"] = session.computeNextToken();
+
+      var headers = Hateoas.buildHeadersAttachment ( r._links["self"].attachments.headers, context );
+
+      var URI = baseURI + ObjUtils.interpolate (r._links["self"].href, { "taskId": 2 } );
+
+      return XHR.send ( r._links["self"].verb, URI, { headers: headers });
     }).then ( function ( r ) {
-      console.log ( r );
-      session.nextIncompleteToken = r.nextToken;
-    }).done();;
+      console.log ( r, "response from GET self" );
+      Hateoas.storeResponseToContext( r, context );
+      session.nextIntermediateToken = context["next-token"];
+      context["next-token"] = session.computeNextToken();
+    }).catch ( function ( err ) {
+      console.log ( err, "failure in chain");
+    }).done();
 
 
-
-
-    /*
-    REST.post( "/auth", {
-
-      "userId": "JDOE",
-      "candidatePassword": "password"
-    }).then ( function (r) {
-      console.log (r);
-    });
-  */
   };
   return APP;
 } );
