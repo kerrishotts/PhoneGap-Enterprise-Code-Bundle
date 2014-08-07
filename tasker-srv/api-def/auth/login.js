@@ -44,6 +44,35 @@ var loginAction =
   "accepts": [ "application/hal+json", "application/json", "text/json" ],
   "sends": [ "application/hal+json", "application/json", "text/json" ],
   "requires": [ "get-token" ] ,
+  "attachments": {
+    "headers": [
+      { name: "csrf-token",
+        key:  "x-csrf-token",
+        value: "{csrf-token}",
+        templated: true
+      }
+    ]
+  },
+  "store": {
+    "body": [
+      {
+        name: "session-id",
+        key:  "sessionId"
+      },
+      {
+        name: "session-salt",
+        key:  "sessionSalt"
+      },
+      {
+        name: "user-id",
+        key:  "userId"
+      },
+      {
+        name: "next-token",
+        key:  "nextToken"
+      }
+    ]
+  },
   "template": {
     "user-id":            {
       "title":     "User Name",
@@ -66,7 +95,6 @@ var loginAction =
     var username = req.body["userId"];
     var password = req.body["candidatePassword"];
     session.createSession ( username, password, function (err, results) {
-      console.log ( results );
       if (err) {
         return next(err);
       }
@@ -79,7 +107,6 @@ var loginAction =
         sessionSalt: results.sessionSalt,
         userId:      results.userId,
         nextToken:   results.nextToken,
-        _meta:       JSON.parse(JSON.stringify(loginAction)),
         _links:      {},
         _embedded:   {}
       };

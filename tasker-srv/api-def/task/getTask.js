@@ -42,12 +42,26 @@ var getTaskAction = {
   "accepts": [ "application/hal+json", "application/json", "text/json" ],
   "sends": [ "application/hal+json", "application/json", "text/json" ],
   "securedBy": "tasker-auth",
+  "attachments": {
+    "headers": [
+      {
+        "name":      "auth-token",
+        "key":       "x-auth-token",
+        "value":     "{session-id}.{next-token}",
+        "templated": true
+      } ]
+  },
+  "store": {
+    "body": [ {
+      "name": "next-token",
+      "key":  "nextToken"
+    } ]
+  },
 	"handler": function ( req, res, next ) {
 
     if (!req.user) { return next(Errors.HTTP_Forbidden()); }
 
     var o = apiUtils.mergeAndClone ({
-      _meta:     JSON.parse(JSON.stringify(getTaskAction)),
       _links:    {},
       _embedded: {}
     }, req.task, {
