@@ -1,0 +1,43 @@
+#rootContainer {
+    display: none;
+}
+
+#console {
+    background-color: white;
+    border: 1em solid #E8E8E8;
+    line-height: 1.3em;
+    color: #333;
+    -webkit-user-select: initial;
+    user-select: initial;
+    font-family: "Helvetica Neue", Helvetica, Arial, Sans-Serif;
+    font-size: 12pt;
+}
+
+#console pre {
+    font-family: "Source Code Pro", "Courier";
+    font-size: 12pt;
+    width: auto;
+    min-width: auto;
+    max-width:100%;
+    max-height: 200px;
+    overflow: scroll;
+}
+
+#console div {
+    padding: 1em;
+    border-bottom: 1em solid #E8E8E8;
+}
+
+#console .key {
+    color: #339;
+}
+
+#console .string {
+    color: #393;
+}
+
+#console .boolean,
+#console .number {
+    color: #933;
+    font-weight: bold;
+}
