@@ -37,7 +37,6 @@ var param = {
 	"name": "taskId",
   "securedBy": "tasker-auth",
 	"handler": function (req, res, next, taskId) {
-    winston.info ( "In taskId Handler");
 		if (!req.user) { return next(Errors.HTTP_Forbidden()); }
 
 		var dbUtil = new DBUtils( req.app.get ( "client-pool" ) );
@@ -48,7 +47,6 @@ var param = {
 					}
 					if (results.length === 0) { return next(Errors.HTTP_NotFound()); }
 					req.task = results[0];
-          winston.info ("Tasks: ", req.task)
 					return next();
 				});
 	}
