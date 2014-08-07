@@ -54,7 +54,6 @@ function Session (dbUtils) {
  */
 Session.prototype.findSession = function ( clientAuthToken, cb ) {
   var self=this;
-  winston.info(clientAuthToken);
 	if (typeof clientAuthToken === "undefined") { return cb(null, false); }
 
 	// an auth token is of the form 1234.ABCDEF10284128401ABC13...
@@ -64,9 +63,6 @@ Session.prototype.findSession = function ( clientAuthToken, cb ) {
 	// get the parts	
 	var sessionId = clientAuthTokenParts[0];
 	var authToken = clientAuthTokenParts[1];
-
-  winston.info (sessionId);
-  winston.info (authToken);
 
 	// ask the database vai dbutils if the token is recognized
 	self._dbUtils.execute ( "CALL tasker.security.verify_token (:1, :2, :3, :4 ) INTO :5",
@@ -114,14 +110,14 @@ Session.prototype.endSession = function ( sessionId, cb ) {
   var self = this;
   if (typeof sessionId === "undefined" ) {
     return cb(null, false);
-  };
+  }
   self._dbUtils.execute ( "CALL tasker.security.end_session ( :1 )",
                           [ sessionId ],
                         function ( err, results ) {
                           if (err) { return cb(err, false); }
                           cb(null, true);
                         });
-}
+};
 
 module.exports = Session;
 
