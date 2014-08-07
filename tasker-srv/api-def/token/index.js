@@ -35,11 +35,18 @@ var getTokenAction =
   "href": "/getToken",
   "accepts": [ "application/hal+json", "application/json", "text/json" ],
   "sends": [ "application/hal+json", "application/json", "text/json" ],
+  "store": {
+    "body": [
+      {
+        "name": "csrf-token",
+        "key":  "token"
+      }
+    ]
+  },
   "handler": function ( req, res, next ) {
 
     var o = {
       token: res.locals.csrftoken,
-      _meta: JSON.parse(JSON.stringify(getTokenAction)),
       _links: {},
       _embedded: {}
     };
