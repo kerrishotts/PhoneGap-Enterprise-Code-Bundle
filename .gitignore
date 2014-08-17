@@ -16,3 +16,7 @@ tasker-srv/cookies.txt
 tasker-srv/tasker.html
 
 tasker-srv/public/halbrowser
+/ch6/nbproject/private/
+*.js#
+
+ch5/www/js/app/.tern-port
