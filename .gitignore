@@ -20,3 +20,5 @@ tasker-srv/public/halbrowser
 *.js#
 
 ch5/www/js/app/.tern-port
+
+ch6/www/js/app/.tern-port
