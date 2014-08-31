@@ -161,19 +161,7 @@ define( [ "yasmf", "app/lib/xhr", "Q", "Boxcar", "app/APIKeys" ], function( _y, 
   }
 
   function notificationClicked( data ) {
-    alert( "not foreground" );
-    console.log( JSON.stringify( data ) );
-    alert( JSON.stringify( data ) );
-    // indicate that we've seen the alert
-    Boxcar.markAsReceived( {
-      onsuccess: notificationSuccess.bind( undefined, "Notification marked as seen." ),
-      onerror: notificationError,
-      id: data.id
-    } );
-    Boxcar.resetBadge( {
-      onsuccess: notificationSuccess.bind( undefined, "Badge reset." ),
-      onerror: notificationError
-    } );
+    alert( "clicked" );
   }
   // APP.start will load the first view and kick us off
   APP.start = function() {
@@ -193,7 +181,7 @@ define( [ "yasmf", "app/lib/xhr", "Q", "Boxcar", "app/APIKeys" ], function( _y, 
     // boxcar initialization
     Boxcar.init( {
       server: "https://boxcar-api.io",
-      richUrlBase: "https://pge-as.acmecorp.com",
+      richUrlBase: "https://boxcar-push.s3.amazonaws.com",
       ios: APIKeys.ios,
       android: APIKeys.android
     } );
