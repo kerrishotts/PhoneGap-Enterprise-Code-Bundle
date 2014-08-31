@@ -22,3 +22,12 @@ tasker-srv/public/halbrowser
 ch5/www/js/app/.tern-port
 
 ch6/www/js/app/.tern-port
+
+APIKeys.*
+
+*.log
+
+*.js~
+*.py~
+*.html~
+*.css~
