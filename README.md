@@ -35,11 +35,11 @@ To do so:
 
 ## Plugins required for each project
 
-For chapter 5 (`ch5`):
+### For chapter 5 (`ch5`):
 
 	cordova plugin add https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin.git
 
-For Chapter 6 (`ch6`):
+### For Chapter 6 (`ch6`):
 
 	cordova plugin add https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin.git
 	cordova plugin add org.apache.cordova.globalization
@@ -49,9 +49,50 @@ For Chapter 6 (`ch6`):
 	cordova plugin add https://github.com/brodysoft/Cordova-SQLitePlugin
 	cordova plugin add com.shazron.cordova.plugin.keychainutil
 
-For Chapter 7 (`ch7`):
+### For Chapter 7 (`ch7`):
 
-For Chapter 8 (`tasker`):
+	cordova plugin add https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin.git
+	cordova plugin add org.apache.cordova.globalization
+	cordova plugin add org.apache.cordova.device
+	cordova plugin add org.apache.cordova.network-information
+	cordova plugin add com.photokandy.localstorage
+	cordova plugin add https://github.com/brodysoft/Cordova-SQLitePlugin
+	cordova plugin add com.shazron.cordova.plugin.keychainutil
+	cordova plugin add https://github.com/boxcar/PushPlugin
+
+> *Note*:
+>
+> You'll need the Boxcar SDK, but we did have to modify the Boxcar.js file
+> supplied in the SDK in order to fix a few bugs. It's possible Boxcar will
+> have updated their SDK to fix these issues, but if not, you'll want to use
+> the `/boxcar/Boxcar.js` file in this package instead.
+
+#### Additional iOS Configuration
+
+You'll need to open the project in Xcode at least once so that you can download the
+Push Notification entitlements you defined in the chapter. Open Xcode, navigate into
+the project's `platforms\ios` directory, and there should be an `.xcodeproj` file. Open
+it, and then open *Xcode* > *Preferences* > *Accounts*. Select your Apple Developer
+account, and then click *View Details*. Once you do, a new screen should appear with a
+refresh button near the bottom-left. Click that and wait. After the process is complete
+you should have your push notification entitlements in the second list box (you may
+need to scroll to see them). Close out of the dialogs, and then proceed to build the
+project. After this point you can build the project using the Cordova CLI.
+
+
+#### Additional Android Configuration
+
+As per Boxcar's documentation:
+
+> On android Storage API used by SDK needs to be enabled manaully in one of config files.
+> To do that XML file `platform/android/res/xml/config.xml` must have additional clause
+>
+>     <plugin name="Storage" value="org.apache.cordova.Storage" />
+>
+> directly in `<widget>` element.
+
+
+### For Chapter 8 (`tasker`):
 
 	cordova plugin add https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin.git
 	cordova plugin add org.apache.cordova.globalization
