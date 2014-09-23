@@ -1,11 +1,9 @@
-/******************************************************************************
+/**
  *
- * Tasker Server (PhoneGap Enterprise Book)
- * ----------------------------------------
+ * color key bar template
  *
  * @author Kerri Shotts
- * @version 0.1.0
- * @license MIT
+ * @version 1.0.0
  *
  * Copyright (c) 2014 Packt Publishing
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this
@@ -22,29 +20,29 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
- *
- ******************************************************************************/
+ */
+define( [ "yasmf", "hammer" ], function ( _y, hammer ) {
+  "use strict";
+  _y.addTranslations( {
+                        "KEY:INPROGRESS": {
+                          "EN": "In Progress"
+                        },
+                        "KEY:ONHOLD":     {
+                          "EN": "On Hold"
+                        },
+                        "KEY:COMPLETE":   {
+                          "EN": "Complete"
+                        }
+                      } );
+  function colorKeyBarTemplate() {
+    var h = _y.h;
+    return h.el( "div.color-key-bar",
+                 [
+                   h.el( "span.inProgress", _y.T( "KEY:INPROGRESS" ) ),
+                   h.el( "span.onHold", _y.T( "KEY:ONHOLD" ) ),
+                   h.el( "span.complete", _y.T( "KEY:COMPLETE" ) )
+                 ] );
+  }
 
-//
-// dependencies
-//
-
-function Task ( dbUtils ) {
-  var self = this;
-  self._dbUtils = dbUtils;
-  return self;
-}
-
-Task.prototype.getTask = function ( taskId ) {
-
-};
-
-Task.prototype.getTasks = function ( query ) {
-
-};
-
-Task.prototype.createTask = function () {
-
-};
-
-module.exports = Task;
+  return colorKeyBarTemplate;
+} );

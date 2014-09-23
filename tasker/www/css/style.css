@@ -1,0 +1,296 @@
+/*
+Tasker Styles
+@author Kerri Shotts
+@version 1.0.0
+
+Copyright (c) 2014 Packt Publishing
+Permission is hereby granted, free of charge, to any person obtaining a copy of this
+software and associated documentation files (the "Software"), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify,
+merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to the following
+conditions:
+The above copyright notice and this permission notice shall be included in all copies
+or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
+OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+/*
+ * form layouts
+ * ============
+ */
+form.vertical-layout div.text {
+  padding:     1em;
+  line-height: 1.25em;
+}
+
+form.vertical-layout div.field {
+  background-color: white;
+  height:           44px;
+  line-height:      44px;
+  padding-left:     1em;
+  border-bottom:    1px solid rgba(0, 0, 0, .25);
+}
+
+form.vertical-layout div.field span {
+  display:    inline-block;
+  box-sizing: border-box;
+  width:      33%;
+}
+
+form.vertical-layout div.field input {
+  display:            inline-block;
+  -webkit-appearance: none;
+  -moz-appearance:    none;
+  border:             0;
+  height:             43px;
+  background-color:   transparent;
+  width:              66%;
+  box-sizing:         border-box;
+  outline:            none;
+  font-size:          18px;
+  margin:             0;
+  padding:            0;
+}
+
+form.vertical-layout div.button-group {
+  padding: 0.5em;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+}
+
+form.vertical-layout div.button-group input,
+form.vertical-layout div.button-group button {
+  -webkit-box-flex:   1;
+  -moz-box-flex:      1;
+  -webkit-flex:       1;
+  -ms-flex:           1;
+  flex:               1;
+  -webkit-appearance: none;
+  -moz-appearance:    none;
+  border:             0;
+  background-color:   blue;
+  color:              white;
+  margin:             0.5em;
+  line-height:        44px;
+  height:             44px;
+  font-size:          18px;
+  outline:            0;
+}
+
+/*
+ * view background colors
+ * ======================
+ */
+.loginView, .dashboardView {
+  background-color: #369;
+}
+
+/*
+ * login view-specific styles
+ * ===========================
+ */
+.loginView form.vertical-layout div.text h1 {
+  text-align:     center;
+  font-size:      300%;
+  line-height:    2em;
+  font-weight:    100;
+  letter-spacing: 1px;
+}
+
+.loginView form.vertical-layout div.text {
+  color:       #E0E0E0;
+  font-weight: 100;
+}
+
+.loginView form.vertical-layout div.field span {
+  color:      #888;
+  text-align: right;
+}
+
+.loginView form.vertical-layout div.field input {
+  color: #333;
+}
+
+.loginView form.vertical-layout div.button-group {
+  background-color: rgba(255, 255, 255, .25);
+}
+
+.loginView form.vertical-layout div.button-group input,
+.loginView form.vertical-layout div.button-group button {
+  background-color:   rgba(255, 255, 255, .5);
+  color:              #333;
+  -webkit-appearance: none;
+  -moz-appearance:    none;
+}
+
+.loginView form.vertical-layout div.text h1 {
+  text-transform: uppercase;
+}
+
+/*
+ * dashboard styles
+ * ================
+ */
+
+.dashboardView .ui-list-heading,
+.dashboardView .ui-list-item {
+  background-color: transparent;
+  color:            #E8E8E8;
+  border-bottom:    1px solid transparent;
+}
+
+.dashboardView .ui-list-heading {
+  margin-bottom: 1em;
+  margin-top:    1em;
+  border-bottom: 1px solid #E8E8E8;
+}
+
+.dashboardView .ui-list-heading .ui-indicator,
+.dashboardView .ui-list-item .ui-indicator {
+  background-color: #E8E8E8;
+}
+
+.dashboardView .ui-list-heading:active,
+.dashboardView .ui-list-item:active {
+  color:            white;
+  background-color: rgba(255, 255, 255, .25);
+  border-bottom:    1px solid white;
+}
+
+.dashboardView .ui-list-item:active {
+  border-bottom: 1px solid transparent;
+}
+
+.dashboardView .ui-list-heading:active .ui-indicator,
+.dashboardView .ui-list-item:active .ui-indicator {
+  background-color: white;
+}
+
+/*
+ * task list styles
+ * ================
+ */
+
+/*
+ * task edit styles
+ * ================
+ */
+
+/*
+ * comment styles
+ * ==============
+ */
+
+/*
+ * comment editor styles
+ * =====================
+ */
+
+/*
+ * other misc styles
+ * =================
+ */
+
+/* color key bar shows
+   [ ] In Progress  [ ] On Hold  [ ] Complete
+ */
+.color-key-bar {
+  margin-top:       44px;
+  height:           44px;
+  line-height:      44px;
+  border-bottom:    1px solid rgba(0, 0, 0, .25);
+  background-color: rgba(255, 255, 255, .75);
+  text-align:       center;
+  font-size:        75%;
+  z-index:          5;
+}
+
+.iosM .color-key-bar {
+  padding-top: 20px;
+  height:      64px;
+}
+
+.color-key-bar span {
+  margin:       0 0.5em;
+  padding-left: 0.5em;
+  border-left:  1em solid black;
+  color:        #484848;
+}
+
+.color-key-bar span.inProgress {
+  border-left-color: #393;
+}
+
+.color-key-bar span.onHold {
+  border-left-color: #933;
+}
+
+.color-key-bar span.complete {
+  border-left-color: #339;
+}
+
+.color-key-bar ~ * .ui-avoid-navigation-bar {
+  padding-top: 88px !important;
+}
+
+.iosM .color-key-bar ~ * .ui-avoid-navigation-bar {
+  padding-top: 108px !important;
+}
+
+.ui-list .task-status {
+  margin:           -10px;
+  margin-right:     10px;
+  background-color: black;
+  min-width:        30px;
+  max-width:        30px;
+}
+
+.ui-list .inProgress {
+  background-color: #393;
+}
+
+.ui-list .onHold {
+  background-color: #933;
+}
+
+.ui-list .complete {
+  background-color: #339;
+}
+
+.ui-list .unknown {
+  background-color: #999;
+}
+
+.ui-list .task-title {
+  font-weight: bold;
+  line-height: 1.25em;
+}
+
+.ui-list .task-description {
+  font-size:   80%;
+  line-height: 1.25em;
+  color:       #666;
+}
+
+.ui-list .task-stat-part {
+  color:          white;
+  text-align:     center;
+  font-size:      80%;
+  line-height:    5em;
+  font-weight:    100;
+  letter-spacing: 2px;
+  min-width:      4em;
+}
+
+.ui-list .task-stat-part.unknown {
+  min-width: 0;
+}
