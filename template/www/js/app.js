@@ -22,24 +22,6 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-/*jshint
-         asi:true,
-         bitwise:true,
-         browser:true,
-         camelcase:true,
-         curly:true,
-         eqeqeq:false,
-         forin:true,
-         noarg:true,
-         noempty:true,
-         plusplus:false,
-         smarttabs:true,
-         sub:true,
-         trailing:false,
-         undef:true,
-         white:false,
-         onevar:false 
- */
 /*global require, requirejs*/
 /**
  * requirejs configuration -- by default our libraries are in js/lib
@@ -52,28 +34,38 @@
  * so they don't load out-of-order
  */
 requirejs.config( {
-  baseUrl: './js/lib',
-  paths: {
-    'app': '../app',
-    'html': '../../html',
-    'Q': 'q'
-  },
-  urlArgs: "bust=" + ( new Date() ).getTime(),
-  shim: {
-    "cultures/globalize.culture.en-US": [ "globalize" ],
-    "cultures/globalize.culture.es-US": [ "globalize" ],
-    "Q": {
-      exports: "Q"
-    },
-    "yasmf": [ "Q" ]
-  }
-} );
+                    baseUrl: './js/lib',
+                    paths: {
+                      'app': '../app',
+                      'html': '../../html',
+                      'Q': 'q',
+                      'Boxcar': '../app/lib/Boxcar',
+                      'PushNotifications': '../../PushNotification'
+                    },
+                    urlArgs: "bust=" + ( new Date() ).getTime(),
+                    shim: {
+                      "cultures/globalize.culture.en-US": [ "globalize" ],
+                      "cultures/globalize.culture.es-US": [ "globalize" ],
+                      "Q": {
+                        exports: "Q"
+                      },
+                      "PushNotifications": {
+                        exports: "PushNotification"
+                      },
+                      "Boxcar": {
+                        exports: "Boxcar",
+                        deps: [ "PushNotifications" ]
+                      },
+                      "yasmf": [ "Q" ]
+                    }
+                  } );
 /**
  * Start the app once all the dependencies are met
  */
 require( [ 'yasmf', 'app/main', 'Q', 'cultures/globalize.culture.en-US',
   'cultures/globalize.culture.es-US'
 ], function( _y, APP, Q ) {
+  "use strict";
   // for future reference, add _y to the global object
   window._y = _y;
   // and the app as well
