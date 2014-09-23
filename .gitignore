@@ -19,9 +19,8 @@ tasker-srv/public/halbrowser
 /ch6/nbproject/private/
 *.js#
 
-ch5/www/js/app/.tern-port
 
-ch6/www/js/app/.tern-port
+*/*.tern-port
 
 APIKeys.*
 
@@ -31,3 +30,10 @@ APIKeys.*
 *.py~
 *.html~
 *.css~
+
+.brackets.json
+*/.zedstate
+
+ch5/www/js/app/.tern-port
+
+ch7/www/.zedstate
