@@ -1,6 +1,6 @@
 {
-	"application": {
-		"name": "Tasker Server",
-		"version": "0.0.1"
-	}
+  "application": {
+    "name": "Tasker Server",
+    "version": "0.0.1"
+  }
 }

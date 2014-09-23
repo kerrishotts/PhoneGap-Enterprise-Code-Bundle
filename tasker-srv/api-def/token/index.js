@@ -25,25 +25,22 @@
  *
  ******************************************************************************/
 
-var getTokenAction =
-{
+var getTokenAction = {
   "title": "Get CSRF Token",
   "action": "get-token",
   "description": "Returns a token suitable for use in a POST, PUT, or DELETE as part of the x-csrf-token" +
-                 "header. Response is in `token`.",
+    "header. Response is in `token`.",
   "verb": "get",
   "href": "/getToken",
   "accepts": [ "application/hal+json", "application/json", "text/json" ],
   "sends": [ "application/hal+json", "application/json", "text/json" ],
   "store": {
-    "body": [
-      {
-        "name": "csrf-token",
-        "key":  "token"
-      }
-    ]
+    "body": [ {
+      "name": "csrf-token",
+      "key": "token"
+    } ]
   },
-  "handler": function ( req, res, next ) {
+  "handler": function( req, res, next ) {
 
     var o = {
       token: res.locals.csrftoken,
@@ -51,22 +48,18 @@ var getTokenAction =
       _embedded: {}
     };
 
-    o._links["self"] = JSON.parse ( JSON.stringify ( getTokenAction ) );
-    [ require("../auth/login"), require("../auth/logout") ].forEach ( function ( apiAction ) {
-      o._links[ apiAction.action ] = JSON.parse ( JSON.stringify ( apiAction ) );
+    o._links.self = JSON.parse( JSON.stringify( getTokenAction ) );
+    [ require( "../auth/login" ), require( "../auth/logout" ) ].forEach( function( apiAction ) {
+      o._links[ apiAction.action ] = JSON.parse( JSON.stringify( apiAction ) );
     } );
 
-    res.json ( 200, o );
+    res.json( 200, o );
   }
 };
 
-var routes =
-  [
-    {
-      "route": "/getToken",
-      "actions":
-        [ getTokenAction ]
-    }
-  ];
+var routes = [ {
+  "route": "/getToken",
+  "actions": [ getTokenAction ]
+} ];
 
 module.exports = routes;

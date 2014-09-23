@@ -1,28 +1,30 @@
 #!/usr/bin/env node
-var debug = require('debug')('tasker-srv');
-var app = require('../app');
-var https = require('https');
-var fs = require('fs');
-var config = require('../config/config');
 
-var SSLOptions = {
-    key: fs.readFileSync (config.get('ssl:keyFile')),
-    cert: fs.readFileSync (config.get('ssl:certFile')),
-    ca: fs.readFileSync (config.get('ssl:caFile'))
-};
+var debug = require( 'debug' )( 'tasker-srv' ),
+  app = require( '../app' ),
+  https = require( 'https' ),
+  fs = require( 'fs' ),
+  config = require( '../config/config' ),
 
-app.set('port', config.get('express:port') );
+  SSLOptions = {
+    key: fs.readFileSync( config.get( 'ssl:keyFile' ) ),
+    cert: fs.readFileSync( config.get( 'ssl:certFile' ) ),
+    ca: fs.readFileSync( config.get( 'ssl:caFile' ) )
+  };
 
-var server = https.createServer (SSLOptions, app).listen(app.get('port'), function() {
-  debug('Express server listening on port ' + server.address().port);
-});
+app.set( 'port', config.get( 'express:port' ) );
+
+var server = https.createServer( SSLOptions, app ).listen( app.get( 'port' ), function() {
+  debug( 'Express server listening on port ' + server.address().port );
+} );
 
 //http://socket.io/docs/
-var io = require("socket.io")(server);
-io.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
-  });
-});
-
+var io = require( "socket.io" )( server );
+io.on( 'connection', function( socket ) {
+  socket.emit( 'news', {
+    hello: 'world'
+  } );
+  socket.on( 'my other event', function( data ) {
+    console.log( data );
+  } );
+} );
