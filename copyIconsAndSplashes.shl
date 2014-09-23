@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# Copies the icons and splash screens for Tasker
+#
+# Tasker
+sh copyIcons.shl design/tasker-icon tasker Tasker
+sh copySplash.shl design/tasker-splash tasker Tasker
+# Done!

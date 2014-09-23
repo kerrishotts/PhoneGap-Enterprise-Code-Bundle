@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# This script will iterate over all the projects in the book and call
+# cordova create for each. It will copy the www contents and the config.xml
+# file, as well as add the platforms and install the plugins. Splash screens
+# and icons will be copied as well.
+#
+
+echo "Creating all projects..."
+sh ./createProject.shl ch5 pgech5 TaskerCh5
+sh ./createProject.shl ch6 pgech6 TaskerCh6
+sh ./createProject.shl ch7 pgech7 TaskerCh7
+sh ./createProject.shl tasker tasker Tasker
+
+echo "Updating projects..."
+sh ./updateProjectPlugins.shl
+
+echo "Adding icons and splash screens..."
+sh ./copyIconsAndSplashes.shl
+
+echo "Done!"

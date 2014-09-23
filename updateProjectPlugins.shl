@@ -1,0 +1,72 @@
+#!/bin/sh
+#
+# Updates all subprojects with the correct (and most recent) plugins
+# and also updates the platforms; run after a cordova update and/or
+# plugin update. TEST AFTER: things are almost certainly to break.
+#
+echo "Updating all subprojects with updated platforms and plugins..."
+cd ch5
+echo "... ${PWD##*/}"
+echo "... ... updating platforms..."
+cordova platform update ios
+cordova platform update android
+echo "... ... updating plugins..."
+cordova plugin add https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin.git
+echo "... ... preparing platforms..."
+cordova prepare
+
+cd ../ch6
+echo "... ${PWD##*/}"
+echo "... ... updating platforms..."
+cordova platform update ios
+cordova platform update android
+echo "... ... updating plugins..."
+cordova plugin add https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin.git
+cordova plugin add org.apache.cordova.globalization
+cordova plugin add org.apache.cordova.device
+cordova plugin add org.apache.cordova.network-information
+cordova plugin add com.photokandy.localstorage
+cordova plugin add https://github.com/brodysoft/Cordova-SQLitePlugin
+cordova plugin add com.shazron.cordova.plugin.keychainutil
+echo "... ... preparing platforms..."
+cordova prepare
+
+cd ../ch7
+echo "... ${PWD##*/}"
+echo "... ... updating platforms..."
+cordova platform update ios
+cordova platform update android
+echo "... ... updating plugins..."
+cordova plugin add https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin.git
+cordova plugin add org.apache.cordova.globalization
+cordova plugin add org.apache.cordova.device
+cordova plugin add org.apache.cordova.network-information
+cordova plugin add com.photokandy.localstorage
+cordova plugin add https://github.com/brodysoft/Cordova-SQLitePlugin
+cordova plugin add com.shazron.cordova.plugin.keychainutil
+cordova plugin add https://github.com/boxcar/PushPlugin
+echo "... ... preparing platforms..."
+cordova prepare
+
+cd ../tasker
+echo "... ${PWD##*/}"
+echo "... ... updating platforms..."
+cordova platform update ios
+cordova platform update android
+echo "... ... updating plugins..."
+cordova plugin add https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin.git
+cordova plugin add org.apache.cordova.globalization
+cordova plugin add org.apache.cordova.device
+cordova plugin add org.apache.cordova.network-information
+cordova plugin add com.photokandy.localstorage
+cordova plugin add https://github.com/brodysoft/Cordova-SQLitePlugin
+cordova plugin add com.shazron.cordova.plugin.keychainutil
+cordova plugin add https://github.com/boxcar/PushPlugin
+echo "... ... preparing platforms..."
+cordova prepare
+
+cd ..
+echo "Update complete."
+
+sh ./copyIconsAndSplashes.shl
+echo "Icons and Splashes copied."
