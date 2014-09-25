@@ -53,7 +53,7 @@ function Session( dbUtils ) {
  *
  * @return {object} Session Object
  */
-Session.prototype.findSession = function( clientAuthToken, cb ) {
+Session.prototype.findSession = function ( clientAuthToken, cb ) {
   var self = this;
   if ( typeof clientAuthToken === "undefined" ) {
     return cb( null, false );
@@ -70,83 +70,70 @@ Session.prototype.findSession = function( clientAuthToken, cb ) {
     authToken = clientAuthTokenParts[ 1 ];
 
   // ask the database via dbutils if the token is recognized
-  self._dbUtils.execute( "CALL tasker.security.verify_token (:1, :2, :3, :4 ) INTO :5", [ sessionId,
-      authToken, // authorization token
-      self._dbUtils.outVarchar2( {
-        size: 32
-      } ), // user name     (returnParam)
-      self._dbUtils.outVarchar2( {
-        size: 4000
-      } ), // next token  (returnParam1)
-      self._dbUtils.outVarchar2( {
-        size: 1
-      } ) // success Y/N (returnParam2)
-    ],
-    function( err, results ) {
-      if ( err ) {
-        return cb( err, false );
-      }
-      if ( results.returnParam2 === "Y" ) {
-        cb( null, {
-          userId: results.returnParam,
-          sessionId: sessionId,
-          nextToken: results.returnParam1
-        } );
-      } else {
-        cb( null, false );
-      }
-    } );
+  self._dbUtils.execute( "CALL tasker.security.verify_token (:1, :2, :3, :4 ) INTO :5",
+                         [ sessionId,
+                           authToken, // authorization token
+                           self._dbUtils.outVarchar2( { size: 32 } ), // user name     (returnParam)
+                           self._dbUtils.outVarchar2( { size: 4000 } ), // next token  (returnParam1)
+                           self._dbUtils.outVarchar2( { size: 1 } ) // success Y/N (returnParam2)
+                         ],
+                         function ( err, results ) {
+                           if ( err ) {
+                             return cb( err, false );
+                           }
+                           if ( results.returnParam2 === "Y" ) {
+                             cb( null, {
+                               userId:    results.returnParam,
+                               sessionId: sessionId,
+                               nextToken: results.returnParam1
+                             } );
+                           } else {
+                             cb( null, false );
+                           }
+                         } );
 };
 
-Session.prototype.createSession = function( userName, candidatePassword, cb ) {
+Session.prototype.createSession = function ( userName, candidatePassword, cb ) {
   var self = this;
   if ( typeof userName === "undefined" || typeof candidatePassword === "undefined" ) {
     return cb( null, false );
   }
   self._dbUtils.execute( "CALL tasker.security.authenticate_user( :1, :2, :3, :4, :5 ) INTO :6", [
-      userName, candidatePassword,
-      self._dbUtils.outVarchar2( {
-        size: 4000
-      } ), // session id (returnParam)
-      self._dbUtils.outVarchar2( {
-        size: 4000
-      } ), // next token (returnParam1)
-      self._dbUtils.outVarchar2( {
-        size: 4000
-      } ), // session salt (returnParam2)
-      self._dbUtils.outVarchar2( {
-        size: 1
-      } ) // success Y/N (returnParam3
-    ],
-    function( err, results ) {
-      if ( err ) {
-        return cb( err, false );
-      }
-      if ( results.returnParam3 === "Y" ) {
-        cb( null, {
-          userId: userName,
-          sessionId: results.returnParam,
-          nextToken: results.returnParam1,
-          sessionSalt: results.returnParam2
-        } );
-      } else {
-        cb( null, false );
-      }
-    } );
+                           userName, candidatePassword,
+                           self._dbUtils.outVarchar2( { size: 4000 } ), // session id (returnParam)
+                           self._dbUtils.outVarchar2( { size: 4000 } ), // next token (returnParam1)
+                           self._dbUtils.outVarchar2( { size: 4000 } ), // hmac token (returnParam2)
+                           self._dbUtils.outVarchar2( { size: 1 } ) // success Y/N (returnParam3
+                         ],
+                         function ( err, results ) {
+                           if ( err ) {
+                             return cb( err, false );
+                           }
+                           if ( results.returnParam3 === "Y" ) {
+                             cb( null, {
+                               userId:    userName,
+                               sessionId: results.returnParam,
+                               nextToken: results.returnParam1,
+                               hmacToken: results.returnParam2
+                             } );
+                           } else {
+                             cb( null, false );
+                           }
+                         } );
 };
 
-Session.prototype.endSession = function( sessionId, cb ) {
+Session.prototype.endSession = function ( sessionId, cb ) {
   var self = this;
   if ( typeof sessionId === "undefined" ) {
     return cb( null, false );
   }
   self._dbUtils.execute( "CALL tasker.security.end_session ( :1 )", [ sessionId ],
-    function( err, results ) {
-      if ( err ) {
-        return cb( err, false );
-      }
-      cb( null, true );
-    } );
+                         function ( err, results ) {
+                           if ( err ) {
+                             return cb( err, false );
+                           }
+                           cb( null, true );
+                         } );
 };
 
 module.exports = Session;

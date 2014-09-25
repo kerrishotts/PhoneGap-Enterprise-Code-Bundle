@@ -56,8 +56,8 @@ var Session = require( "../../models/session" ),
         name: "session-id",
         key: "sessionId"
       }, {
-        name: "session-salt",
-        key: "sessionSalt"
+        name: "hmac-token",
+        key: "hmacToken"
       }, {
         name: "user-id",
         key: "userId"
@@ -97,7 +97,7 @@ var Session = require( "../../models/session" ),
 
         var o = {
           sessionId: results.sessionId,
-          sessionSalt: results.sessionSalt,
+          hmacToken: results.hmacToken,
           userId: results.userId,
           nextToken: results.nextToken,
           _links: {},
