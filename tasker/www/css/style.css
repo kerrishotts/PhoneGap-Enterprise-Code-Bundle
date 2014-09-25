@@ -91,7 +91,7 @@ form.vertical-layout div.button-group button {
  * ======================
  */
 .loginView, .dashboardView {
-  background-color: #369;
+  background-color: #ee6232;
 }
 
 /*
@@ -255,19 +255,19 @@ form.vertical-layout div.button-group button {
 }
 
 .ui-list .inProgress {
-  background-color: #393;
+  background-color: #62ee32;
 }
 
 .ui-list .onHold {
-  background-color: #933;
+  background-color: #ee3262;
 }
 
 .ui-list .complete {
-  background-color: #339;
+  background-color: #3262ee;
 }
 
 .ui-list .unknown {
-  background-color: #999;
+  background-color: #333;
 }
 
 .ui-list .task-title {
