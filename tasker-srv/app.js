@@ -53,6 +53,7 @@ var fs = require( "fs" ),
   // routes are defined by our API definition
   //
   apiDef = require( "./api-def" ),
+  securityDef = require ( "./api-def/security" ),
   apiUtils = require( "./api-utils" ),
   // create new Express app and link the configuration
   app = express(),
@@ -78,10 +79,11 @@ app.disable( "x-powered-by" ); // Showing what powers our service just makes the
 // job easier.
 // security enhancements via helmet
 // Only trust content from self and our application server
+/*
 app.use( helmet.csp( {
   defaultSrc: [ "'self'", "pge-as.acmecorp.com" ],
   safari5: false // safari5 has buggy behavior
-} ) );
+} ) );*/
 app.use( helmet.xframe() ); // no framing our content!
 app.use( helmet.xssFilter() ); // old IE won't get this, since some implementations are buggy
 app.use( helmet.hsts( {
@@ -149,6 +151,10 @@ app.use( function( req, res, next ) {
 } );
 // static content -- if you have it
 app.use( express.static( path.join( __dirname, "public" ) ) );
+app.use( helmet.csp( {
+                       defaultSrc: [ "'self'", "pge-as.acmecorp.com" ],
+                       safari5: false // safari5 has buggy behavior
+                     } ) );
 //
 // set up our database pool and connections
 //
@@ -230,7 +236,7 @@ function checkAuth( req, res, next ) {
 // tie our API to / and enable secured resources to use the above method
 app.use( "/", apiUtils.createRouterForApi( apiDef, checkAuth ) );
 // and set the pretty API as a global variable so our discover method can find it.
-app.set( "x-api-root", apiUtils.generateHypermediaForApi( apiDef ) );
+app.set( "x-api-root", apiUtils.generateHypermediaForApi( apiDef, securityDef ) );
 /// catch 404 and forward to error handler
 app.use( function handle404( req, res, next ) {
   var err = new Error( "Not Found" );
