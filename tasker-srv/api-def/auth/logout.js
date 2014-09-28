@@ -31,39 +31,47 @@
 var Errors = require( "../../errors" ),
   DBUtils = require( "../../db-utils" ),
   Session = require( "../../models/session" ),
+  apiUtils = require ( "../../api-utils" ),
+  security = require ( "../security" ),
 
   logoutAction = {
-    "title": "Log Out",
-    "action": "logout",
+    "title":      "Log Out",
+    "action":     "logout",
     "description": "Logs out a user and disables their associated token. Returns 403 is the user is " +
-      "not authenticated.",
-    "verb": "delete",
-    "href": "/auth",
-    "accepts": [ "application/hal+json", "application/json", "text/json" ],
-    "sends": [ "application/hal+json", "application/json", "text/json" ],
-    "requires": [ "get-token" ],
-    "template": null,
-    "securedBy": "tasker-auth",
-    "handler": function( req, res, next ) {
+                   "not authenticated.",
+    "verb":       "delete",
+    "href":       "/auth",
+    "base-href":  "/auth",
+    "accepts":    [ "application/hal+json", "application/json", "text/json" ],
+    "sends":      [ "application/hal+json", "application/json", "text/json" ],
+    "requires":   [ "get-token" ],
+    "template":   null,
+    "secured-by": "tasker-auth",
+    "hmac":       "tasker-256",
+    "handler":    function ( req, res, next ) {
 
       var session = new Session( new DBUtils( req.app.get( "client-pool" ) ) );
 
       if ( !req.user ) {
         return next( Errors.HTTP_Forbidden() );
       }
+      if ( !security["hmac-defs"]["tasker-256"].handler(req) ) {
+        return next ( Errors.HTTP_Unauthorized() );
+      }
 
-      session.endSession( req.user.sessionId, function( err, results ) {
+      session.endSession( req.user.sessionId, function ( err, results ) {
         if ( err ) {
           return next( err );
         }
 
         var o = {
-          message: "User logged out.",
-          _links: {},
+          message:   "User logged out.",
+          _links:    {},
           _embedded: {}
         };
+        apiUtils.generateHypermediaForAction( logoutAction, o._links, security, "self" );
         o._links.self = JSON.parse( JSON.stringify( logoutAction ) );
-        o._links.root = req.app.get( "x-api-root" );
+        o._links = apiUtils.mergeAndClone( o._links, req.app.get( "x-api-root" ) );
         res.json( 200, o );
       } );
     }

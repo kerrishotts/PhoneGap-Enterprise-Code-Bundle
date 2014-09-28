@@ -29,52 +29,42 @@
 // dependencies
 //
 var apiUtils = require( "../../api-utils" ),
+  security = require( "../security" ),
   Errors = require( "../../errors" ),
 
-  // get a specific task
+// get a specific task
   getTaskAction = {
-    "title": "Task",
-    "action": "get-task",
+    "title":       "Task",
+    "action":      "get-task",
     "description": "Return a task with a specific ID. Returns 403 if the user is not authorized.",
-    "verb": "get",
-    "href": "/task/{taskId}",
-    "templated": true,
-    "accepts": [ "application/hal+json", "application/json", "text/json" ],
-    "sends": [ "application/hal+json", "application/json", "text/json" ],
-    "securedBy": "tasker-auth",
-    "attachments": {
-      "headers": [ {
-        "name": "auth-token",
-        "key": "x-auth-token",
-        "value": "{session-id}.{next-token}",
-        "templated": true
-      } ]
-    },
-    "store": {
-      "body": [ {
-        "name": "next-token",
-        "key": "nextToken"
-      } ]
-    },
-    "handler": function( req, res, next ) {
+    "verb":        "get",
+    "href":        "/task/{taskId}",
+    "templated":   true,
+    "base-href":   "/task",
+    "accepts":     [ "application/hal+json", "application/json", "text/json" ],
+    "sends":       [ "application/hal+json", "application/json", "text/json" ],
+    "secured-by":  "tasker-auth",
+    "hmac":        "tasker-256",
+    "handler":     function ( req, res, next ) {
 
       if ( !req.user ) {
         return next( Errors.HTTP_Forbidden() );
       }
 
-      var o = apiUtils.mergeAndClone( {
-        _links: {},
-        _embedded: {}
-      }, req.task, {
-        nextToken: req.user.nextToken
-      } );
+      if ( !security["hmac-defs"]["tasker-256"].handler(req) ) {
+        return next ( Errors.HTTP_Unauthorized() );
+      }
 
-      o._links.self = apiUtils.mergeAndClone( JSON.parse( JSON.stringify( getTaskAction ) ), {
-        "href": "/task/" + req.task.ID
-      } );
+      var o = apiUtils.mergeAndClone( { _links: {}, _embedded: {} }, req.task, { nextToken: req.user.nextToken } );
+
+      o._links.self = apiUtils.mergeAndClone(
+        apiUtils.generateHypermediaForAction( getTaskAction, o._links, security, "self" ), {
+          "href": "/task/" + req.task.ID,
+          "templated": false
+        } );
       /*  [ require("../task/getTask") ].forEach ( function ( apiAction ) {
-      o._links[ apiAction.action ] = JSON.parse ( JSON.stringify ( apiAction ) );
-    } ); */
+       o._links[ apiAction.action ] = JSON.parse ( JSON.stringify ( apiAction ) );
+       } ); */
 
       res.json( 200, o );
     }
