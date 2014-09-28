@@ -25,116 +25,62 @@
  *
  ******************************************************************************/
 /*eslint no-underscore-dangle:0*/
+var objUtils = require( "../../obj-utils" );
 
-//
-// dependencies
-//
-var Errors = require( "../../errors" );
-
-var TASK_STATUS = {
-  "inProgress": "I",
-  "complete": "C",
-  "onHold": "H",
-  "deleted": "X"
-};
-
+var TASK_DESCRIPTION_CODE = {
+    "inProgress": "I",
+    "complete":   "C",
+    "onHold":     "H",
+    "deleted":    "X"
+  },
+  TASK_CODE_DESCRIPTION = {
+    "I": "inProgress",
+    "C": "complete",
+    "H": "onHold",
+    "X": "deleted"
+  };
 
 /**
  * Task - Returns a new task with the properties set to the specified values
  *        or default values. Data source is also set so that changes can
  *        be propagated back to the database
  *
- * @param  {*} taskOptions object containing values to assign
- * @return {Task}          A task
+ * @param  {*} taskProperties object containing values to assign
+ * @return {Task}              A task
  */
 function Task( taskProperties ) {
   "use strict";
   var defaultTask = {
-    "id": undefined,
-    "title": "",
+    "id":          undefined,
+    "title":       "",
     "description": "",
     "pctComplete": 0,
-    "status": TASK_STATUS.inProgress,
-    "owner": undefined,
-    "assignedTo": undefined,
-    "changeDate": new Date(),
-    "changeUser": undefined
+    "status":      TASK_DESCRIPTION_CODE.inProgress,
+    "owner":       undefined,
+    "assignedTo":  undefined,
+    "changeDate":  new Date(),
+    "changeUser":  undefined
+  };
+  var dbFieldMap = {
+    "ID":           { key: "id" },
+    "TITLE":        { key: "title" },
+    "DESCRIPTION":  { key: "description" },
+    "PCT_COMPLETE": { key: "pctComplete" },
+    "STATUS":       { key: "status" },
+    "OWNER":        { key: "owner" },
+    "ASSIGNED_TO":  { key: "assignedTo" },
+    "CHANGE_DATE":  { key: "changeDate", cvt: function ( v ) { return new Date( v ); } },
+    "CHANGE_USER":  { key: "changeUser" }
   };
 
-  if ( typeof taskProperties !== "undefined" ) {
-    for ( var prop in defaultTask ) {
-      if ( defaultTask.hasOwnProperty( prop ) ) {
-        if ( typeof taskProperties[ prop ] !== "undefined" ) {
-          this[ prop ] = taskProperties[ prop ];
-        } else {
-          this[ prop ] = defaultTask[ prop ];
-        }
-      }
-    }
-  }
+  return objUtils.mergeIntoUsingMap( taskProperties, defaultTask, dbFieldMap );
 }
 
-Task.prototype.copy = function() {
+Task.prototype.copy = function () {
   return new Task( this );
 };
 
-function TaskReader( dataSource ) {
-  "use strict";
-  this._db = dataSource;
-}
-
-TaskReader.prototype.get = function( taskId, userId, next ) {
-  var db = this._db;
-  db.query( "SELECT * FROM table(tasker.task_mgmt.get_task(:1,:2))", [ taskId, userId ],
-    function( err, results ) {
-      if ( err ) {
-        return next( new Error( err ) );
-      }
-      if ( results.length === 0 ) {
-        return next( Errors.HTTP_NotFound() );
-      }
-      return next( new Task( results[ 0 ] ) );
-    } );
-};
-
-function TaskWriter( dataSource ) {
-  "use strict";
-  this._db = dataSource;
-}
-
-TaskWriter.prototype.put = function( oldTask, newTask, userId, next ) {
-  var db = this._db;
-  if ( newTask.status !== oldTask.status ) {
-    db.execute( "tasker.task_mgmt.update_task_status(:1,:2,:3)", [ oldTask.id, newTask.status,
-        userId
-      ],
-      function( err, results ) {
-        if ( err ) {
-          return next( new Error( err ) );
-        }
-        if ( newTask.pctComplete !== oldTask.pctComplete ) {
-          db.execute( "tasker.task_mgmt.update_task_percentage(:1,:2,:3)", [ oldTask.id, newTask.pctComplete,
-              userId
-            ],
-            function( err, results ) {
-              if ( err ) {
-                return next( new Error( err ) );
-              }
-              return next();
-            } );
-        } else {
-          return next();
-        }
-      } );
-  }
-};
-
-Task.prototype.getTasks = function( query ) {
-
-};
-
-Task.prototype.createTask = function() {
-
-};
+Task.DESCRIPTION_CODE = TASK_DESCRIPTION_CODE;
+Task.CODE_DESCRIPTION = TASK_CODE_DESCRIPTION;
 
 module.exports = Task;
