@@ -49,6 +49,8 @@ module.exports = {
    *           "template": "/some/{variable}{?queryParameters}", // optional
    *           "accept": "types", // like application/json, optional
    *           "type": "types", // like applicaiton/json, optional
+   *           "secured-by": ...,
+   *           "hmac": "something in hmacs",...
    *         },
    *         "handler": function ( req, res, next ) {
    *           res.json ( 200, "ok" );  // handle request
@@ -60,17 +62,17 @@ module.exports = {
    *
    * @param api {array}
    */
-  createRouterForApi: function( api, checkAuthFn ) {
+  createRouterForApi:          function ( api, checkAuthFn ) {
     var router = express.Router();
     // process each route in the api; a route consists of the uri (route)
     // and a series of verbs (get, post, etc.)
-    api.forEach( function( apiRoute ) {
+    api.forEach( function ( apiRoute ) {
       // add params
 
       if ( typeof apiRoute.params !== "undefined" ) {
-        apiRoute.params.forEach( function( param ) {
-          if ( typeof param.securedBy !== "undefined" ) {
-            router.param( param.name, function( req, res, next, v ) {
+        apiRoute.params.forEach( function ( param ) {
+          if ( typeof param["secured-by"] !== "undefined" ) {
+            router.param( param.name, function ( req, res, next, v ) {
               return checkAuthFn( req, res, param.handler.bind( this, req, res, next, v ) );
             } );
           } else {
@@ -79,16 +81,16 @@ module.exports = {
         } );
       }
       var uri = apiRoute.route,
-        // create a new route with the uri
+      // create a new route with the uri
         route = router.route( uri );
       // process through each action
-      apiRoute.actions.forEach( function( action ) {
+      apiRoute.actions.forEach( function ( action ) {
         // just in case we have more than one verb, split them out
         var verbs = action.verb.split( "," );
         // and add the handler specified to the route (if it's a valid verb)
-        verbs.forEach( function( verb ) {
+        verbs.forEach( function ( verb ) {
           if ( typeof route[ verb ] === "function" ) {
-            if ( typeof action.securedBy !== "undefined" ) {
+            if ( typeof action["secured-by"] !== "undefined" ) {
               route[ verb ]( checkAuthFn, action.handler );
             } else {
               route[ verb ]( action.handler );
@@ -116,15 +118,21 @@ module.exports = {
    * If parent is supplied, the data is appended to parent object, otherwise the above data is
    * returned
    */
-  generateHypermediaForAction: function( action, parent ) {
+  generateHypermediaForAction: function ( action, parent, security, override ) {
     var hm = JSON.parse( JSON.stringify( action ) );
     hm.allow = action.verb;
+    if ( typeof hm["secured-by"] !== "undefined" ) {
+      hm = this.mergeAndClone( hm, security["secured-by-defs"][hm["secured-by"]] );
+    }
+    if ( typeof hm["hmac"] !== "undefined" ) {
+      hm = this.mergeAndClone( hm, security["hmac-defs"][hm["hmac"]] );
+    }
     if ( typeof parent !== "undefined" ) {
-      parent[ action.action ] = hm;
+      parent[ (typeof override === "undefined") ? action.action : override ] = hm;
       return hm;
     } else {
       parent = {};
-      parent[ action.action ] = hm;
+      parent[ (typeof override === "undefined") ? action.action : override ] = hm;
       return parent;
     }
   },
@@ -133,12 +141,12 @@ module.exports = {
    * Generates a hypermedia representation for an entire API.
    *
    */
-  generateHypermediaForApi: function( api ) {
+  generateHypermediaForApi:    function ( api, security ) {
     var hm = {},
       self = this;
-    api.forEach( function( apiRoute ) {
-      apiRoute.actions.forEach( function( action ) {
-        self.generateHypermediaForAction( action, hm );
+    api.forEach( function ( apiRoute ) {
+      apiRoute.actions.forEach( function ( action ) {
+        self.generateHypermediaForAction( action, hm, security );
       } );
     } );
     return hm;
@@ -147,10 +155,10 @@ module.exports = {
    * Merges the supplied objects into one new object. This isn't a deep clone -- so
    * this is only usable in lists and the like
    */
-  mergeAndClone: function() {
+  mergeAndClone:               function () {
     var o = {},
       args = Array.prototype.slice.call( arguments, 0 );
-    args.forEach( function( arr ) {
+    args.forEach( function ( arr ) {
       for ( var prop in arr ) {
         if ( arr.hasOwnProperty( prop ) ) {
           o[ prop ] = arr[ prop ];
