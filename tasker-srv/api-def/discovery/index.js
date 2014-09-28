@@ -25,17 +25,17 @@
  *
  ******************************************************************************/
 var apiUtils = require( "../../api-utils" ),
-
-
+  security = require( "../security" ),
   discoverAction = {
-    "title": "API Discovery",
-    "action": "discover_api",
+    "title":       "API Discovery",
+    "action":      "discover_api",
     "description": "Returns all the valid API actions",
-    "verb": "get",
-    "href": "/",
-    "accepts": [ "application/hal+json", "application/json", "text/json" ],
-    "sends": [ "application/hal+json", "application/json", "text/json" ],
-    "handler": function( req, res, next ) {
+    "verb":        "get",
+    "href":        "/",
+    "base-href":   "/",
+    "accepts":     [ "application/hal+json", "application/json", "text/json" ],
+    "sends":       [ "application/hal+json", "application/json", "text/json" ],
+    "handler":     function ( req, res, next ) {
 
       var o = {
         "version": "Tasker API v0.1",
@@ -45,29 +45,30 @@ var apiUtils = require( "../../api-utils" ),
         "toAUTH2": "call login with the user id and candidate password. If invalid 403",
         "toAUTH3": "is returned, otherwise a session is returned. Use nextToken and compute",
         "toAUTH4": "based on the session salt in order to send requests that are secured.",
-        "info1": "This API is a sample API for the PhoneGap Enterprise book published",
-        "info2": "by Packt Publishing and written by Kerri Shotts. For more information",
-        "info3": "please visit the website for the book at ",
-        "info4": "http://www.photokandy.com/books/phonegap-enterprise",
-        _links: {},
+        "info1":   "This API is a sample API for the PhoneGap Enterprise book published",
+        "info2":   "by Packt Publishing and written by Kerri Shotts. For more information",
+        "info3":   "please visit the website for the book at ",
+        "info4":   "http://www.photokandy.com/books/phonegap-enterprise",
+        _links:    {},
         _embedded: {}
       };
 
-      o._links = apiUtils.mergeAndClone( {
-          "self": JSON.parse( JSON.stringify( discoverAction ) )
-        },
-        req.app.get( "x-api-root" ) );
+      o = apiUtils.mergeAndClone( o, security );
+      o._links = apiUtils.mergeAndClone( { "self": JSON.parse( JSON.stringify( discoverAction ) ) },
+                                         req.app.get( "x-api-root" ) );
 
       res.json( 200, o );
     }
   },
 
-  // define the route and action for discovery
-  routes = [ {
-    "route": "/",
-    "actions": [
-      discoverAction
-    ]
-  } ];
+// define the route and action for discovery
+  routes = [
+    {
+      "route":   "/",
+      "actions": [
+        discoverAction
+      ]
+    }
+  ];
 
 module.exports = routes;
