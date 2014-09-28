@@ -41,7 +41,8 @@ AS
 
   FUNCTION verify_token(
       p_session_id NUMBER, p_token      VARCHAR2,
-      p_auth_user OUT VARCHAR2, p_next_token OUT VARCHAR2 )
+      p_auth_user OUT VARCHAR2, p_next_token OUT VARCHAR2,
+      p_hmac_token OUT VARCHAR2)
     RETURN VARCHAR2;
 
   FUNCTION verify_password(
@@ -516,7 +517,8 @@ FUNCTION verify_token(
     p_session_id NUMBER,
     p_token      VARCHAR2,
     p_auth_user OUT VARCHAR2,
-    p_next_token OUT VARCHAR2 )
+    p_next_token OUT VARCHAR2,
+    p_hmac_token OUT VARCHAR2)
   RETURN VARCHAR2
 AS
   PRAGMA AUTONOMOUS_TRANSACTION;
@@ -563,14 +565,24 @@ BEGIN
     IF current_session.token = candidate_salt || candidate_token_hash THEN
       -- set the user that matches
       p_auth_user := current_session.user_id;
-      -- generate the next token
-      make_token ( current_session.hmac_secret, client_token, db_token);
-      p_next_token := client_token;
-       UPDATE sessions
-      SET token = db_token,
-          expiry = sysdate + to_number( tasker.app_settings.get( 'TOKEN_EXPIRY' ) )
-        WHERE id = p_session_id;
-      COMMIT;
+      -- determine if we should generate a new token, or reuse the existing token
+      if tasker.app_settings.get ( 'AUTH_TOKEN_MODE', 'REGEN_EVERY' ) = 'REGEN_EVERY' then
+        -- generate the next token
+        make_token ( current_session.hmac_secret, client_token, db_token);
+        p_next_token := client_token;
+        UPDATE sessions
+        SET token = db_token,
+            expiry = sysdate + to_number( tasker.app_settings.get( 'TOKEN_EXPIRY' ) )
+          WHERE id = p_session_id;
+        COMMIT;
+      else
+        p_next_token := null;
+        UPDATE sessions
+        SET  expiry = sysdate + to_number( tasker.app_settings.get( 'TOKEN_EXPIRY' ) )
+          WHERE id = p_session_id;
+        COMMIT;
+      end if;
+      p_hmac_token := current_session.hmac_secret;
 
       -- restore the session context
       TASKER.SESSION_CONTEXT.set_session_id ( p_session_id );
@@ -583,4 +595,5 @@ BEGIN
   RETURN 'N';
 END;
 END SECURITY;
+
 
