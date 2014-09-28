@@ -112,7 +112,7 @@ define( [ "yasmf", "app/views/loginView", "app/views/dashboardView" ], function 
     APP.dispatchGlobalEvent( "network" + status );
     console.log( "Network is now " + status.toUpperCase() );
   }
-
+  
   /**
    * Dispatches a networkOnlineEvent
    */
