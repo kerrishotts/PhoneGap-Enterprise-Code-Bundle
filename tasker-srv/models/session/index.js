@@ -70,22 +70,24 @@ Session.prototype.findSession = function ( clientAuthToken, cb ) {
     authToken = clientAuthTokenParts[ 1 ];
 
   // ask the database via dbutils if the token is recognized
-  self._dbUtils.execute( "CALL tasker.security.verify_token (:1, :2, :3, :4 ) INTO :5",
+  self._dbUtils.execute( "CALL tasker.security.verify_token (:1, :2, :3, :4, :5 ) INTO :6",
                          [ sessionId,
                            authToken, // authorization token
                            self._dbUtils.outVarchar2( { size: 32 } ), // user name     (returnParam)
                            self._dbUtils.outVarchar2( { size: 4000 } ), // next token  (returnParam1)
-                           self._dbUtils.outVarchar2( { size: 1 } ) // success Y/N (returnParam2)
+                           self._dbUtils.outVarchar2( { size: 4000 } ), // hmac token  (returnParam2)
+                           self._dbUtils.outVarchar2( { size: 1 } ) // success Y/N (returnParam3)
                          ],
                          function ( err, results ) {
                            if ( err ) {
                              return cb( err, false );
                            }
-                           if ( results.returnParam2 === "Y" ) {
+                           if ( results.returnParam3 === "Y" ) {
                              cb( null, {
                                userId:    results.returnParam,
                                sessionId: sessionId,
-                               nextToken: results.returnParam1
+                               nextToken: results.returnParam1,
+                               hmacToken: results.returnParam2
                              } );
                            } else {
                              cb( null, false );
