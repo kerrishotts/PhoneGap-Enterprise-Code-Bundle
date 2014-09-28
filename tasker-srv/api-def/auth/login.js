@@ -31,63 +31,48 @@
 var Session = require( "../../models/session" ),
   Errors = require( "../../errors" ),
   DBUtils = require( "../../db-utils" ),
+  apiUtils = require( "../../api-utils" ),
+  security = require( "../security" ),
 
   loginAction = {
-    "title": "Authenticate User",
-    "action": "login",
+    "title":       "Authenticate User",
+    "action":      "login",
     "description": "Authenticates a user and returns session information if user was authenticated. " +
-      "Session ID, Salt, User ID, and Partial Token is returned within the `content` " +
-      "object. Should authentication fail, 403 Forbidden is returned.",
-    "verb": "post",
-    "href": "/auth",
-    "accepts": [ "application/hal+json", "application/json", "text/json" ],
-    "sends": [ "application/hal+json", "application/json", "text/json" ],
-    "requires": [ "get-token" ],
+                   "Session ID, Salt, User ID, and Partial Token is returned within the `content` " +
+                   "object. Should authentication fail, 403 Forbidden is returned.",
+    "verb":        "post",
+    "href":        "/auth",
+    "base-href":   "/auth",
+    "accepts":     [ "application/hal+json", "application/json", "text/json" ],
+    "sends":       [ "application/hal+json", "application/json", "text/json" ],
+    "requires":    [ "get-token" ],
     "attachments": {
-      "headers": [ {
-        name: "csrf-token",
-        key: "x-csrf-token",
-        value: "{csrf-token}",
-        templated: true
-      } ]
+      "headers": [
+        { name: "csrf-token", key: "x-csrf-token", value: "{csrf-token}", templated: true }
+      ]
     },
-    "store": {
-      "body": [ {
-        name: "session-id",
-        key: "sessionId"
-      }, {
-        name: "hmac-token",
-        key: "hmacToken"
-      }, {
-        name: "user-id",
-        key: "userId"
-      }, {
-        name: "next-token",
-        key: "nextToken"
-      } ]
+    "store":       {
+      "body": [
+        { name: "session-id", key: "sessionId" },
+        { name: "hmac-token", key: "hmacToken" },
+        { name: "user-id", key: "userId" },
+        { name: "next-token", key: "nextToken" }
+      ]
     },
-    "template": {
-      "user-id": {
-        "title": "User Name",
-        "key": "userId",
-        "type": "string",
-        "required": true,
-        "maxLength": 32
+    "template":    {
+      "user-id":            {
+        "title": "User Name", "key": "userId", "type": "string", "required": true, "maxLength": 32
       },
       "candidate-password": {
-        "title": "Password",
-        "key": "candidatePassword",
-        "type": "string",
-        "required": true,
-        "maxLength": 255
+        "title": "Password", "key": "candidatePassword", "type": "string", "required": true, "maxLength": 255
       }
     },
-    "handler": function( req, res, next ) {
+    "handler":     function ( req, res, next ) {
       var session = new Session( new DBUtils( req.app.get( "client-pool" ) ) ),
-        // username and password are contained in res
+      // username and password are contained in res
         username = req.body.userId,
         password = req.body.candidatePassword;
-      session.createSession( username, password, function( err, results ) {
+      session.createSession( username, password, function ( err, results ) {
         if ( err ) {
           return next( err );
         }
@@ -98,15 +83,16 @@ var Session = require( "../../models/session" ),
         var o = {
           sessionId: results.sessionId,
           hmacToken: results.hmacToken,
-          userId: results.userId,
+          userId:    results.userId,
           nextToken: results.nextToken,
-          _links: {},
+          _links:    {},
           _embedded: {}
         };
-        o._links.self = JSON.parse( JSON.stringify( loginAction ) );
-        [ require( "../task/getTask" ) ].forEach( function( apiAction ) {
-          o._links[ apiAction.action ] = JSON.parse( JSON.stringify( apiAction ) );
-        } );
+        apiUtils.generateHypermediaForAction( loginAction, o._links, security, "self" );
+        [ require( "../task/getTaskList" ), require( "../task/getTask" ),
+          require( "../auth/logout" ) ].forEach( function ( apiAction ) {
+                                                   apiUtils.generateHypermediaForAction( apiAction, o._links, security );
+                                                 } );
 
         res.json( 200, o );
       } );

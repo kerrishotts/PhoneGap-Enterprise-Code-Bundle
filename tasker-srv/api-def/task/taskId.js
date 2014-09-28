@@ -30,29 +30,30 @@
 //
 var DBUtils = require( "../../db-utils" ),
   Errors = require( "../../errors" ),
+  Task = require( "../../models/task" ),
   winston = require( "winston" ),
 
-  // obtain the task information
+// obtain the task information
   param = {
-    "name": "taskId",
-    "securedBy": "tasker-auth",
-    "handler": function( req, res, next, taskId ) {
+    "name":       "taskId",
+    "secured-by": "tasker-auth",
+    "handler":    function ( req, res, next, taskId ) {
       if ( !req.user ) {
         return next( Errors.HTTP_Forbidden() );
       }
 
       var dbUtil = new DBUtils( req.app.get( "client-pool" ) );
       dbUtil.query( "SELECT * FROM table(tasker.task_mgmt.get_task(:1,:2))", [ taskId, req.user.userId ],
-        function( err, results ) {
-          if ( err ) {
-            return next( new Error( err ) );
-          }
-          if ( results.length === 0 ) {
-            return next( Errors.HTTP_NotFound() );
-          }
-          req.task = results[ 0 ];
-          return next();
-        } );
+                    function ( err, results ) {
+                      if ( err ) {
+                        return next( new Error( err ) );
+                      }
+                      if ( results.length === 0 ) {
+                        return next( Errors.HTTP_NotFound() );
+                      }
+                      req.task = new Task( results[ 0 ] );
+                      return next();
+                    } );
     }
   };
 

@@ -25,29 +25,34 @@
  *
  ******************************************************************************/
 
-var heartbeatAction = {
-    "title": "Heartbeat",
-    "action": "heartbeat",
-    "verb": "get",
+var apiUtils = require( "../../api-utils" ),
+  security = require( "../security" ),
+  heartbeatAction = {
+    "title":       "Heartbeat",
+    "action":      "heartbeat",
+    "verb":        "get",
     "description": "Returns 200 OK",
-    "href": "/heartbeat",
-    "accepts": [ "application/hal+json", "application/json", "text/json" ],
-    "sends": [ "application/hal+json", "application/json", "text/json" ],
-    "handler": function( req, res, next ) {
+    "href":        "/heartbeat",
+    "base-href":   "/heartbeat",
+    "accepts":     [ "application/hal+json", "application/json", "text/json" ],
+    "sends":       [ "application/hal+json", "application/json", "text/json" ],
+    "handler":     function ( req, res, next ) {
       var o = {
-        _message: "OK",
-        _links: {},
+        _message:  "OK",
+        _links:    {},
         _embedded: {}
       };
-      o._links.self = JSON.parse( JSON.stringify( heartbeatAction ) );
+      apiUtils.generateHypermediaForAction( heartbeatAction, o._links, security, "self" );
       res.json( 200, o );
     }
   },
 
-  // this route doesn't do anything other than spit back OK
-  routes = [ {
-    "route": "/heartbeat",
-    "actions": [ heartbeatAction ]
-  } ];
+// this route doesn't do anything other than spit back OK
+  routes = [
+    {
+      "route":   "/heartbeat",
+      "actions": [ heartbeatAction ]
+    }
+  ];
 
 module.exports = routes;
