@@ -30,16 +30,36 @@
  * this is only usable in lists and the like
  */
 function mergeAndClone() {
-  var o = {},
+  var t = {},
     args = Array.prototype.slice.call( arguments, 0 );
-  args.forEach( function ( arr ) {
-    for ( var prop in arr ) {
-      if ( arr.hasOwnProperty( prop ) ) {
-        o[ prop ] = arr[ prop ];
+
+  args.forEach( function ( s ) {
+    Object.keys( s ).forEach( function ( prop ) {
+      var e = s[prop];
+      if ( typeof e === "object" && e instanceof Array ) {
+        if ( typeof t[prop] === "object" && t[prop] instanceof Array ) {
+          t[prop] = t[prop].concat( e );
+        } else if ( typeof t[prop] !== "object" || !(t[prop] instanceof Array) ) {
+          t[prop] = e;
+        }
+      } else if ( typeof e === "object" && typeof t[prop] === "object" ) {
+        t[prop] = mergeAndClone( t[prop], e );
+      } else {
+        t[prop] = e;
       }
-    }
+    } )
   } );
-  return o;
+  return t;
+  /*  var o = {},
+   args = Array.prototype.slice.call( arguments, 0 );
+   args.forEach( function ( arr ) {
+   for ( var prop in arr ) {
+   if ( arr.hasOwnProperty( prop ) ) {
+   o[ prop ] = arr[ prop ];
+   }
+   }
+   } );
+   return o;*/
 }
 
 function mergeIntoUsingMap( source, defaults, map ) {
