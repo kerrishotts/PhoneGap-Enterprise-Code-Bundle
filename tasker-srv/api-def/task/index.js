@@ -25,13 +25,20 @@
  *
  ******************************************************************************/
 
-var routes = [ {
-  "route": "/tasks",
-  "actions": [ require( "./getTaskList" ) ]
-}, {
-  "route": "/task/:taskId",
-  "params": [ require( "./taskId" ) ],
-  "actions": [ require( "./getTask" ) ]
-} ];
+var routes = [
+  {
+    "route":   "/tasks",
+    "actions": [ require( "./getTaskList" ) ]
+  },
+  {
+    "route":   "/task",
+    "actions": [ require( "./createTask" ) ]
+  },
+  {
+    "route":   "/task/:taskId",
+    "params":  [ require( "./taskId" ) ],
+    "actions": [ require( "./getTask" ) ]
+  }
+];
 
 module.exports = routes;
