@@ -1,8 +1,70 @@
 body {
   padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font:    14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 a {
   color: #00B7FF;
+}
+
+.code {
+  /*font-family: "Source Code Pro", Menlo, Consolas, Monaco, monospace;*/
+  font-family: "HelveticaNeue", Helvetica, Arial, sans-serif
+}
+
+.object, .array {
+  background-color: rgba(0, 0, 0, 0.05);
+  display:          inline-block;
+  vertical-align:   top;
+  padding:          5px 5px;
+  margin:           5px 5px;
+  border:           1px solid rgba(0, 0, 0, 0.05);
+  border-radius:    5px;
+  text-shadow:      0 0 10px white;
+}
+
+.object {
+  background-color: rgba(64, 128, 255, 0.05);
+}
+
+.array {
+  background-color: rgba(128, 255, 64, 0.05);
+}
+
+.object br:first-child,
+.array br:first-child {
+  display: none;
+}
+
+pre {
+  outline: 1px solid #CCC;
+  padding: 5px;
+  margin:  5px;
+}
+
+.string {
+  color: #008000;
+}
+
+.number {
+  color: #FF8000;
+}
+
+.boolean {
+  color: #000080;
+}
+
+.null {
+  color: #800080;
+}
+
+.key {
+  color: #800000;
+}
+
+.key {
+  font-weight: bold;
+  min-width:10em;
+  display: inline-block;
+  text-align: right;
 }
