@@ -49,25 +49,26 @@ var fs = require( "fs" ),
   DBUtils = require( "./db-utils" ),
   Session = require( "./models/session" ),
   Errors = require( "./errors" ),
-  //
-  // routes are defined by our API definition
-  //
+  resUtils = require( "./res-utils" ),
+//
+// routes are defined by our API definition
+//
   apiDef = require( "./api-def" ),
-  securityDef = require ( "./api-def/security" ),
+  securityDef = require( "./api-def/security" ),
   apiUtils = require( "./api-utils" ),
-  // create new Express app and link the configuration
+// create new Express app and link the configuration
   app = express(),
   config = require( "./config/config" ),
-  // are in a dev mode or production?
-  // export NODE_ENV=development (or production)
+// are in a dev mode or production?
+// export NODE_ENV=development (or production)
   dev = config.env === "development";
 // log all access; if development to stdout, else to a `logs/server.log`
 if ( dev ) {
   app.use( logger( "dev" ) );
 } else {
   app.use( logger( {
-    stream: fs.createWriteStream( config.get( "morgan:target" ) )
-  } ) );
+                     stream: fs.createWriteStream( config.get( "morgan:target" ) )
+                   } ) );
 }
 // set up Winston's transport for logging, if available (otherwise we are on the console only)
 var winstonOptions = config.get( "winston" );
@@ -80,16 +81,16 @@ app.disable( "x-powered-by" ); // Showing what powers our service just makes the
 // security enhancements via helmet
 // Only trust content from self and our application server
 /*
-app.use( helmet.csp( {
-  defaultSrc: [ "'self'", "pge-as.acmecorp.com" ],
-  safari5: false // safari5 has buggy behavior
-} ) );*/
+ app.use( helmet.csp( {
+ defaultSrc: [ "'self'", "pge-as.acmecorp.com" ],
+ safari5: false // safari5 has buggy behavior
+ } ) );*/
 app.use( helmet.xframe() ); // no framing our content!
 app.use( helmet.xssFilter() ); // old IE won't get this, since some implementations are buggy
 app.use( helmet.hsts( {
-  maxAge: 15552000,
-  includeSubDomains: true
-} ) ); // force SSL for six months
+                        maxAge:            15552000,
+                        includeSubDomains: true
+                      } ) ); // force SSL for six months
 app.use( helmet.ienoopen() ); // keep IE from executing downloads
 app.use( helmet.nosniff() ); // keep IE from sniffing mime types
 app.use( helmet.nocache() ); // no caching
@@ -112,15 +113,15 @@ app.use( cookieParser() ); // we need cookies for CSRF on the browser
 // even when no change. saveUninitialized ensures that a session is saved
 // when it is new (even if it hasn't been modified).
 app.use( session( {
-  secret: "a(3hvs23fhOHvi3hwouhS_vh24fuhefoh89Q#",
-  key: "sessionId",
-  cookie: {
-    httpOnly: true,
-    secure: true
-  },
-  resave: true,
-  saveUninitialized: true
-} ) );
+                    secret:            "a(3hvs23fhOHvi3hwouhS_vh24fuhefoh89Q#",
+                    key:               "sessionId",
+                    cookie:            {
+                      httpOnly: true,
+                      secure:   true
+                    },
+                    resave:            true,
+                    saveUninitialized: true
+                  } ) );
 // cors setup
 //
 // We have a corsDelegate in case we ever need to be more choosy about
@@ -128,9 +129,9 @@ app.use( session( {
 // indicate that the origin returned should be the requesting origin
 // (can't use * if we require credentials) and that the browser should
 // send credentials (cookies).
-var corsDelegate = function( req, cb ) {
+var corsDelegate = function ( req, cb ) {
   var corsOptions = {
-    origin: true,
+    origin:      true,
     credentials: true
   };
   cb( null, corsOptions );
@@ -145,7 +146,7 @@ app.options( "*", cors( corsDelegate ) );
 //
 // depends on having a session initialized above
 app.use( csrf() );
-app.use( function( req, res, next ) {
+app.use( function ( req, res, next ) {
   res.locals.csrftoken = req.csrfToken();
   next();
 } );
@@ -153,32 +154,33 @@ app.use( function( req, res, next ) {
 app.use( express.static( path.join( __dirname, "public" ) ) );
 app.use( helmet.csp( {
                        defaultSrc: [ "'self'", "pge-as.acmecorp.com" ],
-                       safari5: false // safari5 has buggy behavior
+                       safari5:    false // safari5 has buggy behavior
                      } ) );
 //
 // set up our database pool and connections
 //
 var clientPool = pool.Pool( {
-  name: "oracle",
-  create: function createOracleConnection( cb ) {
-    return new oracle.connect( config.get( "oracle" ),
-      function doOracleCallback( err, client ) {
-        cb( err, client );
-      } );
-  },
-  destroy: function destroyOracleConnection( client ) {
-    // try...catch in case the client can't be properly closed (as in an
-    // unexpected termination of the connection) Without it, the server dies.
-    try {
-      client.close();
-    } catch ( err ) {
-      // if we can't close... oh well
-    }
-  },
-  max: 5,
-  min: 1,
-  idleTimeoutMillis: 30000 // 30 seconds
-} );
+                              name:              "oracle",
+                              create:            function createOracleConnection( cb ) {
+                                return new oracle.connect( config.get( "oracle" ),
+                                                           function doOracleCallback( err, client ) {
+                                                             cb( err, client );
+                                                           } );
+                              },
+                              destroy:           function destroyOracleConnection( client ) {
+                                // try...catch in case the client can't be properly closed (as in an
+                                // unexpected termination of the connection) Without it, the server dies.
+                                try {
+                                  client.close();
+                                }
+                                catch ( err ) {
+                                  // if we can't close... oh well
+                                }
+                              },
+                              max:               5,
+                              min:               1,
+                              idleTimeoutMillis: 30000 // 30 seconds
+                            } );
 // need to ensure that the pool can drain or shutdowns are slow or may
 // never occur
 process.on( "exit", function drainAllConnections() {
@@ -191,24 +193,20 @@ app.set( "client-pool", clientPool );
 //
 // passport security
 //
-// we're using the ReqStrategy, which is similar to the hash or other
+// we're using the ReqStrategy("req"), which is similar to the hash or other
 // local strategies. In this case, we expect a token to be provided
 // in the header (x-auth-token). The token is compared against the
 // database, and if it matches, the session is serialized and req.user
 // contains the session information (including nextToken)
 //
-// The token is of the form SESSION_ID.NEXT_TOKEN_HASHED_WITH_SALT
+// The token is of the form SESSION_ID.NEXT_TOKEN
 //
-passport.use( new ReqStrategy( function( req, done ) {
+passport.use( new ReqStrategy( function ( req, done ) {
   var clientAuthToken = req.headers[ "x-auth-token" ],
     session = new Session( new DBUtils( clientPool ) );
-  session.findSession( clientAuthToken, function( err, results ) {
-    if ( err ) {
-      return done( err );
-    }
-    if ( !results ) {
-      return done( null, false );
-    }
+  session.findSession( clientAuthToken, function ( err, results ) {
+    if ( err ) { return done( err ); }
+    if ( !results ) { return done( null, false ); }
     done( null, results );
   } );
 } ) );
@@ -243,27 +241,23 @@ app.use( function handle404( req, res, next ) {
   err.status = 404;
   next( err );
 } );
-/// error handlers
-// development error handler
-// will print stacktrace
-if ( dev ) {
-  app.use( function handle500Dev( err, req, res, next ) {
-    winston.error( "message: ", err.message, err.stack );
-    res.status( err.status || 500 );
-    res.render( "error", {
-      message: err.message,
-      error: err
-    } );
-  } );
-}
-// production error handler
-// no stacktraces leaked to user
-app.use( function handle500Prod( err, req, res, next ) {
-  winston.error( "message: ", err.message, err.stack );
-  res.status( err.status || 500 );
-  res.render( "error", {
-    message: err.message,
-    error: {}
-  } );
+
+// error handler
+// for development, we want to be verbose, but for production, we want to be as
+// minimal in the response as possible
+app.use( function handleError( err, req, res, next ) {
+  // Log the error using winston
+  winston.error( JSON.stringify( {"message": err.message, "error": err, "stack": err.stack} ) );
+
+  // if the incoming error specifies a status, use that. If not, use 500
+  var status = err.status || 500;
+
+  // if we're not in dev mode, kill the stack
+  if ( !dev ) { err.stack = ""; }
+
+  // send the error
+  resUtils.error (res, status, err );
+
 } );
+
 module.exports = app;
