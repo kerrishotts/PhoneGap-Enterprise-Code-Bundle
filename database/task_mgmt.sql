@@ -59,7 +59,7 @@ TYPE task_comment_set IS TABLE OF tasker.task_comments%ROWTYPE;
   FUNCTION create_task(
       p_title       VARCHAR2,
       p_description VARCHAR2,
-      p_owned_by    NUMBER,
+      p_owned_by    NUMBER DEFAULT NULL,
       p_as_user     VARCHAR2 DEFAULT NULL)
     RETURN INTEGER;
   PROCEDURE update_task_percentage(
@@ -70,6 +70,10 @@ TYPE task_comment_set IS TABLE OF tasker.task_comments%ROWTYPE;
       p_id      NUMBER,
       p_status  VARCHAR2,
       p_as_user VARCHAR2 DEFAULT NULL);
+PROCEDURE assign_task(
+    p_id      NUMBER,
+    p_assignee  NUMBER,
+    p_as_user VARCHAR2 DEFAULT NULL );
   FUNCTION get_task(
       p_task_id NUMBER,
       p_as_user VARCHAR2 DEFAULT NULL)
@@ -207,16 +211,18 @@ END CAN_UPD_STATUS_ON_ASGND_TASK;
 FUNCTION create_task(
     p_title       VARCHAR2,
     p_description VARCHAR2,
-    p_owned_by    NUMBER,
+    p_owned_by    NUMBER DEFAULT NULL,
     p_as_user     VARCHAR2 DEFAULT NULL)
   RETURN INTEGER
 AS
   PRAGMA AUTONOMOUS_TRANSACTION;
   user_person_id INTEGER;
+  owner_id       INTEGER;
   return_id      INTEGER;
 BEGIN
   user_person_id     := tasker.utils.get_person_id_from_user_id ( p_as_user );
-  IF (user_person_id != p_owned_by) THEN
+  owner_id := nvl(p_owned_by, user_person_id);
+  IF (user_person_id != owner_id) THEN
     IF NOT tasker.security.can_user ( p_as_user, CAN_CREATE_ANY_TASK() ) THEN
       tasker.utils.E_ACCESS_DENIED();
     END IF;
@@ -227,7 +233,7 @@ BEGIN
         id, title, description, pct_complete, status, owner,
         assigned_to, change_date, change_user
       ) VALUES (
-        tasker.task_seq.NEXTVAL, p_title, p_description, 0, 'I', p_owned_by,
+        tasker.task_seq.NEXTVAL, p_title, p_description, 0, 'I', owner_id,
         NULL, sysdate, p_as_user
       )
     RETURNING id INTO return_id;
@@ -328,6 +334,52 @@ BEGIN
     tasker.utils.E_ACCESS_DENIED();
   END IF;
 END update_task_status;
+/**
+ * assign_task
+ *
+ * Assign a task to a person
+ */
+PROCEDURE assign_task(
+    p_id      NUMBER,
+    p_assignee  NUMBER,
+    p_as_user VARCHAR2 DEFAULT NULL )
+AS
+  user_person_id INTEGER;
+  can_assign_to_assignee BOOLEAN := false;
+  task tasker.task%ROWTYPE;
+BEGIN
+  user_person_id := tasker.utils.get_person_id_from_user_id ( p_as_user );
+  SELECT * INTO task FROM tasker.task WHERE id = p_id;
+  IF task.owner         != user_person_id THEN
+    IF NOT tasker.security.can_user ( p_as_user, CAN_REASSIGN_ANY_TASK)  THEN
+      tasker.utils.E_ACCESS_DENIED();
+    END IF;
+  END IF;
+  IF tasker.security.can_user ( p_as_user, CAN_MODIFY_OWN_TASK() )
+     OR tasker.security.can_user ( p_as_user, CAN_MODIFY_ANY_TASK() )  THEN
+
+    IF NOT tasker.security.can_user ( p_as_user, CAN_ASSIGN_ANY_TASK_TO_ANYONE() ) THEN
+      -- get all the people to whom we can assign the task
+      FOR person IN ( SELECT * FROM table(PERSON_MGMT.GET_PEOPLE_ADMINISTERED_BY ( user_person_id )) ) LOOP
+        IF person.id = p_assignee THEN
+          can_assign_to_assignee := true;
+        END IF;
+      END LOOP;
+      IF NOT can_assign_to_assignee THEN
+       tasker.utils.E_ACCESS_DENIED();
+      END IF;
+    END IF;
+
+    UPDATE tasker.task
+    SET assigned_to    = p_assignee,
+           change_date = sysdate,
+           change_user = p_as_user
+         WHERE id      = p_id;
+    COMMIT;
+  ELSE
+    tasker.utils.E_ACCESS_DENIED();
+  END IF;
+END assign_task;
 /**
 * get_task
 *
