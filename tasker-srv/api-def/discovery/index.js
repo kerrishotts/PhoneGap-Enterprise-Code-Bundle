@@ -26,10 +26,14 @@
  ******************************************************************************/
 var apiUtils = require( "../../api-utils" ),
   security = require( "../security" ),
+  resUtils = require( "../../res-utils" ),
   discoverAction = {
     "title":       "API Discovery",
     "action":      "discover_api",
     "description": "Returns all the valid API actions",
+    "returns":     {
+      200: "OK"
+    },
     "verb":        "get",
     "href":        "/",
     "base-href":   "/",
@@ -37,27 +41,32 @@ var apiUtils = require( "../../api-utils" ),
     "sends":       [ "application/hal+json", "application/json", "text/json" ],
     "handler":     function ( req, res, next ) {
 
+      // generate some basic info for the client
       var o = {
         "version": "Tasker API v0.1",
-        "toPOST1": "In order to POST, you'll need to get a token via get-token. You'll also",
-        "toPOST2": "need to support cookies in order to support CSRF tokens.",
-        "toAUTH1": "In order to authenticate, first get a token from get-token, then",
-        "toAUTH2": "call login with the user id and candidate password. If invalid 403",
-        "toAUTH3": "is returned, otherwise a session is returned. Use nextToken and compute",
-        "toAUTH4": "based on the session salt in order to send requests that are secured.",
-        "info1":   "This API is a sample API for the PhoneGap Enterprise book published",
-        "info2":   "by Packt Publishing and written by Kerri Shotts. For more information",
-        "info3":   "please visit the website for the book at ",
-        "info4":   "http://www.photokandy.com/books/phonegap-enterprise",
+        "toPOST":  [ "In order to POST, you'll need to get a token via get-token. You'll also",
+                     "need to support cookies in order to support CSRF tokens." ],
+        "toAUTH":  [ "In order to authenticate, first get a token from get-token, then",
+                     "call login with the user id and candidate password. If invalid 401 Unauthorized",
+                     "is returned, otherwise a session is returned. Use nextToken and send",
+                     "that token on the next request. If nextToken is null, preserve the prior",
+                     "token."],
+        "info":    [ "This API is a sample API for the PhoneGap Enterprise book published",
+                     "by Packt Publishing and written by Kerri Shotts. For more information",
+                     "please visit the website for the book at ",
+                     "http://www.photokandy.com/books/phonegap-enterprise"],
         _links:    {},
         _embedded: {}
       };
 
+      // merge our security info in
       o = apiUtils.mergeAndClone( o, security );
+
+      // and send along the entire API
       o._links = apiUtils.mergeAndClone( { "self": JSON.parse( JSON.stringify( discoverAction ) ) },
                                          req.app.get( "x-api-root" ) );
 
-      res.json( 200, o );
+      resUtils.json( res, 200, o );
     }
   },
 

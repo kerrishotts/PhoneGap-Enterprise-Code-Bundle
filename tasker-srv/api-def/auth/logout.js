@@ -31,48 +31,61 @@
 var Errors = require( "../../errors" ),
   DBUtils = require( "../../db-utils" ),
   Session = require( "../../models/session" ),
-  apiUtils = require ( "../../api-utils" ),
-  security = require ( "../security" ),
+  apiUtils = require( "../../api-utils" ),
+  security = require( "../security" ),
+  resUtils = require( "../../res-utils" ),
 
   logoutAction = {
-    "title":      "Log Out",
-    "action":     "logout",
-    "description": "Logs out a user and disables their associated token. Returns 403 is the user is " +
-                   "not authenticated.",
-    "verb":       "delete",
-    "href":       "/auth",
-    "base-href":  "/auth",
-    "accepts":    [ "application/hal+json", "application/json", "text/json" ],
-    "sends":      [ "application/hal+json", "application/json", "text/json" ],
-    "requires":   [ "get-token" ],
-    "template":   null,
-    "secured-by": "tasker-auth",
-    "hmac":       "tasker-256",
-    "handler":    function ( req, res, next ) {
+    "title":       "Log Out",
+    "action":      "logout",
+    "description": ["Logs out a user and disables their associated token. Returns 401 is the user is " ,
+                    "not authenticated, or 400 if the hmac doesn't match."],
+    "example":     {
+      "body": {
+        "message": "User logged out"
+      }
+    },
+    "returns":     {
+      200: "OK; User logged out. Any token received at this point is invalid.",
+      400: "Bad request -- check your HMAC.",
+      401: "User not authenticated, can't log out.",
+      500: "Internal Server Error."
+    },
+    "verb":        "delete",
+    "href":        "/auth",
+    "base-href":   "/auth",
+    "accepts":     [ "application/hal+json", "application/json", "text/json" ],
+    "sends":       [ "application/hal+json", "application/json", "text/json" ],
+    "requires":    [ "get-token" ],
+    "template":    null,
+    "csrf":        "tasker-csrf",
+    "secured-by":  "tasker-auth",
+    "hmac":        "tasker-256",
+    "handler":     function ( req, res, next ) {
 
+      // create a new session instance
       var session = new Session( new DBUtils( req.app.get( "client-pool" ) ) );
 
-      if ( !req.user ) {
-        return next( Errors.HTTP_Forbidden() );
-      }
-      if ( !security["hmac-defs"]["tasker-256"].handler(req) ) {
-        return next ( Errors.HTTP_Unauthorized() );
-      }
+      // if req.user isn't filled in, we don't have a session. Tell the client
+      if ( !req.user ) { return next( Errors.HTTP_Unauthorized() ); }
 
+      // if the hmac fails, tell the client that we received a bad request
+      if ( !security["hmac-defs"]["tasker-256"].handler( req ) ) { return next( Errors.HTTP_Bad_Request( "Invalid or missing HMAC." ) ); }
+
+      // end the user's session
       session.endSession( req.user.sessionId, function ( err, results ) {
-        if ( err ) {
-          return next( err );
-        }
+        if ( err ) { return next( err ); }
 
+        // inform the client that the user has been logged out
         var o = {
-          message:   "User logged out.",
-          _links:    {},
-          _embedded: {}
+          message: "User logged out.", _links: {}, _embedded: {}
         };
+
+        // generate hypermedia
         apiUtils.generateHypermediaForAction( logoutAction, o._links, security, "self" );
-        o._links.self = JSON.parse( JSON.stringify( logoutAction ) );
         o._links = apiUtils.mergeAndClone( o._links, req.app.get( "x-api-root" ) );
-        res.json( 200, o );
+
+        resUtils.json( res, 200, o );
       } );
     }
   };

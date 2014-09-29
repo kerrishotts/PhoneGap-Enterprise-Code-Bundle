@@ -35,26 +35,41 @@ var DBUtils = require( "../../db-utils" ),
 
 // obtain the task information
   param = {
-    "name":       "taskId",
-    "secured-by": "tasker-auth",
-    "handler":    function ( req, res, next, taskId ) {
-      if ( !req.user ) {
-        return next( Errors.HTTP_Forbidden() );
-      }
+    "name":        "taskId",
+    "type":        "number",
+    "description": ["Obtains the task identified by `taskId`. If the user is not authenticated, 401 Unauthorized is returned. ",
+                    "If the task can't be found (or the user doesn't have access), 404 Not Found is returned."],
+    "returns":     {
+      401: "Unauthorized; user not logged in.",
+      404: "Task not found.",
+      500: "Internal Server Error"
+    },
+    "secured-by":  "tasker-auth",
+    "handler":     function ( req, res, next, taskId ) {
+      "use strict";
 
+      // if we don't have a req.user, the user isn't authenticated. Bail!
+      if ( !req.user ) { return next( Errors.HTTP_Unauthorized() ); }
+
+      // get a database connection
       var dbUtil = new DBUtils( req.app.get( "client-pool" ) );
+
+      // check the type of taskId -- we know it's there, but the type might be funny... it must reduce to a number
+      // we know the value will exist, just not the type
+      taskId = parseInt( taskId, 10 );
+      if ( isNaN( taskId ) ) { return next( Errors.HTTP_Bad_Request( "Type mismatch" ) ); }
+
       dbUtil.query( "SELECT * FROM table(tasker.task_mgmt.get_task(:1,:2))", [ taskId, req.user.userId ],
                     function ( err, results ) {
-                      if ( err ) {
-                        return next( new Error( err ) );
-                      }
-                      if ( results.length === 0 ) {
-                        return next( Errors.HTTP_NotFound() );
-                      }
+                      if ( err ) { return next( new Error( err ) ); }
+
+                      // if no results, return 404 not found
+                      if ( results.length === 0 ) { return next( Errors.HTTP_NotFound() ); }
+
+                      // create a new task with the database results (will be in first row)
                       req.task = new Task( results[ 0 ] );
                       return next();
                     } );
     }
   };
-
 module.exports = param;

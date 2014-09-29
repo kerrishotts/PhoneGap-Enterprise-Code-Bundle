@@ -33,24 +33,35 @@ var Session = require( "../../models/session" ),
   DBUtils = require( "../../db-utils" ),
   apiUtils = require( "../../api-utils" ),
   security = require( "../security" ),
+  resUtils = require( "../../res-utils" ),
 
   loginAction = {
     "title":       "Authenticate User",
     "action":      "login",
-    "description": "Authenticates a user and returns session information if user was authenticated. " +
-                   "Session ID, Salt, User ID, and Partial Token is returned within the `content` " +
-                   "object. Should authentication fail, 403 Forbidden is returned.",
+    "description": ["Authenticates a user and returns session information if user was authenticated." ,
+                    "Session ID, Hmac Secret, User ID, and Token is returned within the response." ,
+                    "Should authentication fail, 401 Unauthorized is returned."],
+    "example":     {
+      "body": {
+        "sessionId": "92013",
+        "hmacToken": "AABBCCDDEEFF11223344556677889900",
+        "userId":    "BMSITH",
+        "nextToken": "0099887766554433221100AABBCCDDEE"
+      }
+    },
+    "returns":     {
+      200: "User authenticated; see information in body.",
+      400: "Missing either username or password.",
+      401: "Incorrect username or password.",
+      500: "Internal Server Error; try again later."
+    },
     "verb":        "post",
     "href":        "/auth",
     "base-href":   "/auth",
     "accepts":     [ "application/hal+json", "application/json", "text/json" ],
     "sends":       [ "application/hal+json", "application/json", "text/json" ],
     "requires":    [ "get-token" ],
-    "attachments": {
-      "headers": [
-        { name: "csrf-token", key: "x-csrf-token", value: "{csrf-token}", templated: true }
-      ]
-    },
+    "csrf":        "tasker-csrf",
     "store":       {
       "body": [
         { name: "session-id", key: "sessionId" },
@@ -61,40 +72,55 @@ var Session = require( "../../models/session" ),
     },
     "template":    {
       "user-id":            {
-        "title": "User Name", "key": "userId", "type": "string", "required": true, "maxLength": 32
+        "title": "User Name", "key": "userId", "type": "string", "required": true, "maxLength": 32, "minLength": 1
       },
       "candidate-password": {
-        "title": "Password", "key": "candidatePassword", "type": "string", "required": true, "maxLength": 255
+        "title": "Password", "key": "candidatePassword", "type": "string", "required": true, "maxLength": 255, "minLength": 1
       }
     },
     "handler":     function ( req, res, next ) {
       var session = new Session( new DBUtils( req.app.get( "client-pool" ) ) ),
-      // username and password are contained in res
-        username = req.body.userId,
-        password = req.body.candidatePassword;
+        username,
+        password;
+
+      // validate! Check for require parameters and min/max lengths
+      if ( typeof req.body.userId !== "string" || typeof req.body.candidatePassword !== "string" ) {
+        return next( Errors.HTTP_Bad_Request( "Missing or invalid username or password." ) );
+      }
+      if ( req.body.userId.length < loginAction.template["user-id"].minLength ||
+           req.body.userId.length > loginAction.template["user-id"].maxLength ||
+           req.body.candidatePassword.length < loginAction.template["candidate-password"].minLength ||
+           req.body.candidatePassword.length > loginAction.template["candidate-password"].maxLength ) {
+        return next( Errors.HTTP_Bad_Request( "Field length out of bounds." ) );
+      }
+
+      // got here -- good; copy the values out
+      username = req.body.userId;
+      password = req.body.candidatePassword;
+
+      //  create a session with the username and password
       session.createSession( username, password, function ( err, results ) {
-        if ( err ) {
-          return next( err );
-        }
-        if ( !results ) {
-          return next( Errors.HTTP_Forbidden() );
-        }
 
+        if ( err ) { return next( err ); }
+
+        // no session? bad username or password
+        if ( !results ) { return next( Errors.HTTP_Unauthorized() ); }
+
+        // return the session information to the client
         var o = {
-          sessionId: results.sessionId,
-          hmacToken: results.hmacToken,
-          userId:    results.userId,
-          nextToken: results.nextToken,
-          _links:    {},
-          _embedded: {}
+          sessionId: results.sessionId, hmacToken: results.hmacToken,
+          userId:    results.userId, nextToken: results.nextToken,
+          _links:    {}, _embedded: {}
         };
-        apiUtils.generateHypermediaForAction( loginAction, o._links, security, "self" );
-        [ require( "../task/getTaskList" ), require( "../task/getTask" ),
-          require( "../auth/logout" ) ].forEach( function ( apiAction ) {
-                                                   apiUtils.generateHypermediaForAction( apiAction, o._links, security );
-                                                 } );
 
-        res.json( 200, o );
+        // generate hypermedia
+        apiUtils.generateHypermediaForAction( loginAction, o._links, security, "self" );
+        [ require( "../task/getTaskList" ), require( "../task/getTask" ), require( "../auth/logout" )
+        ].forEach( function ( apiAction ) {
+                     apiUtils.generateHypermediaForAction( apiAction, o._links, security );
+                   } );
+
+        resUtils.json( res, 200, o );
       } );
     }
   };

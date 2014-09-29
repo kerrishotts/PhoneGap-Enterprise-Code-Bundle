@@ -31,12 +31,34 @@
 var apiUtils = require( "../../api-utils" ),
   security = require( "../security" ),
   Errors = require( "../../errors" ),
-
+  resUtils = require( "../../res-utils" ),
 // get a specific task
   getTaskAction = {
     "title":       "Task",
     "action":      "get-task",
-    "description": "Return a task with a specific ID. Returns 403 if the user is not authorized.",
+    "description": [ "Return a task with a specific ID. Returns 403 Forbidden if the user doesn't have access",
+                     "to the resource. If no task is found, 404 Not Found is returned."],
+    "returns":     {
+      200: "OK",
+      401: "Unauthorized; user not logged in.",
+      403: "Authenticated, but user has no access to this resource.",
+      404: "Task not found.",
+      500: "Internal Server Error"
+    },
+    "example":     {
+      "body": {
+        "id":          21,
+        "title":       "A sample task",
+        "description": "Sample task description",
+        "ownedBy":     2,
+        "assignedTo":  3,
+        "pctComplete": 50,
+        "status":      "I",
+        "changeDate":  (new Date()),
+        "changeUser":  "BSMITH",
+        "nextToken":   "next-auth-token"
+      }
+    },
     "verb":        "get",
     "href":        "/task/{taskId}",
     "templated":   true,
@@ -47,26 +69,28 @@ var apiUtils = require( "../../api-utils" ),
     "hmac":        "tasker-256",
     "handler":     function ( req, res, next ) {
 
-      if ( !req.user ) {
-        return next( Errors.HTTP_Forbidden() );
-      }
+      // if we don't have a user, fail
+      if ( !req.user ) { return next( Errors.HTTP_Unauthorized() ); }
 
-      if ( !security["hmac-defs"]["tasker-256"].handler(req) ) {
-        return next ( Errors.HTTP_Unauthorized() );
-      }
+      // make sure hmac lines up
+      if ( !security["hmac-defs"]["tasker-256"].handler( req ) ) { return next( Errors.HTTP_Forbidden( "Missing or invalid HMAC" ) ); }
 
+      // Create response based on the task (this is found via getTaskId) and pass the next token
       var o = apiUtils.mergeAndClone( { _links: {}, _embedded: {} }, req.task, { nextToken: req.user.nextToken } );
 
+      // generate hypermedia, also updating the href and templated properties
       o._links.self = apiUtils.mergeAndClone(
         apiUtils.generateHypermediaForAction( getTaskAction, o._links, security, "self" ), {
           "href": "/task/" + req.task.ID,
           "templated": false
         } );
+
+      // TODO: send what we can do next..
       /*  [ require("../task/getTask") ].forEach ( function ( apiAction ) {
        o._links[ apiAction.action ] = JSON.parse ( JSON.stringify ( apiAction ) );
        } ); */
 
-      res.json( 200, o );
+      resUtils.json( res, 200, o );
     }
   };
 

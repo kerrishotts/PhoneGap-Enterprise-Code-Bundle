@@ -27,23 +27,34 @@
 
 var apiUtils = require( "../../api-utils" ),
   security = require( "../security" ),
+  resUtils = require( "../../res-utils" ),
   heartbeatAction = {
     "title":       "Heartbeat",
     "action":      "heartbeat",
     "verb":        "get",
-    "description": "Returns 200 OK",
+    "description": "Returns 200 OK -- any other response or lack thereof indicates that the service is not available.",
+    "example":     {
+      "body": {
+        "_message": "OK"
+      }
+    },
+    "returns":     {
+      200: "OK"
+    },
     "href":        "/heartbeat",
     "base-href":   "/heartbeat",
     "accepts":     [ "application/hal+json", "application/json", "text/json" ],
     "sends":       [ "application/hal+json", "application/json", "text/json" ],
     "handler":     function ( req, res, next ) {
+
+      // generate OK response
       var o = {
-        _message:  "OK",
-        _links:    {},
-        _embedded: {}
+        _message: "OK", _links: {}, _embedded: {}
       };
+
+      // and merge hypermedia in
       apiUtils.generateHypermediaForAction( heartbeatAction, o._links, security, "self" );
-      res.json( 200, o );
+      resUtils.json( res, 200, o );
     }
   },
 
