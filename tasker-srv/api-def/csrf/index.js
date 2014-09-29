@@ -27,21 +27,30 @@
 
 var apiUtils = require( "../../api-utils" ),
   security = require( "../security" ),
-  getTokenAction = {
-    "title":     "Get CSRF Token",
-    "action":    "get-token",
-    "description": "Returns a token suitable for use in a POST, PUT, or DELETE as part of the x-csrf-token" +
-                   "header. Response is in `token`.",
-    "verb":      "get",
-    "href":      "/getToken",
-    "base-href": "/getToken",
-    "accepts":   [ "application/hal+json", "application/json", "text/json" ],
-    "sends":     [ "application/hal+json", "application/json", "text/json" ],
-    "store":     { "body": [
+  resUtils = require( "../../res-utils" ),
+  getCSRFAction = {
+    "title":       "Get CSRF Token",
+    "action":      "get-csrf-token",
+    "description": ["Returns a token suitable for use in a POST, PUT, or DELETE as part of the `x-csrf-token` " ,
+                    "header. Response is in `token`."],
+    "example":     {
+      "body": {
+        "token": "csrf-token"
+      }
+    },
+    "returns":     {
+      200: "OK; use token for next mutable request."
+    },
+    "verb":        "get",
+    "href":        "/csrf",
+    "base-href":   "/csrf",
+    "accepts":     [ "application/hal+json", "application/json", "text/json" ],
+    "sends":       [ "application/hal+json", "application/json", "text/json" ],
+    "store":       { "body": [
       { "name": "csrf-token", "key": "token" }
     ]
     },
-    "handler":   function ( req, res, next ) {
+    "handler":     function ( req, res, next ) {
 
       var o = {
         token:     res.locals.csrftoken,
@@ -49,19 +58,19 @@ var apiUtils = require( "../../api-utils" ),
         _embedded: {}
       };
 
-      apiUtils.generateHypermediaForAction( getTokenAction, o._links, security, "self" );
+      apiUtils.generateHypermediaForAction( getCSRFAction, o._links, security, "self" );
       [ require( "../auth/login" ), require( "../auth/logout" ) ].forEach( function ( apiAction ) {
         apiUtils.generateHypermediaForAction( apiAction, o._links, security );
       } );
 
-      res.json( 200, o );
+      resUtils.json( res, 200, o );
     }
   };
 
 var routes = [
   {
-    "route":   "/getToken",
-    "actions": [ getTokenAction ]
+    "route":   "/csrf",
+    "actions": [ getCSRFAction ]
   }
 ];
 

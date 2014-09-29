@@ -26,7 +26,7 @@
  ******************************************************************************/
 /* globals require, module */
 // load in our api definitions and handlers
-var allActionGroups = [ require( "./discovery" ), require( "./token" ),
+var allActionGroups = [ require( "./discovery" ), require( "./csrf" ),
     require( "./auth" ), require( "./heartbeat" ),
     require( "./task" )
   ],

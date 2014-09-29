@@ -27,8 +27,19 @@
 var CryptoJS = require( "crypto-js" ),
   winston = require( "winston" ),
   security = {
+    "csrf-defs":       {
+      "tasker-csrf": {
+        "csrf-action": [ "get-csrf-token" ],
+        "attachments": {
+          "headers": [
+            { name: "csrf-token", key: "x-csrf-token", value: "{csrf-token}", templated: true }
+          ]
+        }
+      }
+    },
     "secured-by-defs": {
       "tasker-auth": {
+        "auth-action": [ "login" ],
         "attachments": {
           "headers": [
             {
