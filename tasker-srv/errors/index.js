@@ -29,24 +29,29 @@ var Errors = {};
 
 function makeError( message, code, overrideMessage ) {
   var theMessage = message;
-  if ( typeof optionalMessage !== "undefined" ) {
-    theMessage = overrideMessage;
-  }
+  if ( typeof overrideMessage !== "undefined" ) { theMessage = theMessage + " (" + overrideMessage + ")"; }
   var err = new Error( theMessage );
   err.status = code;
   return err;
 }
 
-Errors.HTTP_Unauthorized = function( message ) {
+Errors.HTTP_Bad_Request = function ( message ) {
+  return makeError( "Bad Request", 400, message );
+};
+
+Errors.HTTP_Unauthorized = function ( message ) {
   return makeError( "Unauthorized", 401, message );
 };
-Errors.HTTP_Forbidden = function( message ) {
+
+Errors.HTTP_Forbidden = function ( message ) {
   return makeError( "Forbidden", 403, message );
 };
-Errors.HTTP_NotFound = function( message ) {
+
+Errors.HTTP_NotFound = function ( message ) {
   return makeError( "Not Found", 404, message );
 };
-Errors.HTTP_Server_Error = function( message ) {
+
+Errors.HTTP_Server_Error = function ( message ) {
   return makeError( "Internal Server Error", 500, message );
 };
 
