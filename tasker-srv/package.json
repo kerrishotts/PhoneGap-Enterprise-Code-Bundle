@@ -31,7 +31,8 @@
     "cors": "~2.4.1",
     "nor-hal": "0.0.6",
     "socket.io": "~1.0.6",
-    "crypto-js": "~3.1.2-5"
+    "crypto-js": "~3.1.2-5",
+    "q": "~1.0.1"
   },
   "devDependencies": {
     "chai": "*",
