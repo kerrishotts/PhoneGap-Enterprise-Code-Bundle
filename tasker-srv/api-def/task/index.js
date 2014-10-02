@@ -37,8 +37,9 @@ var routes = [
   {
     "route":   "/task/:taskId",
     "params":  [ require( "./taskId" ) ],
-    "actions": [ require( "./getTask" ) ]
+    "actions": [ require( "./getTask" ),
+                 require( "./patchTask" ) ]
   }
-];
+].concat ( require ( "./comments" ) );
 
 module.exports = routes;
