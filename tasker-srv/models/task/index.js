@@ -38,7 +38,13 @@ var TASK_DESCRIPTION_CODE = {
     "C": "complete",
     "H": "onHold",
     "X": "deleted"
-  };
+  },
+  TASK_ENUM = [
+    { title: "In Progress", value: "I" },
+    { title: "On Hold", value: "H" },
+    { title: "Complete", value: "C" },
+    { title: "Deleted", value: "X" }
+  ];
 
 /**
  * Task - Returns a new task with the properties set to the specified values
@@ -82,5 +88,6 @@ Task.prototype.copy = function () {
 
 Task.DESCRIPTION_CODE = TASK_DESCRIPTION_CODE;
 Task.CODE_DESCRIPTION = TASK_CODE_DESCRIPTION;
+Task.ENUM = TASK_ENUM;
 
 module.exports = Task;
