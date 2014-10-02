@@ -36,11 +36,11 @@ var apiUtils = require( "../../api-utils" ),
   getTaskAction = require( "./getTask" ),
 
   createTaskAction = {
-    "title":      "Task",
-    "action":     "create-task",
+    "title":       "Create Task",
+    "action":      "create-task",
     "description": ["Creates a new task. Returns 401 Unauthorized if the user is not authorized, 403 if the user doesn't ",
-                   "have access, 400 Bad Request if title or description is missing, and 500 if an error occurs."],
-    "returns":    {
+                    "have access, 400 Bad Request if title or description is missing, and 500 if an error occurs."],
+    "returns":     {
       200: "OK",
       201: "Created.",
       400: "Bad request: make sure `title` and `description` are supplied.",
@@ -48,25 +48,26 @@ var apiUtils = require( "../../api-utils" ),
       403: "Authenticated, but user has no access to this resource.",
       500: "Internal Server Error"
     },
-    "example": {
-               "headers": [
-                 { "location": "/task/3" }
-               ],
-               "body": {
-                 "taskId": 3,
-                 "nextToken": "next-auth-token"
-               }
+    "example":     {
+      "headers": [
+        { "location":     "/task/3",
+          "x-next-token": "next-auth-token"
+        }
+      ],
+      "body":    {
+        "taskId": 3
+      }
     },
-    "verb":       "post",
-    "href":       "/task",
-    "templated":  true,
-    "base-href":  "/task",
-    "accepts":    [ "application/hal+json", "application/json", "text/json" ],
-    "sends":      [ "application/hal+json", "application/json", "text/json" ],
-    "secured-by": "tasker-auth",
-    "hmac":       "tasker-256",
-    "csrf":       "tasker-csrf",
-    "template":   {
+    "verb":        "post",
+    "href":        "/task",
+    "templated":   false,
+    "base-href":   "/task",
+    "accepts":     [ "application/hal+json", "application/json", "text/json" ],
+    "sends":       [ "application/hal+json", "application/json", "text/json" ],
+    "secured-by":  "tasker-auth",
+    "hmac":        "tasker-256",
+    "csrf":        "tasker-csrf",
+    "template":    {
       "task-title":       {
         "title": "Title", "key": "title", "type": "string", "required": true, "maxLength": 255, "minLength": 1
       },
@@ -74,7 +75,7 @@ var apiUtils = require( "../../api-utils" ),
         "title": "Description", "key": "description", "type": "string", "required": true, "maxLength": 4000, "minLength": 1
       }
     },
-    "store":      {
+    "store":       {
       "headers": [
         { name: "location", key: "location" }
       ],
@@ -82,12 +83,15 @@ var apiUtils = require( "../../api-utils" ),
         { name: "task-id", key: "taskId" }
       ]
     },
-    "handler":    function ( req, res, next ) {
+    "handler":     function ( req, res, next ) {
       // if user isn't authenticated, bail
       if ( !req.user ) { return next( Errors.HTTP_Unauthorized() ); }
 
       // check hmac
       if ( !security["hmac-defs"]["tasker-256"].handler( req ) ) { return next( Errors.HTTP_Bad_Request( "Invalid or missing HMAC" ) ); }
+
+      // store next token
+      res.set( "x-next-token", req.user.nextToken );
 
       // get body fields
       var newTaskTitle = req.body.title, newTaskDescription = req.body.description;
@@ -107,40 +111,41 @@ var apiUtils = require( "../../api-utils" ),
       // create the task
       var dbUtil = new DBUtils( req.app.get( "client-pool" ) );
       dbUtil.query( "CALL tasker.task_mgmt.create_task(:1,:2,null,:3) INTO :4",
-                    [ newTaskTitle, newTaskDescription, req.user.userId, dbUtil.outInteger()],
-                    function ( err, results ) {
-                      if ( err ) { return next( new Error( err ) ); }
-                      //if ( results.length === 0 ) { return next( Errors.HTTP_Forbidden() ); }
+                    [ newTaskTitle, newTaskDescription, req.user.userId, dbUtil.outInteger()] )
+        .then( function ( results ) {
 
-                      if ( results.returnParam !== null ) {
+                 if ( results.returnParam !== null ) {
 
-                        // returnParam the new task id
+                   // returnParam the new task id
 
-                        // make a simple object
-                        o = {
-                          "taskId": results.returnParam,
-                          "nextToken": req.user.nextToken,
-                          _links:   {}, _embedded: {}
-                        };
+                   // make a simple object
+                   o = {
+                     "taskId": results.returnParam,
+                     _links:   {}, _embedded: {}
+                   };
 
-                        // add our self hypermedia
-                        apiUtils.generateHypermediaForAction( createTaskAction, o._links, security, "self" );
+                   // add our self hypermedia
+                   apiUtils.generateHypermediaForAction( createTaskAction, o._links, security, "self" );
 
-                        // and add a link to get the task
-                        apiUtils.generateHypermediaForAction(
-                          apiUtils.mergeAndClone( getTaskAction, { href: getTaskAction["base-href"] + "/" + o.taskId, templated: false } ),
-                          o._links, security );
+                   // and add a link to get the task
+                   apiUtils.generateHypermediaForAction(
+                     apiUtils.mergeAndClone( getTaskAction, { href: getTaskAction["base-href"] + "/" + o.taskId, templated: false } ),
+                     o._links, security );
 
-                        // also send the location
-                        res.location( getTaskAction["base-href"] + "/" + o.taskId );
+                   // also send the location
+                   res.location( getTaskAction["base-href"] + "/" + o.taskId );
 
-                        // send a 201 -- Created
-                        resUtils.json( res, 201, o );
+                   // send a 201 -- Created
+                   resUtils.json( res, 201, o );
 
-                      } else {
-                        return next( Errors.HTTP_Forbidden() );
-                      }
-                    } );
+                 } else {
+                   return next( Errors.HTTP_Forbidden() );
+                 }
+               } )
+        .catch( function ( err ) {
+                  return next( new Error( err ) );
+                } )
+        .done();
     }
   };
 

@@ -46,7 +46,10 @@ var apiUtils = require( "../../api-utils" ),
       500: "Internal Server Error"
     },
     "example":     {
-      "body": {
+      "headers": {
+        "x-next-token": "next-auth-token"
+      },
+      "body":    {
         "id":          21,
         "title":       "A sample task",
         "description": "Sample task description",
@@ -56,7 +59,6 @@ var apiUtils = require( "../../api-utils" ),
         "status":      "I",
         "changeDate":  (new Date()),
         "changeUser":  "BSMITH",
-        "nextToken":   "next-auth-token"
       }
     },
     "verb":        "get",
@@ -75,8 +77,11 @@ var apiUtils = require( "../../api-utils" ),
       // make sure hmac lines up
       if ( !security["hmac-defs"]["tasker-256"].handler( req ) ) { return next( Errors.HTTP_Forbidden( "Missing or invalid HMAC" ) ); }
 
+      // store next token
+      res.set("x-next-token", req.user.nextToken);
+
       // Create response based on the task (this is found via getTaskId) and pass the next token
-      var o = apiUtils.mergeAndClone( { _links: {}, _embedded: {} }, req.task, { nextToken: req.user.nextToken } );
+      var o = apiUtils.mergeAndClone( { _links: {}, _embedded: {} }, req.task );
 
       // generate hypermedia, also updating the href and templated properties
       o._links.self = apiUtils.mergeAndClone(

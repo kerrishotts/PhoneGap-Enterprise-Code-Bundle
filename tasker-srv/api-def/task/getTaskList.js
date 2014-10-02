@@ -52,12 +52,15 @@ var apiUtils = require( "../../api-utils" ),
       500: "Internal Server Error"
     },
     "example":          {
-      "body": {
-        "tasks":     [ 2, 21, 94 ],
-        "nextToken": "next-auth-token"
+      "headers": {
+        "x-next-token": "next-auth-token"
+      },
+      "body":    {
+        "tasks": [ 2, 21, 94 ]
       }
     },
     "href":             "/tasks",
+    "templated":        false,
     "base-href":        "/tasks",
     "accepts":          [ "application/hal+json", "application/json", "text/json" ],
     "sends":            [ "application/hal+json", "application/json", "text/json" ],
@@ -72,12 +75,7 @@ var apiUtils = require( "../../api-utils" ),
       "with-status":        {
         "title":     "Status", "key": "withStatus", "type": "string", "required": false,
         "maxLength": 1, "minLength": 1,
-        "enum":      [
-          { title: "In Progress", value: "I" },
-          { title: "On Hold", value: "H" },
-          { title: "Complete", value: "C" },
-          { title: "Deleted", value: "X" }
-        ]
+        "enum":      Task.ENUM
       },
       "min-completion-pct": {
         "title": "Minimum Completion Percentage", "key": "minCompletion",
@@ -96,8 +94,11 @@ var apiUtils = require( "../../api-utils" ),
       // if the hmac doesn't check, let the client know.
       if ( !security["hmac-defs"]["tasker-256"].handler( req ) ) { return next( Errors.HTTP_Forbidden( "Invalid or missing HMAC." ) ); }
 
+      // store next token
+      res.set( "x-next-token", req.user.nextToken );
+
       var o = {
-        tasks:  [], nextToken: req.user.nextToken,
+        tasks:  [],
         _links: {}, _embedded: {}
       };
 
@@ -139,36 +140,39 @@ var apiUtils = require( "../../api-utils" ),
 
       var dbUtil = new DBUtils( req.app.get( "client-pool" ) );
       dbUtil.query( "SELECT * FROM table(tasker.task_mgmt.get_tasks(:1,:2,:3,:4,:5,:6))",
-                    [ assignedTo, ownedBy, withStatus, minCompletion, maxCompletion, req.user.userId ],
-                    function ( err, results ) {
-                      if ( err ) { return next( new Error( err ) ); }
+                    [ assignedTo, ownedBy, withStatus, minCompletion, maxCompletion, req.user.userId ] )
+        .then( function ( results ) {
 
-                      // for each result, we want to add the task as an embedded element and generate
-                      // the appropriate hypermedia. For the body of our response, we just generate
-                      // an array and push the task IDs on that array
-                      results.forEach( function ( row ) {
-                        // new task, based on result
-                        var task = new Task( row );
-                        // add id to body
-                        o.tasks.push( task.id );
-                        // add the task to the embedded section, along with _links
-                        o._embedded[task.id] = apiUtils.mergeAndClone( task, { "_links": {} } );
-                        // And add the hypermedia to the embedded element
-                        apiUtils.generateHypermediaForAction( getTaskAction, o._embedded[task.id]["_links"], security, "self" );
-                        // update the href and templated parameters in _links
-                        o._embedded[task.id]["_links"].self = apiUtils.mergeAndClone(
-                          o._embedded[task.id]["_links"].self,
-                          { "href": "/task/" + task.id,
-                            "templated": false } );
-                      } );
+                 // for each result, we want to add the task as an embedded element and generate
+                 // the appropriate hypermedia. For the body of our response, we just generate
+                 // an array and push the task IDs on that array
+                 results.forEach( function ( row ) {
+                   // new task, based on result
+                   var task = new Task( row );
+                   // add id to body
+                   o.tasks.push( task.id );
+                   // add the task to the embedded section, along with _links
+                   o._embedded[task.id] = apiUtils.mergeAndClone( task, { "_links": {} } );
+                   // And add the hypermedia to the embedded element
+                   apiUtils.generateHypermediaForAction( getTaskAction, o._embedded[task.id]["_links"], security, "self" );
+                   // update the href and templated parameters in _links
+                   o._embedded[task.id]["_links"].self = apiUtils.mergeAndClone(
+                     o._embedded[task.id]["_links"].self,
+                     { "href": "/task/" + task.id,
+                       "templated": false } );
+                 } );
 
-                      // add hypermedia
-                      apiUtils.generateHypermediaForAction( getTaskListAction, o._links, security, "self" );
-                      [ getTaskAction, require( "../auth/logout" ) ].forEach( function ( apiAction ) {
-                        apiUtils.generateHypermediaForAction( apiAction, o._links, security );
-                      } );
-                      resUtils.json( res, 200, o );
-                    } );
+                 // add hypermedia
+                 apiUtils.generateHypermediaForAction( getTaskListAction, o._links, security, "self" );
+                 [ getTaskAction, require( "../auth/logout" ) ].forEach( function ( apiAction ) {
+                   apiUtils.generateHypermediaForAction( apiAction, o._links, security );
+                 } );
+                 resUtils.json( res, 200, o );
+               } )
+        .catch( function ( err ) {
+                  return next( new Error( err ) );
+                } )
+        .done();
 
     }
   };
