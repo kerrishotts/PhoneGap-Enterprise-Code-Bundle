@@ -204,11 +204,15 @@ app.set( "client-pool", clientPool );
 passport.use( new ReqStrategy( function ( req, done ) {
   var clientAuthToken = req.headers[ "x-auth-token" ],
     session = new Session( new DBUtils( clientPool ) );
-  session.findSession( clientAuthToken, function ( err, results ) {
-    if ( err ) { return done( err ); }
-    if ( !results ) { return done( null, false ); }
-    done( null, results );
-  } );
+  session.findSession( clientAuthToken )
+    .then( function ( results ) {
+             if ( !results ) { return done( null, false ); }
+             done( null, results );
+           } )
+    .catch( function ( err ) {
+              return done( err );
+            } )
+    .done();
 } ) );
 //
 // if passport finds the session, serialize it
@@ -227,8 +231,10 @@ app.use( passport.initialize() );
  */
 function checkAuth( req, res, next ) {
   if ( req.isAuthenticated() ) {
+    // next
     return next();
   }
+  // authenticate
   passport.authenticate( "req" )( req, res, next );
 }
 // tie our API to / and enable secured resources to use the above method
@@ -256,7 +262,7 @@ app.use( function handleError( err, req, res, next ) {
   if ( !dev ) { err.stack = ""; }
 
   // send the error
-  resUtils.error (res, status, err );
+  resUtils.error( res, status, err );
 
 } );
 
