@@ -22,9 +22,10 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 /*global define, console */
-define( [ "Q" ], function( Q ) {
+define( [ "Q" ], function ( Q ) {
   "use strict";
   var DEBUG = true;
+
   /**
    * Construct a TimeoutError suitable for throwing; only thrown
    * when an XHR request exceeds the timeout setting
@@ -35,6 +36,7 @@ define( [ "Q" ], function( Q ) {
     this.message = "Timeout";
     this.code = -20000;
   }
+
   TimeoutError.prototype = new Error();
   TimeoutError.prototype.constructor = TimeoutError;
   /**
@@ -51,6 +53,7 @@ define( [ "Q" ], function( Q ) {
     this.HTTPStatus = status;
     this.HTTPResponse = response;
   }
+
   HTTPError.prototype = new Error();
   HTTPError.prototype.constructor = HTTPError;
   /**
@@ -64,6 +67,7 @@ define( [ "Q" ], function( Q ) {
     this.code = -21000;
     this.cause = cause;
   }
+
   MaxRetryAttemptsReached.prototype = new Error();
   MaxRetryAttemptsReached.prototype.constructor = MaxRetryAttemptsReached;
   /**
@@ -77,6 +81,7 @@ define( [ "Q" ], function( Q ) {
     this.message = "The JSON response could not be parsed";
     this.code = -30000;
   }
+
   JSONParseError.prototype = new Error();
   JSONParseError.prototype.constructor = JSONParseError;
   /**
@@ -88,8 +93,61 @@ define( [ "Q" ], function( Q ) {
     this.message = "Encountered a non-HTTP error during XHR";
     this.code = -10000;
   }
+
   XHRError.prototype = new Error();
   XHRError.prototype.constructor = XHRError;
+
+  /**
+   *
+   * Parse response header string of the form:
+   *
+   * "
+   *     header: value
+   *     another-header: value
+   * "
+   *
+   * @param {string} headerStr    headers to parse
+   * @param {boolean} modifyKeys  if true, header keys are modified to be
+   *                              camelcase. default: true
+   * @return {*}                  object containing header keys
+   *
+   */
+  function parseResponseHeaders( headerStr, modifyKeys ) {
+    // no header? return an empty object
+    if ( !headerStr ) { return {}; }
+    // check if modifyKeys is passed; if not true is the default
+    if ( typeof modifyKeys === "undefined" ) { modifyKeys = true; }
+    // split the header string by carraige return, then reduce it to
+    // an object containing the header keys and values
+    return headerStr.split( "\r\n" ).reduce(
+      function parseHeader( prevValue, headerPair ) {
+        // header is of the form abc: def; split by ": " and then
+        // shift out the key. Reconstruct the value in case some one has
+        // a header of abc: def: ghi
+        var headerParts = headerPair.split( ": " ),
+          headerKey = headerParts.shift(),
+          headerValue = headerParts.join( ": " ),
+          propParts, prop;
+        if ( modifyKeys ) {
+          // convert some-property-key to somePropertyKey
+          propParts = headerKey.split( "-" );
+          prop = propParts.reduce( function ( prevValue, v ) {
+            return prevValue + (v.substr( 0, 1 ).toUpperCase() + v.substr( 1 ));
+          } );
+          prop = prop.substr( 0, 1 ).toLowerCase() +
+                 prop.substr( 1 );
+        }
+        // if we have one or more part, copy the value to the key
+        if ( headerParts.length > 0 ) {
+          prevValue[ modifyKeys ? prop : headerKey ] = headerValue;
+        } else {
+          // otherwise just copy true
+          prevValue[ modifyKeys ? prop : headerKey ] = true;
+        }
+        return prevValue;
+      }, {} );
+  }
+
   /**
    * Sends an XHR using the specified method to the URI using the supplied options.
    * Returns a promise.
@@ -108,20 +166,21 @@ define( [ "Q" ], function( Q ) {
     var deferred = Q.defer();
     // define our default options and merge the user options back in
     var opt = {
-      data: null, // data to send
-      sending: "application/json", // mime type that we're sending
-      receiving: "application/json", // mime type we expect back
-      async: true, // send asynchronously
-      withCredentials: true, // true to send cookies
-      retryAutomatically: true, // if a timeout occurs, retry
-      retryOnXHRError: true, // if an XHR error occurs, also retry
-      timeout: 30000, // timeout after 30s, if no retry, TimeoutError
-      initialRetryDelay: 1500, // attempt a retry after 0.5s
-      retryThrottle: 1.125, // multiply each time round
+      data:                 null, // data to send
+      sending:              "application/json", // mime type that we're sending
+      receiving:            "application/json", // mime type we expect back
+      async:                true, // send asynchronously
+      withCredentials:      true, // true to send cookies
+      retryAutomatically:   true, // if a timeout occurs, retry
+      retryOnXHRError:      true, // if an XHR error occurs, also retry
+      timeout:              30000, // timeout after 30s, if no retry, TimeoutError
+      initialRetryDelay:    1500, // attempt a retry after 0.5s
+      retryThrottle:        1.125, // multiply each time round
       maximumRetryAttempts: 5, // fail after 5 attempts -- MaxRetryAttemptsError
-      headers: [], // headers to send on the request
-      username: undefined, // don't send a username (Basic Auth)
-      password: undefined // don't send a password (Basic Auth)
+      headers:              [], // headers to send on the request
+      username:             undefined, // don't send a username (Basic Auth)
+      password:             undefined, // don't send a password (Basic Auth)
+      modifyHeaderKeys:     false // if true, header keys are converted to camelCase in response
     };
     if ( typeof options !== "undefined" ) {
       for ( var prop in options ) {
@@ -154,14 +213,14 @@ define( [ "Q" ], function( Q ) {
       xhr.setRequestHeader( "Accept", opt.receiving );
       xhr.setRequestHeader( "Content-Type", opt.sending );
       // copy headers from options and emit
-      opt.headers.forEach( function( header ) {
+      opt.headers.forEach( function ( header ) {
         xhr.setRequestHeader( header.headerName, header.headerValue );
       } );
       /**
        * If the response times out, it will retry if retryAutomatically
        * is true. If not, a TimeoutError will be thrown immediately.
        */
-      xhr.ontimeout = function() {
+      xhr.ontimeout = function () {
         if ( opt.retryAutomatically ) {
           if ( retryAttempts == opt.maximumRetryAttempts ) {
             if ( DEBUG ) {
@@ -172,7 +231,7 @@ define( [ "Q" ], function( Q ) {
             if ( DEBUG ) {
               console.log( "Refire" );
             }
-            setTimeout( function() {
+            setTimeout( function () {
               sendRequest();
             }, retryDelay );
             retryDelay = retryDelay * opt.retryThrottle;
@@ -187,7 +246,7 @@ define( [ "Q" ], function( Q ) {
        * if retryOnXHRError isn't true, otherwise it retries several
        * times.
        */
-      xhr.onerror = function() {
+      xhr.onerror = function () {
         if ( opt.retryOnXHRError ) {
           if ( retryAttempts == opt.maximumRetryAttempts ) {
             if ( DEBUG ) {
@@ -198,7 +257,7 @@ define( [ "Q" ], function( Q ) {
             if ( DEBUG ) {
               console.log( "Refire" );
             }
-            setTimeout( function() {
+            setTimeout( function () {
               if ( DEBUG ) {
                 console.log( "Resend" );
               }
@@ -216,23 +275,34 @@ define( [ "Q" ], function( Q ) {
        * 200, then pass the response to as a resolution to the promise.
        * If not, pass the response and HTTP error as an HTTPError.
        */
-      xhr.onload = function() {
-        if ( this.status === 200 ) {
+      xhr.onload = function () {
+        if ( this.status >= 200 && this.status <= 299 ) {
+          var headers = parseResponseHeaders( this.getAllResponseHeaders(), opt.modifyHeaderKeys ),
+            response = {
+              headers: headers,
+              body:    null,
+              status:  this.status
+            };
           switch ( opt.receiving ) {
+            case "application/hal+json":
             case "application/json":
             case "text/json":
               try {
-                deferred.resolve( JSON.parse( this.responseText ) );
-              } catch ( err ) {
+                response.body = JSON.parse( this.responseText );
+                deferred.resolve( response );
+              }
+              catch ( err ) {
                 deferred.reject( new JSONParseError( this.responseText ) );
               }
               break;
             case "application/xml":
             case "text/xml":
-              deferred.resolve( this.responseXML );
+              response.body = this.responseXML;
+              deferred.resolve( response );
               break;
             default:
-              deferred.resolve( this.response );
+              response.body = this.response;
+              deferred.resolve( response );
           }
         } else {
           deferred.reject( new HTTPError( this.status, this.response ) );
@@ -240,6 +310,7 @@ define( [ "Q" ], function( Q ) {
       };
       xhr.send( sendingData );
     }
+
     sendRequest();
     return deferred.promise;
   }
@@ -263,7 +334,8 @@ define( [ "Q" ], function( Q ) {
         args.push( fingerprints[ i ] );
       }
       window.plugins.sslCertificateChecker.check.apply( this, args );
-    } catch ( err ) {
+    }
+    catch ( err ) {
       // if window.plugins isn't defined, we'll go ahead and resolve instead
       if ( typeof window.plugins === "undefined" ) {
         deferred.resolve( "" );
@@ -273,14 +345,14 @@ define( [ "Q" ], function( Q ) {
     }
     return deferred.promise;
   }
-  var XHR = {
-    send: _xhr,
-    checkIfSecure: _checkIfSecure,
-    TimeoutError: TimeoutError,
+
+  return {
+    send:                    _xhr,
+    checkIfSecure:           _checkIfSecure,
+    TimeoutError:            TimeoutError,
     MaxRetryAttemptsReached: MaxRetryAttemptsReached,
-    HTTPError: HTTPError,
-    JSONParseError: JSONParseError,
-    XHRError: XHRError
+    HTTPError:               HTTPError,
+    JSONParseError:          JSONParseError,
+    XHRError:                XHRError
   };
-  return XHR;
 } );
