@@ -345,7 +345,7 @@ PROCEDURE assign_task(
     p_as_user VARCHAR2 DEFAULT NULL )
 AS
   user_person_id INTEGER;
-  can_assign_to_assignee BOOLEAN := false;
+  can_assign_to_assignee BOOLEAN := FALSE;
   task tasker.task%ROWTYPE;
 BEGIN
   user_person_id := tasker.utils.get_person_id_from_user_id ( p_as_user );
@@ -360,9 +360,9 @@ BEGIN
 
     IF NOT tasker.security.can_user ( p_as_user, CAN_ASSIGN_ANY_TASK_TO_ANYONE() ) THEN
       -- get all the people to whom we can assign the task
-      FOR person IN ( SELECT * FROM table(PERSON_MGMT.GET_PEOPLE_ADMINISTERED_BY ( user_person_id )) ) LOOP
+      FOR person IN ( SELECT * FROM TABLE(PERSON_MGMT.GET_PEOPLE_ADMINISTERED_BY ( user_person_id )) ) LOOP
         IF person.id = p_assignee THEN
-          can_assign_to_assignee := true;
+          can_assign_to_assignee := TRUE;
         END IF;
       END LOOP;
       IF NOT can_assign_to_assignee THEN
@@ -450,10 +450,10 @@ BEGIN
   FOR r  IN
   (SELECT *
   FROM tasker.task
-  WHERE assigned_to = NVL(p_assigned_to, assigned_to)
-  AND owner         = NVL(p_owned_by, owner)
-  AND status        = NVL(p_with_status, status)
-  AND pct_complete BETWEEN p_with_completion_low AND p_with_completion_high
+  WHERE NVL (assigned_to,-1) = NVL(NVL(p_assigned_to, assigned_to), -1)
+  AND NVL(owner,-1)         = NVL(NVL(p_owned_by, owner), -1)
+  AND NVL(status,'@')        = NVL(NVL(p_with_status, status), '@')
+  AND NVL(pct_complete,0) BETWEEN NVL(p_with_completion_low,0) AND NVL(p_with_completion_high,100)
   )
   LOOP
     allowed_to_see   := can_see_any_task_cache;
