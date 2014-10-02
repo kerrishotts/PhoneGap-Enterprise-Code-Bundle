@@ -59,17 +59,20 @@ var DBUtils = require( "../../db-utils" ),
       taskId = parseInt( taskId, 10 );
       if ( isNaN( taskId ) ) { return next( Errors.HTTP_Bad_Request( "Type mismatch" ) ); }
 
-      dbUtil.query( "SELECT * FROM table(tasker.task_mgmt.get_task(:1,:2))", [ taskId, req.user.userId ],
-                    function ( err, results ) {
-                      if ( err ) { return next( new Error( err ) ); }
+      dbUtil.query( "SELECT * FROM table(tasker.task_mgmt.get_task(:1,:2))", [ taskId, req.user.userId ] )
+        .then( function ( results ) {
 
-                      // if no results, return 404 not found
-                      if ( results.length === 0 ) { return next( Errors.HTTP_NotFound() ); }
+                 // if no results, return 404 not found
+                 if ( results.length === 0 ) { return next( Errors.HTTP_NotFound() ); }
 
-                      // create a new task with the database results (will be in first row)
-                      req.task = new Task( results[ 0 ] );
-                      return next();
-                    } );
+                 // create a new task with the database results (will be in first row)
+                 req.task = new Task( results[ 0 ] );
+                 return next();
+               } )
+        .catch( function ( err ) {
+                  return next( new Error( err ) );
+                } )
+        .done();
     }
   };
 module.exports = param;
