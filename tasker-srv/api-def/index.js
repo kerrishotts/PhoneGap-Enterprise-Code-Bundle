@@ -27,15 +27,15 @@
 /* globals require, module */
 // load in our api definitions and handlers
 var allActionGroups = [ require( "./discovery" ), require( "./csrf" ),
-    require( "./auth" ), require( "./heartbeat" ),
-    require( "./task" )
+                        require( "./auth" ), require( "./heartbeat" ),
+                        require( "./task" ), require( "./person" )
   ],
 
-  // our api starts life as a blank array
+// our api starts life as a blank array
   api = [];
 
-allActionGroups.forEach( function( actions ) {
-  actions.forEach( function( action ) {
+allActionGroups.forEach( function ( actions ) {
+  actions.forEach( function ( action ) {
     api.push( action );
   } );
 } );
