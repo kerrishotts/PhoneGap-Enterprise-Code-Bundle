@@ -28,7 +28,8 @@
 //
 // dependencies
 //
-var winston = require( "winston" );
+var winston = require( "winston" ),
+  Q = require( "q" );
 
 function Session( dbUtils ) {
   "use strict";
@@ -54,14 +55,19 @@ function Session( dbUtils ) {
  * @return {object} Session Object
  */
 Session.prototype.findSession = function ( clientAuthToken, cb ) {
-  var self = this;
+  var self = this,
+    deferred = Q.defer();
 
   // if no token, no sense in continuing
-  if ( typeof clientAuthToken === "undefined" ) { return cb( null, false ); }
+  if ( typeof clientAuthToken === "undefined" ) {
+    if ( cb ) { return cb( null, false ); } else { deferred.reject(); }
+  }
 
   // an auth token is of the form 1234.ABCDEF10284128401ABC13...
   var clientAuthTokenParts = clientAuthToken.split( "." );
-  if ( !clientAuthTokenParts ) { return cb( null, false ); } // no auth token, no session.
+  if ( !clientAuthTokenParts ) {
+    if ( cb ) { return cb( null, false ); } else { deferred.reject(); }
+  } // no auth token, no session.
 
   // get the parts
   var sessionId = clientAuthTokenParts[ 0 ],
@@ -75,63 +81,84 @@ Session.prototype.findSession = function ( clientAuthToken, cb ) {
                            self._dbUtils.outVarchar2( { size: 4000 } ), // next token  (returnParam1)
                            self._dbUtils.outVarchar2( { size: 4000 } ), // hmac token  (returnParam2)
                            self._dbUtils.outVarchar2( { size: 1 } ) // success Y/N (returnParam3)
-                         ],
-                         function ( err, results ) {
-                           if ( err ) { return cb( err, false ); }
-                           // returnParam3 has a Y or N; Y is good auth
-                           if ( results.returnParam3 === "Y" ) {
-                             // notify callback of successful auth
-                             cb( null, {
-                               userId:    results.returnParam, sessionId: sessionId,
-                               nextToken: results.returnParam1, hmacToken: results.returnParam2
-                             } );
-                           } else {
-                             // auth failed
-                             cb( null, false );
-                           }
-                         } );
+                         ] )
+    .then( function ( results ) {
+             // returnParam3 has a Y or N; Y is good auth
+             if ( results.returnParam3 === "Y" ) {
+               // notify callback of successful auth
+               var user = {
+                 userId:    results.returnParam, sessionId: sessionId,
+                 nextToken: results.returnParam1, hmacToken: results.returnParam2
+               };
+               if ( cb ) { cb( null, user ) } else { deferred.resolve( user ); }
+             } else {
+               // auth failed
+               if ( cb ) { cb( null, false ); } else { deferred.reject(); }
+             }
+           } )
+    .catch( function ( err ) {
+              if ( cb ) { return cb( err, false ); } else { deferred.reject(); }
+            } )
+    .done();
+
+  if ( !cb ) { return deferred.promise; }
 };
 
 Session.prototype.createSession = function ( userName, candidatePassword, cb ) {
-  var self = this;
+  var self = this,
+    deferred = Q.defer();
 
   // if the username or password is missing, notify the callback appropriately
-  if ( typeof userName === "undefined" || typeof candidatePassword === "undefined" ) { return cb( null, false ); }
+  if ( typeof userName === "undefined" || typeof candidatePassword === "undefined" ) {
+    if ( cb ) { return cb( null, false ); } else { deferred.reject(); }
+  }
 
   // attempt to authenticate
   self._dbUtils.execute( "CALL tasker.security.authenticate_user( :1, :2, :3, :4, :5 ) INTO :6", [
-                           userName, candidatePassword,
-                           self._dbUtils.outVarchar2( { size: 4000 } ), // session id (returnParam)
-                           self._dbUtils.outVarchar2( { size: 4000 } ), // next token (returnParam1)
-                           self._dbUtils.outVarchar2( { size: 4000 } ), // hmac token (returnParam2)
-                           self._dbUtils.outVarchar2( { size: 1 } ) // success Y/N (returnParam3
-                         ],
-                         function ( err, results ) {
-                           if ( err ) { return cb( err, false ); }
-                           // ReturnParam3 has Y or N; Y is good auth
-                           if ( results.returnParam3 === "Y" ) {
-                             // notify callback of auth info
-                             cb( null, {
-                               userId:    userName, sessionId: results.returnParam,
-                               nextToken: results.returnParam1, hmacToken: results.returnParam2
-                             } );
-                           } else {
-                             // auth failed
-                             cb( null, false );
-                           }
-                         } );
+    userName, candidatePassword,
+    self._dbUtils.outVarchar2( { size: 4000 } ), // session id (returnParam)
+    self._dbUtils.outVarchar2( { size: 4000 } ), // next token (returnParam1)
+    self._dbUtils.outVarchar2( { size: 4000 } ), // hmac token (returnParam2)
+    self._dbUtils.outVarchar2( { size: 1 } ) // success Y/N (returnParam3
+  ] )
+    .then( function ( results ) {
+             // ReturnParam3 has Y or N; Y is good auth
+             if ( results.returnParam3 === "Y" ) {
+               // notify callback of auth info
+               var user = {
+                 userId:    userName, sessionId: results.returnParam,
+                 nextToken: results.returnParam1, hmacToken: results.returnParam2
+               };
+               if ( cb ) { cb( null, user ); } else { deferred.resolve( user ); }
+             } else {
+               // auth failed
+               if ( cb ) { cb( null, false ); } else { deferred.reject(); }
+             }
+           } )
+    .catch( function ( err ) {
+              if ( cb ) { return cb( err, false ) } else { deferred.reject(); }
+            } )
+    .done();
+  if ( !cb ) { return deferred.promise; }
 };
 
 Session.prototype.endSession = function ( sessionId, cb ) {
-  var self = this;
+  var self = this,
+    deferred = Q.defer();
   // no sense in ending a session if the session id isn't specified
-  if ( typeof sessionId === "undefined" ) { return cb( null, false ); }
-  self._dbUtils.execute( "CALL tasker.security.end_session ( :1 )", [ sessionId ],
-                         function ( err, results ) {
-                           if ( err ) { return cb( err, false ); }
-                           // notify the callback of success (if there is no error, success is guaranteed)
-                           cb( null, true );
-                         } );
+  if ( typeof sessionId === "undefined" ) {
+    if ( cb ) { return cb( null, false ); } else { return deferred.reject(); }
+  }
+  self._dbUtils.execute( "CALL tasker.security.end_session ( :1 )", [ sessionId ] )
+    .then( function ( results ) {
+             // notify the callback of success (if there is no error, success is guaranteed)
+             if ( cb ) { cb( null, true ); } else { deferred.resolve(); }
+           } )
+    .catch( function ( err ) {
+              if ( cb ) { return cb( err, false ); } else { deferred.reject(); }
+            } )
+    .done();
+  if ( !cb ) { return deferred.promise; }
 };
 
 module.exports = Session;
