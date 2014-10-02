@@ -99,29 +99,32 @@ var Session = require( "../../models/session" ),
       password = req.body.candidatePassword;
 
       //  create a session with the username and password
-      session.createSession( username, password, function ( err, results ) {
+      session.createSession( username, password )
+        .then( function ( results ) {
 
-        if ( err ) { return next( err ); }
+                 // no session? bad username or password
+                 if ( !results ) { return next( Errors.HTTP_Unauthorized() ); }
 
-        // no session? bad username or password
-        if ( !results ) { return next( Errors.HTTP_Unauthorized() ); }
+                 // return the session information to the client
+                 var o = {
+                   sessionId: results.sessionId, hmacToken: results.hmacToken,
+                   userId:    results.userId, nextToken: results.nextToken,
+                   _links:    {}, _embedded: {}
+                 };
 
-        // return the session information to the client
-        var o = {
-          sessionId: results.sessionId, hmacToken: results.hmacToken,
-          userId:    results.userId, nextToken: results.nextToken,
-          _links:    {}, _embedded: {}
-        };
+                 // generate hypermedia
+                 apiUtils.generateHypermediaForAction( loginAction, o._links, security, "self" );
+                 [ require( "../task/getTaskList" ), require( "../task/getTask" ), require( "../auth/logout" )
+                 ].forEach( function ( apiAction ) {
+                              apiUtils.generateHypermediaForAction( apiAction, o._links, security );
+                            } );
 
-        // generate hypermedia
-        apiUtils.generateHypermediaForAction( loginAction, o._links, security, "self" );
-        [ require( "../task/getTaskList" ), require( "../task/getTask" ), require( "../auth/logout" )
-        ].forEach( function ( apiAction ) {
-                     apiUtils.generateHypermediaForAction( apiAction, o._links, security );
-                   } );
-
-        resUtils.json( res, 200, o );
-      } );
+                 resUtils.json( res, 200, o );
+               } )
+        .catch( function ( err ) {
+                  return next( err );
+                } )
+        .done();
     }
   };
 

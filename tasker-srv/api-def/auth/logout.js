@@ -73,20 +73,24 @@ var Errors = require( "../../errors" ),
       if ( !security["hmac-defs"]["tasker-256"].handler( req ) ) { return next( Errors.HTTP_Bad_Request( "Invalid or missing HMAC." ) ); }
 
       // end the user's session
-      session.endSession( req.user.sessionId, function ( err, results ) {
-        if ( err ) { return next( err ); }
+      session.endSession( req.user.sessionId )
+        .then( function ( results ) {
 
-        // inform the client that the user has been logged out
-        var o = {
-          message: "User logged out.", _links: {}, _embedded: {}
-        };
+                 // inform the client that the user has been logged out
+                 var o = {
+                   message: "User logged out.", _links: {}, _embedded: {}
+                 };
 
-        // generate hypermedia
-        apiUtils.generateHypermediaForAction( logoutAction, o._links, security, "self" );
-        o._links = apiUtils.mergeAndClone( o._links, req.app.get( "x-api-root" ) );
+                 // generate hypermedia
+                 apiUtils.generateHypermediaForAction( logoutAction, o._links, security, "self" );
+                 o._links = apiUtils.mergeAndClone( o._links, req.app.get( "x-api-root" ) );
 
-        resUtils.json( res, 200, o );
-      } );
+                 resUtils.json( res, 200, o );
+               } )
+        .catch( function ( err ) {
+                  return next( err );
+                } )
+        .done();
     }
   };
 
