@@ -48,9 +48,11 @@ var CryptoJS = require( "crypto-js" ),
             }
           ]
         },
-        "store":       { "body": [
-          { "name": "next-token", "key": "nextToken", "only-when": "not null" }
-        ] }
+        "store":       {
+          "headers": [
+            { "name": "next-token", "key": "x-next-token", "only-when": "not null" }
+          ]
+        }
       }
     },
     "hmac-defs":       {
