@@ -70,6 +70,19 @@ var apiUtils = require( "../../api-utils" ),
     "sends":       [ "application/hal+json", "application/json", "text/json" ],
     "secured-by":  "tasker-auth",
     "hmac":        "tasker-256",
+    "store":       {
+      "body": [
+        { name: "task-id", key: "id" },
+        { name: "title", key: "title" },
+        { name: "description", key: "description" },
+        { name: "owned-by", key: "ownedBy" },
+        { name: "assigned-to", key: "assignedTo" },
+        { name: "pct-complete", key: "pctComplete" },
+        { name: "status", key: "status" },
+        { name: "change-date", key: "changeDate" },
+        { name: "change-user", key: "changeUser" }
+      ]
+    },
     "handler":     function ( req, res, next ) {
 
       // if we don't have a user, fail
@@ -79,7 +92,7 @@ var apiUtils = require( "../../api-utils" ),
       if ( !security["hmac-defs"]["tasker-256"].handler( req ) ) { return next( Errors.HTTP_Forbidden( "Missing or invalid HMAC" ) ); }
 
       // store next token
-      res.set("x-next-token", req.user.nextToken);
+      res.set( "x-next-token", req.user.nextToken );
 
       // Create response based on the task (this is found via getTaskId) and pass the next token
       var o = apiUtils.mergeAndClone( { _links: {}, _embedded: {} }, req.task );
