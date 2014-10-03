@@ -37,6 +37,7 @@ var apiUtils = require( "../../api-utils" ),
   objUtils = require( "../../obj-utils" ),
   Task = require( "../../models/task" ),
   getTaskAction = require( "./getTask" ),
+  Q = require( "q" ),
 
   action = {
     "title":       "Edit Task",
@@ -44,7 +45,7 @@ var apiUtils = require( "../../api-utils" ),
     "description": ["Patches an exiting task. A patch can be in the form of any one or a combination of: ",
                     "Assignee, Status, or Percent Complete"],
     "returns":     {
-      200: "Patched",
+      204: "Patched",
       400: "Bad request: make sure at least one of the three patchable fields are present: assignee, status, or percent complete.",
       401: "Unauthorized; user not logged in.",
       403: "Authenticated, but user has no access to this resource.",
@@ -53,10 +54,7 @@ var apiUtils = require( "../../api-utils" ),
     "example":     {
       "headers": [
         { "x-next-token": "next-auth-token" }
-      ],
-      "body":    {
-        "message": "Task patched."
-      }
+      ]
     },
     "verb":        "patch",
     "href":        "/task/{taskId}",
@@ -97,7 +95,7 @@ var apiUtils = require( "../../api-utils" ),
       // does our input validate?
       var validationResults = objUtils.validate( req.body, action.template );
       if ( !validationResults.validates ) {
-        return next ( Errors.HTTP_Bad_Request( validationResults.message ) );
+        return next( Errors.HTTP_Bad_Request( validationResults.message ) );
       }
 
       // we do need at least one value...
@@ -106,39 +104,41 @@ var apiUtils = require( "../../api-utils" ),
         return next( Errors.HTTP_Bad_Request( "Missing a field; either assignedTo, status, or pctComplete is required." ) )
       }
 
-      // create the task
-      var dbUtil = new DBUtils( req.app.get( "client-pool" ) );
-      dbUtil.query( "CALL tasker.task_mgmt.create_task(:1,:2,null,:3) INTO :4",
-                    [ newTaskTitle, newTaskDescription, req.user.userId, dbUtil.outInteger()] )
+      // we going to generate up to three parallel queries (assuming any data has changed)
+      var dbUtil = new DBUtils( req.app.get( "client-pool" ) ),
+        queries = [];
+
+      if ( req.task.assignedTo !== newAssignee ) {
+        queries.push(
+          dbUtil.query( "CALL tasker.task_mgmt.assign_task(:1,:2,:3)", [req.task.id, newAssignee, req.user.userId ] )
+        );
+      }
+
+      if ( req.task.status !== newStatus ) {
+        queries.push(
+          dbUtil.query( "CALL tasker.task_mgmt.update_task_status(:1,:2,:3)", [req.task.id, newStatus, req.user.userId ] )
+        );
+      }
+
+      if ( req.task.pctComplete !== newPctComplete ) {
+        queries.push(
+          dbUtil.query( "CALL tasker.task_mgmt.update_task_percentage(:1,:2,:3)", [req.task.id, newPctComplete, req.user.userId ] )
+        );
+      }
+      Q.all( queries )
         .then( function ( results ) {
 
-                 if ( results.returnParam !== null ) {
+                 var o = {
+                   "message": "Task patched.",
+                   _links:    {}, _embedded: {}
+                 };
 
-                   // returnParam the new task id
+                 // add our self hypermedia
+                 apiUtils.generateHypermediaForAction( action, o._links, security, "self" );
 
-                   // make a simple object
-                   var o = {
-                     "taskId": results.returnParam,
-                     _links:   {}, _embedded: {}
-                   };
+                 // send a 204 -- No content
+                 resUtils.json( res, 204, o );
 
-                   // add our self hypermedia
-                   apiUtils.generateHypermediaForAction( createTaskAction, o._links, security, "self" );
-
-                   // and add a link to get the task
-                   apiUtils.generateHypermediaForAction(
-                     apiUtils.mergeAndClone( getTaskAction, { href: getTaskAction["base-href"] + "/" + o.taskId, templated: false } ),
-                     o._links, security );
-
-                   // also send the location
-                   res.location( getTaskAction["base-href"] + "/" + o.taskId );
-
-                   // send a 201 -- Created
-                   resUtils.json( res, 201, o );
-
-                 } else {
-                   return next( Errors.HTTP_Forbidden() );
-                 }
                } )
         .catch( function ( err ) {
                   return next( new Error( err ) );
