@@ -559,7 +559,7 @@ BEGIN
   LOOP
     IF
       (
-        (r.owner != user_person_id) OR (r.assigned_to != user_person_id)
+        (r.owner != user_person_id) AND (r.assigned_to != user_person_id)
       )
       AND NOT can_see_any_task_cache THEN
       CONTINUE;
