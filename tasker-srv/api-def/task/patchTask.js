@@ -24,6 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  *
  ******************************************************************************/
+"use strict";
 
 //
 // dependencies
@@ -33,6 +34,7 @@ var apiUtils = require( "../../api-utils" ),
   Errors = require( "../../errors" ),
   DBUtils = require( "../../db-utils" ),
   resUtils = require( "../../res-utils" ),
+  objUtils = require( "../../obj-utils" ),
   Task = require( "../../models/task" ),
   getTaskAction = require( "./getTask" ),
 
@@ -87,61 +89,61 @@ var apiUtils = require( "../../api-utils" ),
       // store next token
       res.set( "x-next-token", req.user.nextToken );
 
-      /*
-       // get body fields
-       var newTaskTitle = req.body.title, newTaskDescription = req.body.description;
+      // get body fields
+      var newAssignee = req.body.assignedTo,
+        newStatus = req.body.status,
+        newPctComplete = req.body.pctComplete;
 
-       // check types and lengths
-       if ( typeof newTaskTitle !== "string" || typeof newTaskDescription !== "string" ) {
-       return next( Errors.HTTP_Bad_Request( "Missing field or Type Mismatch" ) );
-       }
-       if ( newTaskTitle.length < createTaskAction.template["task-title"].minLength ||
-       newTaskTitle.length > createTaskAction.template["task-title"].maxLength ||
-       newTaskDescription.length < createTaskAction.template["task-description"].minLength ||
-       newTaskDescription.length > createTaskAction.template["task-description"].maxLength
-       ) {
-       return next( Errors.HTTP_Bad_Request( "Field length out of bounds" ) );
-       }
+      // does our input validate?
+      var validationResults = objUtils.validate( req.body, action.template );
+      if ( !validationResults.validates ) {
+        return next ( Errors.HTTP_Bad_Request( validationResults.message ) );
+      }
 
-       // create the task
-       var dbUtil = new DBUtils( req.app.get( "client-pool" ) );
-       dbUtil.query( "CALL tasker.task_mgmt.create_task(:1,:2,null,:3) INTO :4",
-       [ newTaskTitle, newTaskDescription, req.user.userId, dbUtil.outInteger()] )
-       .then( function ( results ) {
+      // we do need at least one value...
+      if ( typeof newAssignee === "undefined" && typeof newStatus === "undefined" &&
+           typeof newPctComplete === "undefined" ) {
+        return next( Errors.HTTP_Bad_Request( "Missing a field; either assignedTo, status, or pctComplete is required." ) )
+      }
 
-       if ( results.returnParam !== null ) {
+      // create the task
+      var dbUtil = new DBUtils( req.app.get( "client-pool" ) );
+      dbUtil.query( "CALL tasker.task_mgmt.create_task(:1,:2,null,:3) INTO :4",
+                    [ newTaskTitle, newTaskDescription, req.user.userId, dbUtil.outInteger()] )
+        .then( function ( results ) {
 
-       // returnParam the new task id
+                 if ( results.returnParam !== null ) {
 
-       // make a simple object
-       o = {
-       "taskId": results.returnParam,
-       _links:   {}, _embedded: {}
-       };
+                   // returnParam the new task id
 
-       // add our self hypermedia
-       apiUtils.generateHypermediaForAction( createTaskAction, o._links, security, "self" );
+                   // make a simple object
+                   var o = {
+                     "taskId": results.returnParam,
+                     _links:   {}, _embedded: {}
+                   };
 
-       // and add a link to get the task
-       apiUtils.generateHypermediaForAction(
-       apiUtils.mergeAndClone( getTaskAction, { href: getTaskAction["base-href"] + "/" + o.taskId, templated: false } ),
-       o._links, security );
+                   // add our self hypermedia
+                   apiUtils.generateHypermediaForAction( createTaskAction, o._links, security, "self" );
 
-       // also send the location
-       res.location( getTaskAction["base-href"] + "/" + o.taskId );
+                   // and add a link to get the task
+                   apiUtils.generateHypermediaForAction(
+                     apiUtils.mergeAndClone( getTaskAction, { href: getTaskAction["base-href"] + "/" + o.taskId, templated: false } ),
+                     o._links, security );
 
-       // send a 201 -- Created
-       resUtils.json( res, 201, o );
+                   // also send the location
+                   res.location( getTaskAction["base-href"] + "/" + o.taskId );
 
-       } else {
-       return next( Errors.HTTP_Forbidden() );
-       }
-       } )
-       .catch( function ( err ) {
-       return next( new Error( err ) );
-       } )
-       .done();
-       */
+                   // send a 201 -- Created
+                   resUtils.json( res, 201, o );
+
+                 } else {
+                   return next( Errors.HTTP_Forbidden() );
+                 }
+               } )
+        .catch( function ( err ) {
+                  return next( new Error( err ) );
+                } )
+        .done();
     }
   };
 

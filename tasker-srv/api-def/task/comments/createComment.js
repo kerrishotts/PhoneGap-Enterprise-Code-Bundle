@@ -24,6 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  *
  ******************************************************************************/
+"use strict";
 
 //
 // dependencies
@@ -33,6 +34,7 @@ var apiUtils = require( "../../../api-utils" ),
   Errors = require( "../../../errors" ),
   DBUtils = require( "../../../db-utils" ),
   resUtils = require( "../../../res-utils" ),
+  objUtils = require( "../../../obj-utils" ),
 
   action = {
     "title":       "Add Comment",
@@ -88,6 +90,12 @@ var apiUtils = require( "../../../api-utils" ),
 
       // store next token
       res.set( "x-next-token", req.user.nextToken );
+
+      // does our input validate?
+      var validationResults = objUtils.validate( req.body, action.template );
+      if ( !validationResults.validates ) {
+        return next ( Errors.HTTP_Bad_Request( validationResults.message ) );
+      }
 /*
       // get body fields
       var newTaskTitle = req.body.title, newTaskDescription = req.body.description;

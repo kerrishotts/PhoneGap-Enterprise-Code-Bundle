@@ -28,14 +28,16 @@
 //
 // dependencies
 //
+"use strict";
 var Session = require( "../../models/session" ),
   Errors = require( "../../errors" ),
   DBUtils = require( "../../db-utils" ),
   apiUtils = require( "../../api-utils" ),
   security = require( "../security" ),
   resUtils = require( "../../res-utils" ),
+  objUtils = require( "../../obj-utils" ),
 
-  loginAction = {
+  action = {
     "title":       "Authenticate User",
     "action":      "login",
     "description": ["Authenticates a user and returns session information if user was authenticated." ,
@@ -83,15 +85,10 @@ var Session = require( "../../models/session" ),
         username,
         password;
 
-      // validate! Check for require parameters and min/max lengths
-      if ( typeof req.body.userId !== "string" || typeof req.body.candidatePassword !== "string" ) {
-        return next( Errors.HTTP_Bad_Request( "Missing or invalid username or password." ) );
-      }
-      if ( req.body.userId.length < loginAction.template["user-id"].minLength ||
-           req.body.userId.length > loginAction.template["user-id"].maxLength ||
-           req.body.candidatePassword.length < loginAction.template["candidate-password"].minLength ||
-           req.body.candidatePassword.length > loginAction.template["candidate-password"].maxLength ) {
-        return next( Errors.HTTP_Bad_Request( "Field length out of bounds." ) );
+      // does our input validate?
+      var validationResults = objUtils.validate( req.body, action.template );
+      if ( !validationResults.validates ) {
+        return next( Errors.HTTP_Bad_Request( validationResults.message ) );
       }
 
       // got here -- good; copy the values out
@@ -113,7 +110,7 @@ var Session = require( "../../models/session" ),
                  };
 
                  // generate hypermedia
-                 apiUtils.generateHypermediaForAction( loginAction, o._links, security, "self" );
+                 apiUtils.generateHypermediaForAction( action, o._links, security, "self" );
                  [ require( "../task/getTaskList" ), require( "../task/getTask" ), require( "../auth/logout" )
                  ].forEach( function ( apiAction ) {
                               apiUtils.generateHypermediaForAction( apiAction, o._links, security );
@@ -128,4 +125,4 @@ var Session = require( "../../models/session" ),
     }
   };
 
-module.exports = loginAction;
+module.exports = action;

@@ -24,6 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  *
  ******************************************************************************/
+"use strict";
 
 //
 // dependencies
@@ -34,8 +35,9 @@ var apiUtils = require( "../../api-utils" ),
   DBUtils = require( "../../db-utils" ),
   resUtils = require( "../../res-utils" ),
   getTaskAction = require( "./getTask" ),
+  objUtils = require( "../../obj-utils" ),
 
-  createTaskAction = {
+  action = {
     "title":       "Create Task",
     "action":      "create-task",
     "description": ["Creates a new task. Returns 401 Unauthorized if the user is not authorized, 403 if the user doesn't ",
@@ -93,20 +95,14 @@ var apiUtils = require( "../../api-utils" ),
       // store next token
       res.set( "x-next-token", req.user.nextToken );
 
+      // does our input validate?
+      var validationResults = objUtils.validate( req.body, action.template );
+      if ( !validationResults.validates ) {
+        return next( Errors.HTTP_Bad_Request( validationResults.message ) );
+      }
+
       // get body fields
       var newTaskTitle = req.body.title, newTaskDescription = req.body.description;
-
-      // check types and lengths
-      if ( typeof newTaskTitle !== "string" || typeof newTaskDescription !== "string" ) {
-        return next( Errors.HTTP_Bad_Request( "Missing field or Type Mismatch" ) );
-      }
-      if ( newTaskTitle.length < createTaskAction.template["task-title"].minLength ||
-           newTaskTitle.length > createTaskAction.template["task-title"].maxLength ||
-           newTaskDescription.length < createTaskAction.template["task-description"].minLength ||
-           newTaskDescription.length > createTaskAction.template["task-description"].maxLength
-        ) {
-        return next( Errors.HTTP_Bad_Request( "Field length out of bounds" ) );
-      }
 
       // create the task
       var dbUtil = new DBUtils( req.app.get( "client-pool" ) );
@@ -119,13 +115,13 @@ var apiUtils = require( "../../api-utils" ),
                    // returnParam the new task id
 
                    // make a simple object
-                   o = {
+                   var o = {
                      "taskId": results.returnParam,
                      _links:   {}, _embedded: {}
                    };
 
                    // add our self hypermedia
-                   apiUtils.generateHypermediaForAction( createTaskAction, o._links, security, "self" );
+                   apiUtils.generateHypermediaForAction( action, o._links, security, "self" );
 
                    // and add a link to get the task
                    apiUtils.generateHypermediaForAction(
@@ -149,4 +145,4 @@ var apiUtils = require( "../../api-utils" ),
     }
   };
 
-module.exports = createTaskAction;
+module.exports = action;

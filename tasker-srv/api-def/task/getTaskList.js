@@ -24,6 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  *
  ******************************************************************************/
+"use strict";
 
 //
 // dependencies
@@ -35,8 +36,9 @@ var apiUtils = require( "../../api-utils" ),
   getTaskAction = require( "./getTask" ),
   DBUtils = require( "../../db-utils" ),
   resUtils = require( "../../res-utils" ),
+  objUtils = require( "../../obj-utils" ),
 
-  getTaskListAction = {
+  action = {
     "title":            "Tasks",
     "action":           "get-tasks",
     "verb":             "get",
@@ -102,41 +104,18 @@ var apiUtils = require( "../../api-utils" ),
         _links: {}, _embedded: {}
       };
 
+      // does our input validate?
+      var validationResults = objUtils.validate( req.query, action["query-parameters"] );
+      if ( !validationResults.validates ) {
+        return next( Errors.HTTP_Bad_Request( validationResults.message ) );
+      }
+
       // get the potential parameters
       var assignedTo = (typeof req.query.assignedTo !== "undefined") ? req.query.assignedTo : null,
         ownedBy = (typeof req.query.ownedBy !== "undefined") ? req.query.ownedBy : null,
         withStatus = (typeof req.query.withStatus !== "undefined") ? req.query.withStatus : null,
         minCompletion = (typeof req.query.minCompletion !== "undefined") ? req.query.minCompletion : 0,
         maxCompletion = (typeof req.query.maxCompletion !== "undefined") ? req.query.maxCompletion : 100;
-
-      if ( assignedTo !== null ) { assignedTo = parseInt( assignedTo, 10 ); }
-      if ( ownedBy !== null ) { ownedBy = parseInt( ownedBy, 10 ); }
-      minCompletion = parseInt( minCompletion, 10 );
-      maxCompletion = parseInt( maxCompletion, 10 );
-      // make sure our numbers really are numbers
-      if ( isNaN( assignedTo ) || isNaN( ownedBy ) || isNaN( minCompletion ) || isNaN( maxCompletion ) ) {
-        return next( Errors.HTTP_Bad_Request( "Type Mismatch" ) );
-      }
-      if ( withStatus !== null ) {
-        // with status, if present, must be long enough
-        if ( withStatus.length < getTaskListAction["query-parameters"]["with-status"].minLength ||
-             withStatus.length > getTaskListAction["query-parameters"]["with-status"].maxLength ) {
-          return next( Errors.HTTP_Bad_Request( "Field length out of bounds" ) );
-        }
-        // status needs to be one of the acceptable enums
-        if ( getTaskListAction["query-parameters"]["with-status"].enum.map( function ( aStatus ) {
-          return aStatus.value;
-        } ).indexOf( withStatus ) < 0 ) {
-          return next( Errors.HTTP_Bad_Request( "Invalid Status Code" ) );
-        }
-      }
-      // min/max completion %s need to be in range
-      if ( minCompletion < getTaskListAction["query-parameters"]["min-completion-pct"].min ||
-           minCompletion > getTaskListAction["query-parameters"]["min-completion-pct"].max ||
-           maxCompletion < getTaskListAction["query-parameters"]["max-completion-pct"].min ||
-           maxCompletion > getTaskListAction["query-parameters"]["max-completion-pct"].max ) {
-        return next( Errors.HTTP_Bad_Request( "Completion Percent out of bounds" ) );
-      }
 
       var dbUtil = new DBUtils( req.app.get( "client-pool" ) );
       dbUtil.query( "SELECT * FROM table(tasker.task_mgmt.get_tasks(:1,:2,:3,:4,:5,:6))",
@@ -163,7 +142,7 @@ var apiUtils = require( "../../api-utils" ),
                  } );
 
                  // add hypermedia
-                 apiUtils.generateHypermediaForAction( getTaskListAction, o._links, security, "self" );
+                 apiUtils.generateHypermediaForAction( action, o._links, security, "self" );
                  [ getTaskAction, require( "../auth/logout" ) ].forEach( function ( apiAction ) {
                    apiUtils.generateHypermediaForAction( apiAction, o._links, security );
                  } );
@@ -177,4 +156,4 @@ var apiUtils = require( "../../api-utils" ),
     }
   };
 
-module.exports = getTaskListAction;
+module.exports = action;
