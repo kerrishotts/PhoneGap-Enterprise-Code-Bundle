@@ -32,6 +32,7 @@
 var DBUtils = require( "../../db-utils" ),
   Errors = require( "../../errors" ),
   winston = require( "winston" ),
+  Person = require( "../../models/person" ),
 
   param = {
     "name":        "personId",
@@ -45,35 +46,33 @@ var DBUtils = require( "../../db-utils" ),
       500: "Internal Server Error"
     },
     "secured-by":  "tasker-auth",
-    "handler":     function ( req, res, next, taskId ) {
+    "handler":     function ( req, res, next, personId ) {
       "use strict";
 
       // if we don't have a req.user, the user isn't authenticated. Bail!
       if ( !req.user ) { return next( Errors.HTTP_Unauthorized() ); }
-/*
       // get a database connection
       var dbUtil = new DBUtils( req.app.get( "client-pool" ) );
 
-      // check the type of taskId -- we know it's there, but the type might be funny... it must reduce to a number
+      // check the type of personId -- we know it's there, but the type might be funny... it must reduce to a number
       // we know the value will exist, just not the type
-      taskId = parseInt( taskId, 10 );
-      if ( isNaN( taskId ) ) { return next( Errors.HTTP_Bad_Request( "Type mismatch" ) ); }
+      personId = parseInt( personId, 10 );
+      if ( isNaN( personId ) ) { return next( Errors.HTTP_Bad_Request( "Type mismatch" ) ); }
 
-      dbUtil.query( "SELECT * FROM table(tasker.task_mgmt.get_task(:1,:2))", [ taskId, req.user.userId ] )
+      dbUtil.query( "SELECT * FROM table(tasker.person_mgmt.get_person(:1))", [ personId ] )
         .then( function ( results ) {
 
                  // if no results, return 404 not found
                  if ( results.length === 0 ) { return next( Errors.HTTP_NotFound() ); }
 
                  // create a new task with the database results (will be in first row)
-                 req.task = new Task( results[ 0 ] );
+                 req.person = new Person( results[ 0 ] );
                  return next();
                } )
         .catch( function ( err ) {
                   return next( new Error( err ) );
                 } )
         .done();
-        */
     }
   };
 module.exports = param;

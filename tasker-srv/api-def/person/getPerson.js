@@ -68,6 +68,17 @@ var apiUtils = require( "../../api-utils" ),
     "sends":       [ "application/hal+json", "application/json", "text/json" ],
     "secured-by":  "tasker-auth",
     "hmac":        "tasker-256",
+    "store":       {
+      "body": [
+        { name: "person-id", key: "id" },
+        { name: "user-id", key: "userId" },
+        { name: "full-name", key: "fullName" },
+        { name: "pref-name", key: "prefName" },
+        { name: "administrator", key: "administeredBy" },
+        { name: "change-date", key: "changeDate" },
+        { name: "change-user", key: "changeUser" }
+      ]
+    },
     "handler":     function ( req, res, next ) {
 
       // if we don't have a user, fail
@@ -78,19 +89,17 @@ var apiUtils = require( "../../api-utils" ),
 
       // store next token
       res.set( "x-next-token", req.user.nextToken );
-/*
       // Create response based on the task (this is found via getTaskId) and pass the next token
-      var o = apiUtils.mergeAndClone( { _links: {}, _embedded: {} }, req.task );
+      var o = apiUtils.mergeAndClone( { _links: {}, _embedded: {} }, req.person );
 
       // generate hypermedia, also updating the href and templated properties
       o._links.self = apiUtils.mergeAndClone(
-        apiUtils.generateHypermediaForAction( getTaskAction, o._links, security, "self" ), {
-          "href": "/task/" + req.task.ID,
+        apiUtils.generateHypermediaForAction( action, o._links, security, "self" ), {
+          "href": "/person/" + req.person.ID,
           "templated": false
         } );
 
       resUtils.json( res, 200, o );
-      */
     }
   };
 

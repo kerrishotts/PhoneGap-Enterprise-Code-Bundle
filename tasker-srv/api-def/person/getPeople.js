@@ -35,6 +35,8 @@ var apiUtils = require( "../../api-utils" ),
   DBUtils = require( "../../db-utils" ),
   resUtils = require( "../../res-utils" ),
   objUtils = require( "../../obj-utils" ),
+  Person = require( "../../models/person" ),
+  getPersonAction = require( "./getPerson" ),
 
   action = {
     "title":            "People",
@@ -70,7 +72,7 @@ var apiUtils = require( "../../api-utils" ),
       ]
     },
     "query-parameters": {
-      "administered-by": { "title": "Administered By", "key": "administeredBy", "type": "number", "required": false },
+      "administered-by": { "title": "Administered By", "key": "administeredBy", "type": "number", "required": false }
     },
     "handler":          function ( req, res, next ) {
 
@@ -88,84 +90,51 @@ var apiUtils = require( "../../api-utils" ),
       if ( !validationResults.validates ) {
         return next( Errors.HTTP_Bad_Request( validationResults.message ) );
       }
-      /*
-       var o = {
-       tasks:  [],
-       _links: {}, _embedded: {}
-       };
+      var o = {
+        people: [],
+        _links: {}, _embedded: {}
+      };
 
-       // get the potential parameters
-       var assignedTo = (typeof req.query.assignedTo !== "undefined") ? req.query.assignedTo : null,
-       ownedBy = (typeof req.query.ownedBy !== "undefined") ? req.query.ownedBy : null,
-       withStatus = (typeof req.query.withStatus !== "undefined") ? req.query.withStatus : null,
-       minCompletion = (typeof req.query.minCompletion !== "undefined") ? req.query.minCompletion : 0,
-       maxCompletion = (typeof req.query.maxCompletion !== "undefined") ? req.query.maxCompletion : 100;
+      // get the potential parameters
+      var administeredBy = (typeof req.query.administeredBy !== "undefined") ? req.query.administeredBy : null;
 
-       if ( assignedTo !== null ) { assignedTo = parseInt( assignedTo, 10 ); }
-       if ( ownedBy !== null ) { ownedBy = parseInt( ownedBy, 10 ); }
-       minCompletion = parseInt( minCompletion, 10 );
-       maxCompletion = parseInt( maxCompletion, 10 );
-       // make sure our numbers really are numbers
-       if ( isNaN( assignedTo ) || isNaN( ownedBy ) || isNaN( minCompletion ) || isNaN( maxCompletion ) ) {
-       return next( Errors.HTTP_Bad_Request( "Type Mismatch" ) );
-       }
-       if ( withStatus !== null ) {
-       // with status, if present, must be long enough
-       if ( withStatus.length < getTaskListAction["query-parameters"]["with-status"].minLength ||
-       withStatus.length > getTaskListAction["query-parameters"]["with-status"].maxLength ) {
-       return next( Errors.HTTP_Bad_Request( "Field length out of bounds" ) );
-       }
-       // status needs to be one of the acceptable enums
-       if ( getTaskListAction["query-parameters"]["with-status"].enum.map( function ( aStatus ) {
-       return aStatus.value;
-       } ).indexOf( withStatus ) < 0 ) {
-       return next( Errors.HTTP_Bad_Request( "Invalid Status Code" ) );
-       }
-       }
-       // min/max completion %s need to be in range
-       if ( minCompletion < getTaskListAction["query-parameters"]["min-completion-pct"].min ||
-       minCompletion > getTaskListAction["query-parameters"]["min-completion-pct"].max ||
-       maxCompletion < getTaskListAction["query-parameters"]["max-completion-pct"].min ||
-       maxCompletion > getTaskListAction["query-parameters"]["max-completion-pct"].max ) {
-       return next( Errors.HTTP_Bad_Request( "Completion Percent out of bounds" ) );
-       }
+      if ( administeredBy !== null ) { administeredBy = parseInt( administeredBy, 10 ); }
 
-       var dbUtil = new DBUtils( req.app.get( "client-pool" ) );
-       dbUtil.query( "SELECT * FROM table(tasker.task_mgmt.get_tasks(:1,:2,:3,:4,:5,:6))",
-       [ assignedTo, ownedBy, withStatus, minCompletion, maxCompletion, req.user.userId ] )
-       .then( function ( results ) {
+      var dbUtil = new DBUtils( req.app.get( "client-pool" ) );
+      dbUtil.query( "SELECT * FROM table(tasker.person_mgmt.get_people_administered_by(:1))",
+                    [ administeredBy ] )
+        .then( function ( results ) {
 
-       // for each result, we want to add the task as an embedded element and generate
-       // the appropriate hypermedia. For the body of our response, we just generate
-       // an array and push the task IDs on that array
-       results.forEach( function ( row ) {
-       // new task, based on result
-       var task = new Task( row );
-       // add id to body
-       o.tasks.push( task.id );
-       // add the task to the embedded section, along with _links
-       o._embedded[task.id] = apiUtils.mergeAndClone( task, { "_links": {} } );
-       // And add the hypermedia to the embedded element
-       apiUtils.generateHypermediaForAction( getTaskAction, o._embedded[task.id]["_links"], security, "self" );
-       // update the href and templated parameters in _links
-       o._embedded[task.id]["_links"].self = apiUtils.mergeAndClone(
-       o._embedded[task.id]["_links"].self,
-       { "href": "/task/" + task.id,
-       "templated": false } );
-       } );
+                 // for each result, we want to add the person as an embedded element and generate
+                 // the appropriate hypermedia. For the body of our response, we just generate
+                 // an array and push the person IDs on that array
+                 results.forEach( function ( row ) {
+                   // new task, based on result
+                   var person = new Person( row );
+                   // add id to body
+                   o.people.push( person.id );
+                   // add the task to the embedded section, along with _links
+                   o._embedded[person.id] = apiUtils.mergeAndClone( person, { "_links": {} } );
+                   // And add the hypermedia to the embedded element
+                   apiUtils.generateHypermediaForAction( getPersonAction, o._embedded[person.id]["_links"], security, "self" );
+                   // update the href and templated parameters in _links
+                   o._embedded[person.id]["_links"].self = apiUtils.mergeAndClone(
+                     o._embedded[person.id]["_links"].self,
+                     { "href": "/person/" + person.id,
+                       "templated": false } );
+                 } );
 
-       // add hypermedia
-       apiUtils.generateHypermediaForAction( getTaskListAction, o._links, security, "self" );
-       [ getTaskAction, require( "../auth/logout" ) ].forEach( function ( apiAction ) {
-       apiUtils.generateHypermediaForAction( apiAction, o._links, security );
-       } );
-       resUtils.json( res, 200, o );
-       } )
-       .catch( function ( err ) {
-       return next( new Error( err ) );
-       } )
-       .done();
-       */
+                 // add hypermedia
+                 apiUtils.generateHypermediaForAction( action, o._links, security, "self" );
+                 [ getPersonAction, require( "../auth/logout" ) ].forEach( function ( apiAction ) {
+                   apiUtils.generateHypermediaForAction( apiAction, o._links, security );
+                 } );
+                 resUtils.json( res, 200, o );
+               } )
+        .catch( function ( err ) {
+                  return next( new Error( err ) );
+                } )
+        .done();
     }
   };
 
