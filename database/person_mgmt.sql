@@ -62,6 +62,10 @@ TYPE people_set IS TABLE OF tasker.person%ROWTYPE;
       p_administrator_id NUMBER )
     RETURN people_set pipelined;
 
+  FUNCTION get_person (
+    p_person_id NUMBER
+  ) RETURN people_set pipelined;
+
 END PERSON_MGMT;
 CREATE OR REPLACE PACKAGE BODY "TASKER"."PERSON_MGMT"
 AS
@@ -200,5 +204,22 @@ BEGIN
     pipe row (r);
   END LOOP;
 END get_people_administered_by;
+
+/**
+ * return a person specified by the ID
+ */
+FUNCTION get_person(
+    p_person_id NUMBER
+  )
+  RETURN people_set pipelined
+AS
+BEGIN
+  FOR r IN
+  ( SELECT * FROM tasker.person WHERE id = p_person_id )
+  LOOP
+    pipe row (r);
+  END LOOP;
+END get_person;
+
 END PERSON_MGMT;
 
