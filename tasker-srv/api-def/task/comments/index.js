@@ -32,11 +32,6 @@ var routes = [
     "actions": [ require( "./getComments" ) ]
   },
   {
-    "route":   "/task/:taskId/comment/:commentId",
-    "params":  [ require( "./commentId" ) ],
-    "actions": [ require( "./getComment" ) ]
-  },
-  {
     "route":   "/task/:taskId/comment",
     "actions": [ require( "./createComment" ) ]
   }

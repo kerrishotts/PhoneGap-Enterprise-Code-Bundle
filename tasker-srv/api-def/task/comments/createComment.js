@@ -40,7 +40,7 @@ var apiUtils = require( "../../../api-utils" ),
     "title":       "Add Comment",
     "action":      "create-comment",
     "description": [
-                  "Adds a comment to an existing task."
+      "Adds a comment to an existing task."
     ],
     "returns":     {
       201: "Created.",
@@ -51,7 +51,7 @@ var apiUtils = require( "../../../api-utils" ),
     },
     "example":     {
       "headers": [
-        { "location":     "/task/3/comment/10",
+        {
           "x-next-token": "next-auth-token"
         }
       ],
@@ -69,15 +69,12 @@ var apiUtils = require( "../../../api-utils" ),
     "hmac":        "tasker-256",
     "csrf":        "tasker-csrf",
     "template":    {
-      "task-comments":       {
+      "task-comments": {
         "title": "Task Comments", "key": "comments", "type": "string", "required": true, "maxLength": 4000, "minLength": 1
       }
     },
     "store":       {
-      "headers": [
-        { name: "location", key: "location" }
-      ],
-      "body":    [
+      "body": [
         { name: "comment-id", key: "commentId" }
       ]
     },
@@ -94,50 +91,29 @@ var apiUtils = require( "../../../api-utils" ),
       // does our input validate?
       var validationResults = objUtils.validate( req.body, action.template );
       if ( !validationResults.validates ) {
-        return next ( Errors.HTTP_Bad_Request( validationResults.message ) );
+        return next( Errors.HTTP_Bad_Request( validationResults.message ) );
       }
-/*
       // get body fields
-      var newTaskTitle = req.body.title, newTaskDescription = req.body.description;
+      var newComments = req.body.comments;
 
-      // check types and lengths
-      if ( typeof newTaskTitle !== "string" || typeof newTaskDescription !== "string" ) {
-        return next( Errors.HTTP_Bad_Request( "Missing field or Type Mismatch" ) );
-      }
-      if ( newTaskTitle.length < createTaskAction.template["task-title"].minLength ||
-           newTaskTitle.length > createTaskAction.template["task-title"].maxLength ||
-           newTaskDescription.length < createTaskAction.template["task-description"].minLength ||
-           newTaskDescription.length > createTaskAction.template["task-description"].maxLength
-        ) {
-        return next( Errors.HTTP_Bad_Request( "Field length out of bounds" ) );
-      }
-
-      // create the task
+      // create the comment
       var dbUtil = new DBUtils( req.app.get( "client-pool" ) );
-      dbUtil.query( "CALL tasker.task_mgmt.create_task(:1,:2,null,:3) INTO :4",
-                    [ newTaskTitle, newTaskDescription, req.user.userId, dbUtil.outInteger()] )
+      dbUtil.query( "CALL tasker.task_mgmt.create_task_comment(:1,:2,:3) INTO :4",
+                    [ req.task.id, newComments, req.user.userId, dbUtil.outInteger()] )
         .then( function ( results ) {
 
                  if ( results.returnParam !== null ) {
 
-                   // returnParam the new task id
+                   // returnParam the new comment id
 
                    // make a simple object
-                   o = {
-                     "taskId": results.returnParam,
-                     _links:   {}, _embedded: {}
+                   var o = {
+                     "commentId": results.returnParam,
+                     _links:      {}, _embedded: {}
                    };
 
                    // add our self hypermedia
-                   apiUtils.generateHypermediaForAction( createTaskAction, o._links, security, "self" );
-
-                   // and add a link to get the task
-                   apiUtils.generateHypermediaForAction(
-                     apiUtils.mergeAndClone( getTaskAction, { href: getTaskAction["base-href"] + "/" + o.taskId, templated: false } ),
-                     o._links, security );
-
-                   // also send the location
-                   res.location( getTaskAction["base-href"] + "/" + o.taskId );
+                   apiUtils.generateHypermediaForAction( action, o._links, security, "self" );
 
                    // send a 201 -- Created
                    resUtils.json( res, 201, o );
@@ -149,7 +125,7 @@ var apiUtils = require( "../../../api-utils" ),
         .catch( function ( err ) {
                   return next( new Error( err ) );
                 } )
-        .done(); */
+        .done();
     }
   };
 
