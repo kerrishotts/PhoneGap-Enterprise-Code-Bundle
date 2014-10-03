@@ -24,6 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  *
  ******************************************************************************/
+"use strict";
 /*eslint no-underscore-dangle:0*/
 //
 // dependencies

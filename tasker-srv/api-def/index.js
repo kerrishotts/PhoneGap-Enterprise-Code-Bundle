@@ -24,6 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  *
  ******************************************************************************/
+"use strict";
 /* globals require, module */
 // load in our api definitions and handlers
 var allActionGroups = [ require( "./discovery" ), require( "./csrf" ),

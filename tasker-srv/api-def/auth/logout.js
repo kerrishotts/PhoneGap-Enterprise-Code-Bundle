@@ -28,6 +28,7 @@
 //
 // dependencies
 //
+"use strict";
 var Errors = require( "../../errors" ),
   DBUtils = require( "../../db-utils" ),
   Session = require( "../../models/session" ),

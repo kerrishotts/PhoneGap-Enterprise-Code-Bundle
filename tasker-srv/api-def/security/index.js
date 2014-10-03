@@ -24,6 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  *
  ******************************************************************************/
+"use strict";
 var CryptoJS = require( "crypto-js" ),
   winston = require( "winston" ),
   security = {

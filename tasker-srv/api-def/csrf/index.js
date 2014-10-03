@@ -24,6 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  *
  ******************************************************************************/
+"use strict";
 
 var apiUtils = require( "../../api-utils" ),
   security = require( "../security" ),

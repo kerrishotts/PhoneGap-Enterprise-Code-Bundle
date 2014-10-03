@@ -24,6 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  *
  ******************************************************************************/
+"use strict";
 
 // adapted from: http://stackoverflow.com/a/7220510/741043
 function syntaxHighlight( json ) {

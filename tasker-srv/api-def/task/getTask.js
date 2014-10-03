@@ -24,6 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  *
  ******************************************************************************/
+"use strict";
 
 //
 // dependencies
@@ -58,7 +59,7 @@ var apiUtils = require( "../../api-utils" ),
         "pctComplete": 50,
         "status":      "I",
         "changeDate":  (new Date()),
-        "changeUser":  "BSMITH",
+        "changeUser":  "BSMITH"
       }
     },
     "verb":        "get",

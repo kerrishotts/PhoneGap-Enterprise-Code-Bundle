@@ -28,6 +28,7 @@
 //
 // dependencies
 //
+"use strict";
 var express = require( "express" ),
 
   // actions

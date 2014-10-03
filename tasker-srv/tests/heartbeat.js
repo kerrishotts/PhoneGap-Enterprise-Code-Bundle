@@ -24,6 +24,7 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 *
 ******************************************************************************/
+"use strict";
 
 
 var app = require( "../app"),

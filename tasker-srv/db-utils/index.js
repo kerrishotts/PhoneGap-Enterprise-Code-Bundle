@@ -1,6 +1,7 @@
 //
 // dependencies
 //
+"use strict";
 var winston = require( "winston" ),
   oracle = require( "oracle" ),
   Q = require( "q" );
