@@ -21,10 +21,14 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 /*global define, device*/
-define( [ "yasmf", "app/views/loginView", "app/views/dashboardView" ], function ( _y, LoginView, DashboardView ) {
+define( [ "yasmf", "app/views/loginView", "app/views/dashboardView",
+          "app/api/api" ], function ( _y, LoginView, DashboardView, API ) {
   "use strict";
+
   // define our app object
-  var APP = {};
+  var APP = new _y.BaseObject();
+  APP.subclass( "APP" );
+  APP.API = new API( {} );
   /**
    * stores our global event listeners
    */
@@ -72,8 +76,7 @@ define( [ "yasmf", "app/views/loginView", "app/views/dashboardView" ], function 
         if ( doSynchronously ) {
           try {
             listener( EVENT );
-          }
-          catch ( err ) {
+          } catch ( err ) {
             console.log( "dispatchGlobalEvent caught error: " + JSON.stringify( err ) );
           }
         } else {
@@ -112,7 +115,7 @@ define( [ "yasmf", "app/views/loginView", "app/views/dashboardView" ], function 
     APP.dispatchGlobalEvent( "network" + status );
     console.log( "Network is now " + status.toUpperCase() );
   }
-  
+
   /**
    * Dispatches a networkOnlineEvent
    */
@@ -140,9 +143,9 @@ define( [ "yasmf", "app/views/loginView", "app/views/dashboardView" ], function 
     function saveDataBeforePause() {
       localStorage.pauseInProgress = "true";
       localStorage.dataToSave = JSON.stringify( {
-                                                  "name":    "Bob Smith",
-                                                  "manager": "John Doe"
-                                                } );
+        "name": "Bob Smith",
+        "manager": "John Doe"
+      } );
     }
 
     APP.addGlobalEventListener( "applicationPausing", saveDataBeforePause );
@@ -161,25 +164,30 @@ define( [ "yasmf", "app/views/loginView", "app/views/dashboardView" ], function 
     }
     // find the rootContainer DOM element, make a new login view and show it
     var rootContainer = _y.ge( "rootContainer" ),
-        dashboardView = new DashboardView( {} ),
-        navigationController = new _y.UI.NavigationController( {
-                                                                 rootView: dashboardView,
-                                                                 parent:   rootContainer
-                                                               } );
+      dashboardView = new DashboardView( {} ),
+      navigationController = new _y.UI.NavigationController( {
+        rootView: dashboardView,
+        parent: rootContainer
+      } );
     APP.navigationController = navigationController;
 
     var loginView = new LoginView( {} );
     APP.loginView = loginView;
     _y.UI.globalNotifications.registerNotification( "APP:needsLogin" );
     _y.UI.globalNotifications.on( "APP:needsLogin", function () {
-      var navigationController = new _y.UI.NavigationController( { rootView: loginView } );
+      var navigationController = new _y.UI.NavigationController( {
+        rootView: loginView
+      } );
       navigationController.presentModalController( _y.$id( "rootContainer" ) );
     } );
     // register routes
     var router = _y.Router;
-    router.addURL( "/", "Home" ).addURL( "/login", "Login" )
-      .addURL( "/task", "List of Tasks" ).addURL( "/task/:taskId", "View/Edit Task" )
-      .addURL( "/task/:taskId/comment", "View comments" ).addURL( "/task/:taskId/comment/add", "Add comment" );
+    router.addURL( "/", "Home" )
+      .addURL( "/login", "Login" )
+      .addURL( "/task", "List of Tasks" )
+      .addURL( "/task/:taskId", "View/Edit Task" )
+      .addURL( "/task/:taskId/comment", "View comments" )
+      .addURL( "/task/:taskId/comment/add", "Add comment" );
     router.listen();
     router.replace( "/", 1 );
   };
