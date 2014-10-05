@@ -24,61 +24,61 @@
 define( [ "yasmf", "app/templates/loginTemplate" ], function ( _y, loginTemplate ) {
   "use strict";
   var _className = "LoginView",
-      LoginView = function () {
-        // we descend from a simple ViewContainer
-        var self = new _y.UI.ViewContainer();
-        // always subclass
-        self.subclass( _className );
-        //
-        // we need access to the username and password; in order to bind
-        // they need to be observable
-        self.defineObservableProperty( "username", {
-          default: ""
-        } );
-        self.defineObservableProperty( "password", {
-          default: ""
-        } );
-        //
-        // the template will attach event handlers to our methods
-        // submit and forgot
-        self.doAuthentication = function doAuthentication( e ) {
-          self.emit( "login:go" );
-          self.navigationController.dismissModalController();
-          e.preventDefault();
-          return false;
-        };
-        self.doForgotPassword = function doForgetPassword( e ) {
-          self.emit( "login:forgot" );
-        };
-        //
-        // return the login template when the view is rendered
-        // `self` is both the view and controller
-        self.override( function render() {
-          return loginTemplate( self, self, {
-            "username": "username",
-            "password": "password"
-          } );
-        } );
-        //
-        // init
-        self.override( function init( theParentElement ) {
-          self.super( _className, "init", [ undefined, "div", "loginView ui-container",
-                                            theParentElement
-          ] );
-        } );
-        //
-        // initWithOptions
-        self.override( function initWithOptions( options ) {
-          var theParentElement;
-          if ( typeof options !== "undefined" ) {
-            if ( typeof options.parent !== "undefined" ) {
-              theParentElement = options.parent;
-            }
-          }
-          self.init( theParentElement );
-        } );
-        self._autoInit.apply( self, arguments );
-        return self;
+    LoginView = function () {
+      // we descend from a simple ViewContainer
+      var self = new _y.UI.ViewContainer();
+      // always subclass
+      self.subclass( _className );
+      //
+      // we need access to the username and password; in order to bind
+      // they need to be observable
+      self.defineObservableProperty( "username", {
+        default: ""
+      } );
+      self.defineObservableProperty( "password", {
+        default: ""
+      } );
+      //
+      // the template will attach event handlers to our methods
+      // submit and forgot
+      self.doAuthentication = function doAuthentication( e ) {
+        self.emit( "login:go" );
+        self.navigationController.dismissModalController();
+        e.preventDefault();
+        return false;
       };
+      self.doForgotPassword = function doForgetPassword( e ) {
+        self.emit( "login:forgot" );
+      };
+      //
+      // return the login template when the view is rendered
+      // `self` is both the view and controller
+      self.override( function render() {
+        return loginTemplate( self, self, {
+          "username": "username",
+          "password": "password"
+        } );
+      } );
+      //
+      // init
+      self.override( function init( theParentElement ) {
+        self.super( _className, "init", [ undefined, "div", "loginView ui-container",
+          theParentElement
+        ] );
+      } );
+      //
+      // initWithOptions
+      self.override( function initWithOptions( options ) {
+        var theParentElement;
+        if ( typeof options !== "undefined" ) {
+          if ( typeof options.parent !== "undefined" ) {
+            theParentElement = options.parent;
+          }
+        }
+        self.init( theParentElement );
+      } );
+      self._autoInit.apply( self, arguments );
+      return self;
+    };
   return LoginView;
 } );
