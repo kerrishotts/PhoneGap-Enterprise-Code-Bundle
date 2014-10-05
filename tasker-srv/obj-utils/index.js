@@ -29,27 +29,30 @@
 /**
  * Merges the supplied objects into one new object. This isn't a deep clone -- so
  * this is only usable in lists and the like
+ *
+ * See: https://gist.github.com/kerrishotts/12c86d2a57f8b5bc1aca#file-merge-js
  */
-function mergeAndClone() {
+function merge() {
   "use strict";
   var t = {},
     args = Array.prototype.slice.call( arguments, 0 );
 
   args.forEach( function ( s ) {
-    Object.keys( s ).forEach( function ( prop ) {
-      var e = s[prop];
-      if ( typeof e === "object" && e instanceof Array ) {
-        if ( typeof t[prop] === "object" && t[prop] instanceof Array ) {
-          t[prop] = t[prop].concat( e );
-        } else if ( typeof t[prop] !== "object" || !(t[prop] instanceof Array) ) {
-          t[prop] = e;
+    Object.keys( s )
+      .forEach( function ( prop ) {
+        var e = s[ prop ];
+        if ( e instanceof Array ) {
+          if ( t[ prop ] instanceof Array ) {
+            t[ prop ] = t[ prop ].concat( e );
+          } else if ( !( t[ prop ] instanceof Object ) || !( t[ prop ] instanceof Array ) ) {
+            t[ prop ] = e;
+          }
+        } else if ( e instanceof Object && t[ prop ] instanceof Object ) {
+          t[ prop ] = merge( t[ prop ], e );
+        } else {
+          t[ prop ] = e;
         }
-      } else if ( typeof e === "object" && typeof t[prop] === "object" ) {
-        t[prop] = mergeAndClone( t[prop], e );
-      } else {
-        t[prop] = e;
-      }
-    } )
+      } );
   } );
   return t;
 }
@@ -57,31 +60,35 @@ function mergeAndClone() {
 function mergeIntoUsingMap( source, defaults, map ) {
   "use strict";
   var returningObject = {};
-  if ( typeof defaults !== "undefined" ) {
-    returningObject = mergeAndClone( returningObject, defaults );
+  if ( defaults !== undefined ) {
+    returningObject = merge( returningObject, defaults );
   }
-  if ( typeof source !== "undefined" ) {
-    Object.keys( source ).forEach( function ( prop ) {
-      var mapper;
-      if ( typeof returningObject[prop] !== "undefined" ) {
-        returningObject[ prop ] = source[ prop ];
-      }
-      if ( typeof map !== "undefined" ) {
-        if ( typeof map[ prop ] !== "undefined" ) {
-          mapper = map[ prop ];
-          if ( typeof mapper.cvt === "function" ) {
-            returningObject[ mapper.key ] = mapper.cvt( source [ prop ] );
-          } else {
-            returningObject[ mapper.key ] = source[ prop ];
+  if ( source !== undefined ) {
+    Object.keys( source )
+      .forEach( function ( prop ) {
+        var mapper;
+        if ( returningObject[ prop ] !== undefined ) {
+          returningObject[ prop ] = source[ prop ];
+        }
+        if ( map !== undefined ) {
+          if ( map[ prop ] !== undefined ) {
+            mapper = map[ prop ];
+            if ( typeof mapper.cvt === "function" ) {
+              returningObject[ mapper.key ] = mapper.cvt( source[ prop ] );
+            } else {
+              returningObject[ mapper.key ] = source[ prop ];
+            }
           }
         }
-      }
-    } );
+      } );
   }
   return returningObject;
 }
 
 /**
+ *
+ * from: https://gist.github.com/kerrishotts/3ffe4c5c704b23e8d22f#file-validate-js
+ *
  * Validates a source against the specified rules. `source` can look like this:
  *
  *     { aString: "hi", aNumber: { hi: 294.12 }, anInteger: 1944.32 }
@@ -123,50 +130,53 @@ function validate( source, rules ) {
   "use strict";
   var r = {
     validates: true,
-    message:   ""
+    message: ""
   };
 
-  if (typeof rules !== "object" ) {
+  if ( !( rules instanceof Object ) ) {
     return r;
   }
 
   // go over each rule in `rules`
-  Object.keys( rules ).forEach( function ( prop ) {
-    if ( r.validates ) {
-      // get the rule
-      var rule = rules[ prop ],
-        v = source,
-      // and get the value in source
-        k = (typeof rule.key !== "undefined") ? rule.key : prop,
-        title = (typeof rule.title !== "undefined" ) ? rule.title : prop;
-      k = k.replace( "[", "." ).replace( "]", "" ).replace( "\"", "" );
-      k.split( "." ).forEach( function ( keyPart ) {
-        try {
-          v = v[keyPart];
+  Object.keys( rules )
+    .forEach( function ( prop ) {
+      if ( r.validates ) {
+        // get the rule
+        var rule = rules[ prop ],
+          v = source,
+          // and get the value in source
+          k = ( rule.key !== undefined ) ? rule.key : prop,
+          title = ( rule.title !== undefined ) ? rule.title : prop;
+        k = k.replace( "[", "." )
+          .replace( "]", "" )
+          .replace( "\"", "" );
+        k.split( "." )
+          .forEach( function ( keyPart ) {
+            try {
+              v = v[ keyPart ];
+            } catch ( err ) {
+              v = undefined;
+            }
+          } );
+        // is it required?
+        if ( ( ( rule.required !== undefined ) ? rule.required : false ) && v === undefined ) {
+          r.validates = false;
+          r.message = "Missing required value " + title;
+          return;
         }
-        catch ( err ) {
-          v = undefined;
+
+        // can it be null?
+        if ( !( ( rule.nullable !== undefined ) ? rule.nullable : false ) && v === null ) {
+          r.validates = false;
+          r.message = "Unexpected null in " + title;
+          return;
         }
-      } );
-      // is it required?
-      if ( ( ( typeof rule.required !== "undefined" ) ? rule.required : false ) && typeof v === "undefined" ) {
-        r.validates = false;
-        r.message = "Missing required value " + title;
-        return;
-      }
 
-      // can it be null?
-      if ( !( ( typeof rule.nullable !== "undefined" ) ? rule.nullable : false ) && v === null ) {
-        r.validates = false;
-        r.message = "Unexpected null in " + title;
-        return;
-      }
-
-      // is it of the right type?
-      r.message = "Type Mismatch; expected " + rule.type + " not " + (typeof v) + " in " + title;
-      switch ( rule.type ) {
+        // is it of the right type?
+        r.message = "Type Mismatch; expected " + rule.type + " not " + ( typeof v ) + " in " + title;
+        switch ( rule.type ) {
         case "number":
-          if ( typeof v !== "undefined" ) {
+          if ( v !== undefined ) {
             if ( isNaN( parseFloat( v ) ) ) {
               r.validates = false;
               return;
@@ -178,7 +188,7 @@ function validate( source, rules ) {
           }
           break;
         case "integer":
-          if ( typeof v !== "undefined" ) {
+          if ( v !== undefined ) {
             if ( isNaN( parseInt( v, 10 ) ) ) {
               r.validates = false;
               return;
@@ -190,19 +200,14 @@ function validate( source, rules ) {
           }
           break;
         case "array":
-          if ( typeof v === "object" ) {
-            if ( !(v instanceof Array ) ) {
-              r.validates = false;
-              return;
-            }
-          } else if ( typeof v !== "object" && typeof v !== "undefined" ) {
+          if ( v !== undefined && !( v instanceof Array ) ) {
             r.validates = false;
             return;
           }
           break;
         case "date":
-          if ( typeof v === "object" ) {
-            if ( !(v instanceof Date ) ) {
+          if ( v instanceof Object ) {
+            if ( !( v instanceof Date ) ) {
               r.validates = false;
               return;
             } else if ( v instanceof Date && isNaN( v.getTime() ) ) {
@@ -211,84 +216,87 @@ function validate( source, rules ) {
               return;
             }
           } else if ( typeof v === "string" ) {
-            if ( isNaN( ( new Date( v ) ).getTime() ) ) {
+            if ( isNaN( ( new Date( v ) )
+              .getTime() ) ) {
               r.validates = false;
               r.message = "Invalid date in " + title;
               return;
             }
-          } else if ( typeof v !== "object" && typeof v !== "undefined" ) {
+          } else if ( !( v instanceof "object" ) && v !== undefined ) {
             r.validates = false;
             return;
           }
           break;
         case "object":
-          if ( typeof v !== "object" && typeof v !== "undefined" ) {
+          if ( !( v instanceof Object ) && v !== undefined ) {
             r.validates = false;
+            return;
           }
           break;
         case "*":
           break;
         default:
-          if ( !( typeof v === rule.type || typeof v === "undefined" ) ) {
+          if ( !( typeof v === rule.type || v === undefined ) ) {
             r.validates = false;
             return;
           }
-      }
-      r.message = "";
+        }
+        r.message = "";
 
-      // if we're still here, types are good. Now check length, range, and enum
+        // if we're still here, types are good. Now check length, range, and enum
 
-      // check range
-      r.message = "Value out of range " + v + " in " + title;
-      if ( typeof rule.min === "number" && v < rule.min ) {
-        r.validates = false;
-        return;
-      }
-      if ( typeof rule.max === "number" && v > rule.max ) {
-        r.validates = false;
-        return;
-      }
-      r.message = "";
+        // check range
+        r.message = "Value out of range " + v + " in " + title;
+        if ( typeof rule.min === "number" && v < rule.min ) {
+          r.validates = false;
+          return;
+        }
+        if ( typeof rule.max === "number" && v > rule.max ) {
+          r.validates = false;
+          return;
+        }
+        r.message = "";
 
-      // check length
-      if ( ( typeof rule.minLength === "number" && typeof v !== "undefined" && typeof v.length !== "undefined" && v.length < rule.minLength ) ||
-           ( typeof rule.maxLength === "number" && typeof v !== "undefined" && typeof v.length !== "undefined" && v.length > rule.maxLength ) ) {
-        r.message = "" + title + " out of length range";
-        r.validates = false;
-        return;
-      }
+        // check length
+        if ( ( typeof rule.minLength === "number" && v !== undefined && v.length !== undefined && v.length < rule.minLength ) ||
+          ( typeof rule.maxLength === "number" && v !== undefined && v.length !== undefined && v.length > rule.maxLength ) ) {
+          r.message = "" + title + " out of length range";
+          r.validates = false;
+          return;
+        }
 
-      // check enum
-      if ( typeof rule.enum === "object" && typeof v !== "undefined" ) {
-        if ( rule.enum.filter( function ( e ) {
-          if ( typeof e.value !== "undefined" ) {
-            return e.value == v;
-          } else {
-            return e == v;
+        // check enum
+        if ( rule.enum instanceof Object && v !== undefined ) {
+          if ( rule.enum.filter( function ( e ) {
+              if ( e.value !== undefined ) {
+                return e.value == v;
+              } else {
+                return e == v;
+              }
+            } )
+            .length === 0 ) {
+            r.message = "" + title + " contains unexpected value " + v + " in " + title;
+            r.validates = false;
+            return;
           }
-        } ).length === 0 ) {
-          r.message = "" + title + " contains unexpected value " + v + " in " + title;
-          r.validates = false;
-          return;
         }
-      }
 
-      // check pattern
-      if ( typeof rule.pattern === "object" && typeof v !== "undefined" ) {
-        if ( v.match( rule.pattern ) === null ) {
-          r.message = "" + title + " doesn't match pattern in " + title;
-          r.validates = false;
-          return;
+        // check pattern
+        if ( rule.pattern instanceof Object && v !== undefined ) {
+          if ( v.match( rule.pattern ) === null ) {
+            r.message = "" + title + " doesn't match pattern in " + title;
+            r.validates = false;
+            return;
+          }
         }
       }
-    }
-  } );
+    } );
 
   return r;
 }
 
 module.exports = {
-  mergeAndClone:     mergeAndClone,
+  mergeAndClone: merge,
   mergeIntoUsingMap: mergeIntoUsingMap,
-  validate:          validate
+  validate: validate
 };
