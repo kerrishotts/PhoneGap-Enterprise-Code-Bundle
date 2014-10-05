@@ -29,7 +29,8 @@
 //
 // dependencies
 //
-var express = require( "express" );
+var express = require( "express" ),
+    objUtils = require( "../obj-utils");
 
 // return utility methods for dealing with api definitions
 module.exports = {
@@ -157,28 +158,9 @@ module.exports = {
   },
   /**
    * Merges the supplied objects into one new object. This isn't a deep clone -- so
-   * this is only usable in lists and the like
+   * this is only usable in lists and the like.
+   *
+   * https://gist.github.com/kerrishotts/12c86d2a57f8b5bc1aca#file-merge-js
    */
-  mergeAndClone:               function mergeAndClone() {
-    var t = {},
-      args = Array.prototype.slice.call( arguments, 0 );
-
-    args.forEach( function ( s ) {
-      Object.keys( s ).forEach( function ( prop ) {
-        var e = s[prop];
-        if ( typeof e === "object" && e instanceof Array ) {
-          if ( typeof t[prop] === "object" && t[prop] instanceof Array ) {
-            t[prop] = t[prop].concat( e );
-          } else if ( typeof t[prop] !== "object" || !(t[prop] instanceof Array) ) {
-            t[prop] = e;
-          }
-        } else if ( typeof e === "object" && typeof t[prop] === "object" ) {
-          t[prop] = mergeAndClone( t[prop], e );
-        } else {
-          t[prop] = e;
-        }
-      } )
-    } );
-    return t;
-  }
+  mergeAndClone:  objUtils.mergeAndClone
 };
