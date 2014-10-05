@@ -23,41 +23,35 @@
  */
 define( function () {
   "use strict";
+
+  var _y = require( "yasmf" );
+
   var ObjUtils = {
-    merge:       function merge() {
+    valueForKeyPath: _y.valueForKeyPath,
+    merge: function merge() {
       var t = {},
         args = Array.prototype.slice.call( arguments, 0 );
 
       args.forEach( function ( s ) {
-        Object.keys( s ).forEach( function ( prop ) {
-          var e = s[prop];
-          if ( typeof e === "object" && e instanceof Array ) {
-            if ( typeof t[prop] === "object" && t[prop] instanceof Array ) {
-              t[prop] = t[prop].concat( e );
-            } else if ( typeof t[prop] !== "object" || !(t[prop] instanceof Array) ) {
-              t[prop] = e;
+        Object.keys( s )
+          .forEach( function ( prop ) {
+            var e = s[ prop ];
+            if ( typeof e === "object" && e instanceof Array ) {
+              if ( typeof t[ prop ] === "object" && t[ prop ] instanceof Array ) {
+                t[ prop ] = t[ prop ].concat( e );
+              } else if ( typeof t[ prop ] !== "object" || !( t[ prop ] instanceof Array ) ) {
+                t[ prop ] = e;
+              }
+            } else if ( typeof e === "object" && typeof t[ prop ] === "object" ) {
+              t[ prop ] = merge( t[ prop ], e );
+            } else {
+              t[ prop ] = e;
             }
-          } else if ( typeof e === "object" && typeof t[prop] === "object" ) {
-            t[prop] = mergeAndClone( t[prop], e );
-          } else {
-            t[prop] = e;
-          }
-        } )
+          } );
       } );
       return t;
-      /*var o = {};
-       var prop;
-       var args = Array.prototype.slice.call( arguments, 0 );
-       args.forEach( function ( arr ) {
-       for ( prop in arr ) {
-       if ( arr.hasOwnProperty( prop ) ) {
-       o[prop] = arr[prop];
-       }
-       }
-       } );
-       return o;*/
     },
-    forEach:     function forEach( o, fn ) {
+    forEach: function forEach( o, fn ) {
       if ( typeof o === "object" ) {
         if ( typeof o.forEach !== "undefined" ) {
           o.forEach( fn );
@@ -70,9 +64,10 @@ define( function () {
       if ( typeof fn !== "function" ) {
         return;
       }
-      Object.keys( o ).forEach( function ( prop ) {
-        fn( o[prop], prop, o ); // mimic value, idx, array on Array forEach
-      } );
+      Object.keys( o )
+        .forEach( function ( prop ) {
+          fn( o[ prop ], prop, o ); // mimic value, idx, array on Array forEach
+        } );
     },
     interpolate: function interpolate( str, context ) {
       var newStr = str;
