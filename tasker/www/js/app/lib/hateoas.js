@@ -23,50 +23,48 @@
  */
 define( [ "app/lib/objUtils" ], function ( ObjUtils ) {
   "use strict";
+
   function storeResponseToContext( r, context ) {
-    var selfStore;
-    if ( typeof r !== "undefined" ) {
-      if ( typeof r.body !== "undefined" ) {
-        if ( typeof r.body._links !== "undefined" ) {
-          if ( typeof r.body._links.self !== "undefined" ) {
-            if ( typeof r.body._links.self.store !== "undefined" ) {
-              selfStore = r.body._links.self.store;
-            }
-          }
-        }
-      }
+    var selfStore = ObjUtils.valueForKeyPath( r, "body._links.self.store" );
+    if ( selfStore === undefined ) {
+      return;
     }
-    if ( selfStore === undefined ) { return; }
-    ObjUtils.forEach( selfStore, function ( o, oProp ) {
-      // o will be body and headers and status; we can ignore status
-      if ( typeof o === "object" ) {
-        ObjUtils.forEach( o, function ( v, prop ) {
-          v.forEach( function ( item ) {
-            context[item.name] = r[oProp][item.key];
-          } );
+
+    Object.keys( selfStore )
+      .forEach( function ( prop ) {
+        var o = selfStore[ prop ];
+        o.forEach( function ( item ) {
+          context[ item.name ] = ObjUtils.valueForKeyPath( r[ prop ], item.key );
         } );
-      }
-    } )
+      } );
   }
 
   function map( o, usingTemplate ) {
     var newO = {};
-    ObjUtils.forEach( usingTemplate, function ( v, prop ) {
-      newO[v.key] = o[prop];
-    } );
+    Object.keys( usingTemplate )
+      .forEach( function ( prop ) {
+        var v = usingTemplate[ prop ];
+        newO[ v.key ] = o[ prop ];
+      } );
     return newO;
   }
 
   function buildHeadersAttachment( headers, context ) {
     var returnHeaders = [];
-    if ( typeof headers === "undefined" ) { return returnHeaders; }
+    if ( typeof headers === "undefined" ) {
+      return returnHeaders;
+    }
     headers.forEach( function ( header ) {
       if ( typeof header.templated === "undefined" || !header.templated ) {
-        returnHeaders.push( { headerName:  header.key,
-                              headerValue: header.value } );
+        returnHeaders.push( {
+          headerName: header.key,
+          headerValue: header.value
+        } );
       } else {
-        returnHeaders.push( { headerName:  header.key,
-                              headerValue: ObjUtils.interpolate( header.value, context )} );
+        returnHeaders.push( {
+          headerName: header.key,
+          headerValue: ObjUtils.interpolate( header.value, context )
+        } );
       }
     } );
     return returnHeaders;
@@ -74,7 +72,7 @@ define( [ "app/lib/objUtils" ], function ( ObjUtils ) {
 
   return {
     storeResponseToContext: storeResponseToContext,
-    map:                    map,
+    map: map,
     buildHeadersAttachment: buildHeadersAttachment
-  }
+  };
 } );
