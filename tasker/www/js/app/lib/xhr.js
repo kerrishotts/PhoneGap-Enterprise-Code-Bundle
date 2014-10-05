@@ -79,6 +79,7 @@ define( [ "Q" ], function ( Q ) {
   function JSONParseError( response ) {
     this.name = "JSONParseError";
     this.message = "The JSON response could not be parsed";
+    this.response = response;
     this.code = -30000;
   }
 
@@ -98,7 +99,7 @@ define( [ "Q" ], function ( Q ) {
   XHRError.prototype.constructor = XHRError;
 
   /**
-   *
+   * From: https://gist.github.com/kerrishotts/67a077893f6223f42758#file-parseresponseheaders-js
    * Parse response header string of the form:
    *
    * "
@@ -114,38 +115,45 @@ define( [ "Q" ], function ( Q ) {
    */
   function parseResponseHeaders( headerStr, modifyKeys ) {
     // no header? return an empty object
-    if ( !headerStr ) { return {}; }
+    if ( !headerStr ) {
+      return {};
+    }
     // check if modifyKeys is passed; if not true is the default
-    if ( typeof modifyKeys === "undefined" ) { modifyKeys = true; }
+    if ( typeof modifyKeys === "undefined" ) {
+      modifyKeys = true;
+    }
     // split the header string by carraige return, then reduce it to
     // an object containing the header keys and values
-    return headerStr.split( "\r\n" ).reduce(
-      function parseHeader( prevValue, headerPair ) {
-        // header is of the form abc: def; split by ": " and then
-        // shift out the key. Reconstruct the value in case some one has
-        // a header of abc: def: ghi
-        var headerParts = headerPair.split( ": " ),
-          headerKey = headerParts.shift(),
-          headerValue = headerParts.join( ": " ),
-          propParts, prop;
-        if ( modifyKeys ) {
-          // convert some-property-key to somePropertyKey
-          propParts = headerKey.split( "-" );
-          prop = propParts.reduce( function ( prevValue, v ) {
-            return prevValue + (v.substr( 0, 1 ).toUpperCase() + v.substr( 1 ));
-          } );
-          prop = prop.substr( 0, 1 ).toLowerCase() +
-                 prop.substr( 1 );
-        }
-        // if we have one or more part, copy the value to the key
-        if ( headerParts.length > 0 ) {
-          prevValue[ modifyKeys ? prop : headerKey ] = headerValue;
-        } else {
-          // otherwise just copy true
-          prevValue[ modifyKeys ? prop : headerKey ] = true;
-        }
-        return prevValue;
-      }, {} );
+    return headerStr.split( "\r\n" )
+      .reduce(
+        function parseHeader( prevValue, headerPair ) {
+          // header is of the form abc: def; split by ": " and then
+          // shift out the key. Reconstruct the value in case some one has
+          // a header of abc: def: ghi
+          var headerParts = headerPair.split( ": " ),
+            headerKey = headerParts.shift(),
+            headerValue = headerParts.join( ": " ),
+            propParts, prop;
+          if ( modifyKeys ) {
+            // convert some-property-key to somePropertyKey
+            propParts = headerKey.split( "-" );
+            prop = propParts.reduce( function ( prevValue, v ) {
+              return prevValue + ( v.substr( 0, 1 )
+                .toUpperCase() + v.substr( 1 ) );
+            } );
+            prop = prop.substr( 0, 1 )
+              .toLowerCase() +
+              prop.substr( 1 );
+          }
+          // if we have one or more part, copy the value to the key
+          if ( headerParts.length > 0 ) {
+            prevValue[ modifyKeys ? prop : headerKey ] = headerValue;
+          } else {
+            // otherwise just copy true
+            prevValue[ modifyKeys ? prop : headerKey ] = true;
+          }
+          return prevValue;
+        }, {} );
   }
 
   /**
@@ -159,6 +167,7 @@ define( [ "Q" ], function ( Q ) {
    * @private
    */
   function _xhr( method, uri, options ) {
+    method = method.toUpperCase();
     if ( DEBUG ) {
       console.log( method, uri, options );
     }
@@ -166,21 +175,22 @@ define( [ "Q" ], function ( Q ) {
     var deferred = Q.defer();
     // define our default options and merge the user options back in
     var opt = {
-      data:                 null, // data to send
-      sending:              "application/json", // mime type that we're sending
-      receiving:            "application/json", // mime type we expect back
-      async:                true, // send asynchronously
-      withCredentials:      true, // true to send cookies
-      retryAutomatically:   true, // if a timeout occurs, retry
-      retryOnXHRError:      true, // if an XHR error occurs, also retry
-      timeout:              30000, // timeout after 30s, if no retry, TimeoutError
-      initialRetryDelay:    1500, // attempt a retry after 0.5s
-      retryThrottle:        1.125, // multiply each time round
+      data: null, // data to send
+      sending: "application/json", // mime type that we're sending
+      receiving: "application/json", // mime type we expect back
+      async: true, // send asynchronously
+      withCredentials: true, // true to send cookies
+      retryAutomatically: true, // if a timeout occurs, retry
+      retryOnXHRError: true, // if an XHR error occurs, also retry
+      timeout: 30000, // timeout after 30s, if no retry, TimeoutError
+      initialRetryDelay: 1500, // attempt a retry after 0.5s
+      retryThrottle: 1.125, // multiply each time round
       maximumRetryAttempts: 5, // fail after 5 attempts -- MaxRetryAttemptsError
-      headers:              [], // headers to send on the request
-      username:             undefined, // don't send a username (Basic Auth)
-      password:             undefined, // don't send a password (Basic Auth)
-      modifyHeaderKeys:     false // if true, header keys are converted to camelCase in response
+      headers: [], // headers to send on the request
+      username: undefined, // don't send a username (Basic Auth)
+      password: undefined, // don't send a password (Basic Auth)
+      modifyHeaderKeys: false // if true, header keys are converted to camelCase in response
+
     };
     if ( typeof options !== "undefined" ) {
       for ( var prop in options ) {
@@ -194,8 +204,9 @@ define( [ "Q" ], function ( Q ) {
       retryDelay = opt.initialRetryDelay;
     // If the data we're sending is JSON and sending is application/json, then
     // parse the data accordingly -- otherwise copy the value
-    var sendingData;
-    if ( opt.sending === "application/json" || opt.sending === "text/json" ) {
+    var sendingData = null;
+    if ( ( opt.sending === "application/json" || opt.sending === "text/json" ) &&
+      ( opt.data !== undefined && opt.data !== null ) ) {
       sendingData = JSON.stringify( opt.data );
     } else {
       sendingData = opt.data;
@@ -207,7 +218,7 @@ define( [ "Q" ], function ( Q ) {
      */
     function sendRequest() {
       var xhr = new XMLHttpRequest();
-      xhr.open( method.toUpperCase(), uri, opt.async, opt.username, opt.password );
+      xhr.open( method, uri, opt.async, opt.username, opt.password );
       xhr.withCredentials = opt.withCredentials;
       xhr.timeout = opt.timeout;
       xhr.setRequestHeader( "Accept", opt.receiving );
@@ -222,7 +233,7 @@ define( [ "Q" ], function ( Q ) {
        */
       xhr.ontimeout = function () {
         if ( opt.retryAutomatically ) {
-          if ( retryAttempts == opt.maximumRetryAttempts ) {
+          if ( retryAttempts === opt.maximumRetryAttempts ) {
             if ( DEBUG ) {
               console.log( "Max attempts" );
             }
@@ -248,7 +259,7 @@ define( [ "Q" ], function ( Q ) {
        */
       xhr.onerror = function () {
         if ( opt.retryOnXHRError ) {
-          if ( retryAttempts == opt.maximumRetryAttempts ) {
+          if ( retryAttempts === opt.maximumRetryAttempts ) {
             if ( DEBUG ) {
               console.log( "Max attempts" );
             }
@@ -280,29 +291,28 @@ define( [ "Q" ], function ( Q ) {
           var headers = parseResponseHeaders( this.getAllResponseHeaders(), opt.modifyHeaderKeys ),
             response = {
               headers: headers,
-              body:    null,
-              status:  this.status
+              body: null,
+              status: this.status
             };
           switch ( opt.receiving ) {
-            case "application/hal+json":
-            case "application/json":
-            case "text/json":
-              try {
-                response.body = JSON.parse( this.responseText );
-                deferred.resolve( response );
-              }
-              catch ( err ) {
-                deferred.reject( new JSONParseError( this.responseText ) );
-              }
-              break;
-            case "application/xml":
-            case "text/xml":
-              response.body = this.responseXML;
+          case "application/hal+json":
+          case "application/json":
+          case "text/json":
+            try {
+              response.body = JSON.parse( this.responseText );
               deferred.resolve( response );
-              break;
-            default:
-              response.body = this.response;
-              deferred.resolve( response );
+            } catch ( err ) {
+              deferred.reject( new JSONParseError( this.responseText ) );
+            }
+            break;
+          case "application/xml":
+          case "text/xml":
+            response.body = this.responseXML;
+            deferred.resolve( response );
+            break;
+          default:
+            response.body = this.response;
+            deferred.resolve( response );
           }
         } else {
           deferred.reject( new HTTPError( this.status, this.response ) );
@@ -334,8 +344,7 @@ define( [ "Q" ], function ( Q ) {
         args.push( fingerprints[ i ] );
       }
       window.plugins.sslCertificateChecker.check.apply( this, args );
-    }
-    catch ( err ) {
+    } catch ( err ) {
       // if window.plugins isn't defined, we'll go ahead and resolve instead
       if ( typeof window.plugins === "undefined" ) {
         deferred.resolve( "" );
@@ -347,12 +356,12 @@ define( [ "Q" ], function ( Q ) {
   }
 
   return {
-    send:                    _xhr,
-    checkIfSecure:           _checkIfSecure,
-    TimeoutError:            TimeoutError,
+    send: _xhr,
+    checkIfSecure: _checkIfSecure,
+    TimeoutError: TimeoutError,
     MaxRetryAttemptsReached: MaxRetryAttemptsReached,
-    HTTPError:               HTTPError,
-    JSONParseError:          JSONParseError,
-    XHRError:                XHRError
+    HTTPError: HTTPError,
+    JSONParseError: JSONParseError,
+    XHRError: XHRError
   };
 } );
