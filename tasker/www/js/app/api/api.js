@@ -355,7 +355,7 @@ define( [ "../models/session", "../lib/objUtils", "../lib/xhr", "../lib/cryptojs
               self._session = new Session( {
                 userId: context[ "user-id" ],
                 sessionId: context[ "session-id" ],
-                hmacSecret: context[ "hmac-token" ],
+                hmacSecret: context[ "hmac-secret" ],
                 nextToken: context[ "next-token" ]
               } );
               deferred.resolve( r );
