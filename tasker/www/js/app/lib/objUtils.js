@@ -21,13 +21,32 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-define( function () {
+define( [ "yasmf" ], function ( _y ) {
   "use strict";
 
-  var _y = require( "yasmf" );
-
   var ObjUtils = {
+    /**
+     * Returns a value in an object for a given keypath. A keypath can drill into the
+     * object to an arbitrary number of levels, which makes this incredibly useful.
+     * If any portion of the keypath evaluates to undefined or null, that is the final
+     * result. Essentially this is a quick way to obtain values deep in an object
+     * hierarchy without knowing (or caring) if there are intervening undefined/null
+     * values.
+     *
+     * A keypath looks like this: "field1.field2.field3[index1].field4"
+     *
+     * @param {*} o        object
+     * @param {string} k   keypath
+     * @param {*} d        default
+     * @return {*}         value at keypath or default if keypath undefined or null
+     */
     valueForKeyPath: _y.valueForKeyPath,
+    /**
+     * Merge multiple objects into one. For more information, see
+     * https://gist.github.com/kerrishotts/12c86d2a57f8b5bc1aca
+     *
+     * @return {*} merged objects
+     */
     merge: function merge() {
       var t = {},
         args = Array.prototype.slice.call( arguments, 0 );
@@ -36,13 +55,13 @@ define( function () {
         Object.keys( s )
           .forEach( function ( prop ) {
             var e = s[ prop ];
-            if ( typeof e === "object" && e instanceof Array ) {
-              if ( typeof t[ prop ] === "object" && t[ prop ] instanceof Array ) {
+            if ( e instanceof Array ) {
+              if ( t[ prop ] instanceof Array ) {
                 t[ prop ] = t[ prop ].concat( e );
-              } else if ( typeof t[ prop ] !== "object" || !( t[ prop ] instanceof Array ) ) {
+              } else if ( !( t[ prop ] instanceof Object ) || !( t[ prop ] instanceof Array ) ) {
                 t[ prop ] = e;
               }
-            } else if ( typeof e === "object" && typeof t[ prop ] === "object" ) {
+            } else if ( e instanceof Object && t[ prop ] instanceof Object ) {
               t[ prop ] = merge( t[ prop ], e );
             } else {
               t[ prop ] = e;
@@ -51,6 +70,12 @@ define( function () {
       } );
       return t;
     },
+
+    /**
+     * Iterates over the keys in an object
+     * @param  {Object|Array}   o  Object or array to iterate over
+     * @param  {Function} fn Function to call with each item (value, key, object)
+     */
     forEach: function forEach( o, fn ) {
       if ( typeof o === "object" ) {
         if ( typeof o.forEach !== "undefined" ) {
@@ -69,16 +94,10 @@ define( function () {
           fn( o[ prop ], prop, o ); // mimic value, idx, array on Array forEach
         } );
     },
-    interpolate: function interpolate( str, context ) {
-      var newStr = str;
-      if ( typeof context === "undefined" ) {
-        return newStr;
-      }
-      ObjUtils.forEach( context, function ( v, prop ) {
-        newStr = newStr.replace( "{" + prop + "}", v );
-      } );
-      return newStr;
-    }
+    /**
+     * Interpolates a string
+     */
+    interpolate: _y.interpolate
   };
 
   return ObjUtils;
