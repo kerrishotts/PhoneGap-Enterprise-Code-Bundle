@@ -108,7 +108,7 @@ define( [ "yasmf", "app/lib/xhr",
     if ( body !== undefined && body !== null ) {
       stringToHmac += JSON.stringify( body );
     }
-    hmacString = CryptoJS.HmacSHA256( stringToHmac, context[ "hmac-token" ] )
+    hmacString = CryptoJS.HmacSHA256( stringToHmac, context[ "hmac-secret" ] )
       .toString( CryptoJS.enc.Hex );
 
     context[ "hmac-token" ] = hmacString;
