@@ -28,13 +28,16 @@
 var CryptoJS = require( "crypto-js" ),
   winston = require( "winston" ),
   security = {
-    "csrf-defs":       {
+    "csrf-defs": {
       "tasker-csrf": {
         "csrf-action": [ "get-csrf-token" ],
         "attachments": {
-          "headers": [
-            { name: "csrf-token", key: "x-csrf-token", value: "{csrf-token}", templated: true }
-          ]
+          "headers": [ {
+            name: "csrf-token",
+            key: "x-csrf-token",
+            value: "{csrf-token}",
+            templated: true
+          } ]
         }
       }
     },
@@ -42,32 +45,43 @@ var CryptoJS = require( "crypto-js" ),
       "tasker-auth": {
         "auth-action": [ "login" ],
         "attachments": {
-          "headers": [
-            {
-              "name":      "auth-token", "key": "x-auth-token", "value": "{session-id}.{next-token}",
-              "templated": true
-            }
-          ]
+          "headers": [ {
+            "name": "auth-token",
+            "key": "x-auth-token",
+            "value": "{session-id}.{next-token}",
+            "templated": true
+          } ]
         },
-        "store":       {
-          "headers": [
-            { "name": "next-token", "key": "x-next-token", "only-when": "not null" }
-          ]
+        "store": {
+          "headers": [ {
+            "name": "next-token",
+            "key": "x-next-token",
+            "only-when": "not null"
+          } ]
         }
       }
     },
-    "hmac-defs":       {
+    "hmac-defs": {
       "tasker-256": {
-        "hmac":          "SHA256",
+        "hmac": "SHA256",
         "hmac-template": "{date:%Y%m%d.%H%M}{route}{query-string}{body}",
-        "hmac-secret":   "{hmac-token}",
-        "handler":       function checkHmac( req ) {
+        "hmac-secret": "{hmac-token}",
+        "attachments": {
+          "headers": [ {
+            "name": "hmac-token",
+            "key": "x-hmac-token",
+            "value": "{hmac-token}",
+            templated: true
+          } ]
+        },
+        "handler": function checkHmac( req ) {
           if ( !req.isAuthenticated() ) {
             return false; // can't check -- we won't have an hmac token
           }
+
           function checkHmac( candidate, delta ) {
             function pad2( v ) {
-              return (v < 10) ? "0" + v : "" + v;
+              return ( v < 10 ) ? "0" + v : "" + v;
             }
 
             var now = new Date(),
@@ -86,12 +100,20 @@ var CryptoJS = require( "crypto-js" ),
             nowHH = now.getUTCHours();
             nowMI = now.getUTCMinutes();
             dateString = "" + nowYYYY + pad2( nowMM ) + pad2( nowDD ) + "." + pad2( nowHH ) + pad2( nowMI );
-            stringToHmac = "" + dateString + "." + req.url + (Object.keys( req.body ).length > 0 ? "." + JSON.stringify( req.body ) : "");
-            hmacString = CryptoJS.HmacSHA256( stringToHmac, req.user.hmacToken ).toString( CryptoJS.enc.Base64 );
-            return hmacString == candidate;
+            stringToHmac = "" + dateString + "." + req.url + ( Object.keys( req.body )
+              .length > 0 ? "." + JSON.stringify( req.body ) : "" );
+            hmacString = CryptoJS.HmacSHA256( stringToHmac, req.user.hmacToken )
+              .toString( CryptoJS.enc.Base64 );
+            if ( hmacString !== candidate ) {
+              // try a hex encoding
+              hmacString = CryptoJS.HmacSHA256( stringToHmac, req.user.hmacToken )
+                .toString( CryptoJS.enc.Hex );
+              return hmacString === candidate;
+            }
+            return hmacString === candidate;
           }
 
-          var clientHmac = req.headers["x-hmac-token"],
+          var clientHmac = req.headers[ "x-hmac-token" ],
             validHmac = false;
           if ( !checkHmac( clientHmac, 0 ) ) {
             // client's time doesn't match ours -- give them some leeway (+/-5min)
