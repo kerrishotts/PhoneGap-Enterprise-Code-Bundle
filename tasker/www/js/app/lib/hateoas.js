@@ -44,7 +44,9 @@ define( [ "app/lib/objUtils" ], function ( ObjUtils ) {
     Object.keys( usingTemplate )
       .forEach( function ( prop ) {
         var v = usingTemplate[ prop ];
-        newO[ v.key ] = o[ prop ];
+        if ( o[ prop ] !== undefined ) {
+          newO[ v.key ] = o[ prop ];
+        }
       } );
     return newO;
   }
