@@ -23,6 +23,20 @@
  */
 define( [ "yasmf", "app/templates/loginTemplate" ], function ( _y, loginTemplate ) {
   "use strict";
+  _y.addTranslations( {
+    "LOGIN:INVALID_USERNAME_OR_PASSWORD": {
+      "EN": "Invalid username or password.\nPlease try again."
+    },
+    "LOGIN:PROBLEM": {
+      "EN": "Login Failed"
+    },
+    "LOGIN:TRY_AGAIN": {
+      "EN": "Try Again"
+    },
+    "LOGIN:CANCEL": {
+      "EN": "Cancel"
+    }
+  } );
   var _className = "LoginView",
     LoginView = function () {
       // we descend from a simple ViewContainer
@@ -42,8 +56,41 @@ define( [ "yasmf", "app/templates/loginTemplate" ], function ( _y, loginTemplate
       // the template will attach event handlers to our methods
       // submit and forgot
       self.doAuthentication = function doAuthentication( e ) {
-        self.emit( "login:go" );
-        self.navigationController.dismissModalController();
+        _y.UI.globalNotifications.emit( "login:auth", [ self.username, self.password ] );
+        _y.UI.globalNotifications.once( "login:response", function ( sender, notice, args ) {
+          if ( args[ 0 ] !== "" ) {
+            _y.UI.globalNotifications.emit( "login:fail" );
+            var alert = new _y.UI.Alert();
+            alert.initWithOptions( {
+              title: _y.T( "LOGIN:PROBLEM" ),
+              text: _y.T( args[ 0 ] ),
+              promise: true,
+              buttons: [
+                _y.UI.Alert.button( _y.T( "LOGIN:TRY_AGAIN" ) ),
+                _y.UI.Alert.button( _y.T( "LOGIN:CANCEL" ), {
+                  type: "bold",
+                  tag: -1
+                } )
+              ]
+            } );
+            alert.show()
+              .then( function ( idx ) {
+                // we actually do nothing; the login screen is still visible
+                return;
+              } )
+              .catch( function ( e ) {
+                // let the world know we're canceling the attempt
+                _y.UI.globalNotifications.emit( "login:authCancel" );
+                self.navigationController.dismissModalController();
+              } )
+              .done();
+            // alert it
+          } else {
+            _y.UI.globalNotifications.emit( "login:good" );
+            // close us
+            self.navigationController.dismissModalController();
+          }
+        } );
         e.preventDefault();
         return false;
       };
