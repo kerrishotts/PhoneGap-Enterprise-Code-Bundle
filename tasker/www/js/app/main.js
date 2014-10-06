@@ -22,7 +22,8 @@
  */
 /*global define, device*/
 define( [ "yasmf", "app/views/loginView", "app/views/dashboardView",
-          "app/api/api" ], function ( _y, LoginView, DashboardView, API ) {
+  "app/api/api"
+], function ( _y, LoginView, DashboardView, API ) {
   "use strict";
 
   // define our app object
@@ -171,10 +172,27 @@ define( [ "yasmf", "app/views/loginView", "app/views/dashboardView",
       } );
     APP.navigationController = navigationController;
 
-    var loginView = new LoginView( {} );
-    APP.loginView = loginView;
-    _y.UI.globalNotifications.registerNotification( "APP:needsLogin" );
+
+    // register login-related notifications
+    [ "APP:needsLogin", "APP:needsLoginUI", "login:auth", "login:authCancel",
+      "login:response", "login:good", "login:fail", "login:dismiss"
+    ].forEach( function ( n ) {
+      _y.UI.globalNotifications.registerNotification( n );
+    } );
+
+    // when APP:needLogin is posted, we will attempt a login through the API
     _y.UI.globalNotifications.on( "APP:needsLogin", function () {
+      APP.API.login()
+        .catch( function ( err ) {
+          console.log( "here", err );
+        } )
+        .done();
+    } );
+
+    // when APP:needsLoginUI is posted, we display the login UI
+    _y.UI.globalNotifications.on( "APP:needsLoginUI", function () {
+      var loginView = new LoginView( {} );
+      APP.loginView = loginView;
       var navigationController = new _y.UI.NavigationController( {
         rootView: loginView
       } );
@@ -183,7 +201,6 @@ define( [ "yasmf", "app/views/loginView", "app/views/dashboardView",
     // register routes
     var router = _y.Router;
     router.addURL( "/", "Home" )
-      .addURL( "/login", "Login" )
       .addURL( "/task", "List of Tasks" )
       .addURL( "/task/:taskId", "View/Edit Task" )
       .addURL( "/task/:taskId/comment", "View comments" )
