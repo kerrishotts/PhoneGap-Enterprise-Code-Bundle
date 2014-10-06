@@ -132,7 +132,9 @@ app.use( session( {
 var corsDelegate = function ( req, cb ) {
   var corsOptions = {
     origin:      true,
-    credentials: true
+    credentials: true,
+    allowedHeaders: [ "x-auth-token", "x-hmac-token", "Content-Type", "x-csrf-token" ],
+    exposedHeaders: [ "x-next-token", "location" ]
   };
   cb( null, corsOptions );
 };
