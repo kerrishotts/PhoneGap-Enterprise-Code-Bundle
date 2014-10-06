@@ -2200,6 +2200,25 @@ define( 'yasmf/util/core',[ "globalize", "cultures/globalize.culture.en-US" ], f
     return ( ( v === undefined || v === null ) && ( d !== undefined ) ) ? d : v;
   }
   /**
+   * Interpolates values from the context into the string. Placeholders are of the
+   * form {...}. If values within {...} do not exist within context, they are
+   * replaced with undefined.
+   * @param  {string} str     string to interpolate
+   * @param  {*} context      context to use for interpolation
+   * @return {string}}        interpolated string
+   */
+  function interpolate( str, context ) {
+    var newStr = str;
+    if ( typeof context === "undefined" ) {
+      return newStr;
+    }
+    str.match( /\{([^\}]+)\}/g ).forEach( function ( match ) {
+      var prop = match.substr( 1, match.length - 2 ).trim();
+      newStr = newStr.replace( match, valueForKeyPath( context, prop ) );
+    } );
+    return newStr;
+  }
+  /**
    * Merges the supplied objects together and returns a copy containin the merged objects. The original
    * objects are untouched, and a new object is returned containing a relatively deep copy of each object.
    *
@@ -2226,7 +2245,6 @@ define( 'yasmf/util/core',[ "globalize", "cultures/globalize.culture.en-US" ], f
    * License MIT. Copyright Kerri Shotts 2014
    */
   function merge() {
-    
     var t = {},
       args = Array.prototype.slice.call( arguments, 0 );
     args.forEach( function ( s ) {
@@ -2289,7 +2307,6 @@ define( 'yasmf/util/core',[ "globalize", "cultures/globalize.culture.en-US" ], f
    * Copyright Kerri Shotts, 2014
    */
   function validate( source, rules ) {
-    
     var r = {
       validates: true,
       message: ""
@@ -2443,6 +2460,7 @@ define( 'yasmf/util/core',[ "globalize", "cultures/globalize.culture.en-US" ], f
   var _y = {
     VERSION: "0.5.142",
     valueForKeyPath: valueForKeyPath,
+    interpolate: interpolate,
     merge: merge,
     validate: validate,
     /**
