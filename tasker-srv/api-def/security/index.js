@@ -65,7 +65,7 @@ var CryptoJS = require( "crypto-js" ),
       "tasker-256": {
         "hmac": "SHA256",
         "hmac-template": "{date:%Y%m%d.%H%M}{route}{query-string}{body}",
-        "hmac-secret": "{hmac-token}",
+        "hmac-secret": "{hmac-secret}",
         "attachments": {
           "headers": [ {
             "name": "hmac-token",
@@ -102,11 +102,11 @@ var CryptoJS = require( "crypto-js" ),
             dateString = "" + nowYYYY + pad2( nowMM ) + pad2( nowDD ) + "." + pad2( nowHH ) + pad2( nowMI );
             stringToHmac = "" + dateString + "." + req.url + ( Object.keys( req.body )
               .length > 0 ? "." + JSON.stringify( req.body ) : "" );
-            hmacString = CryptoJS.HmacSHA256( stringToHmac, req.user.hmacToken )
+            hmacString = CryptoJS.HmacSHA256( stringToHmac, req.user.hmacSecret )
               .toString( CryptoJS.enc.Base64 );
             if ( hmacString !== candidate ) {
               // try a hex encoding
-              hmacString = CryptoJS.HmacSHA256( stringToHmac, req.user.hmacToken )
+              hmacString = CryptoJS.HmacSHA256( stringToHmac, req.user.hmacSecret )
                 .toString( CryptoJS.enc.Hex );
               return hmacString === candidate;
             }

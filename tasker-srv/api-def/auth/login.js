@@ -46,7 +46,7 @@ var Session = require( "../../models/session" ),
     "example":     {
       "body": {
         "sessionId": "92013",
-        "hmacToken": "AABBCCDDEEFF11223344556677889900",
+        "hmacSecret": "AABBCCDDEEFF11223344556677889900",
         "userId":    "BMSITH",
         "nextToken": "0099887766554433221100AABBCCDDEE"
       }
@@ -67,7 +67,7 @@ var Session = require( "../../models/session" ),
     "store":       {
       "body": [
         { name: "session-id", key: "sessionId" },
-        { name: "hmac-token", key: "hmacToken" },
+        { name: "hmac-secret", key: "hmacSecret" },
         { name: "user-id", key: "userId" },
         { name: "next-token", key: "nextToken" }
       ]
@@ -104,7 +104,7 @@ var Session = require( "../../models/session" ),
 
                  // return the session information to the client
                  var o = {
-                   sessionId: results.sessionId, hmacToken: results.hmacToken,
+                   sessionId: results.sessionId, hmacSecret: results.hmacSecret,
                    userId:    results.userId, nextToken: results.nextToken,
                    _links:    {}, _embedded: {}
                  };

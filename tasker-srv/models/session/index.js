@@ -89,7 +89,7 @@ Session.prototype.findSession = function ( clientAuthToken, cb ) {
                // notify callback of successful auth
                var user = {
                  userId:    results.returnParam, sessionId: sessionId,
-                 nextToken: results.returnParam1, hmacToken: results.returnParam2
+                 nextToken: results.returnParam1, hmacSecret: results.returnParam2
                };
                if ( cb ) { cb( null, user ) } else { deferred.resolve( user ); }
              } else {
@@ -128,7 +128,7 @@ Session.prototype.createSession = function ( userName, candidatePassword, cb ) {
                // notify callback of auth info
                var user = {
                  userId:    userName, sessionId: results.returnParam,
-                 nextToken: results.returnParam1, hmacToken: results.returnParam2
+                 nextToken: results.returnParam1, hmacSecret: results.returnParam2
                };
                if ( cb ) { cb( null, user ); } else { deferred.resolve( user ); }
              } else {
