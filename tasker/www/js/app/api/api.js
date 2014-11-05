@@ -323,7 +323,7 @@ define( [ "../models/session", "../lib/objUtils", "../lib/xhr", "../lib/cryptojs
           _y.UI.globalNotifications.on( "login:auth*", function authCheck( sender, notice, args ) {
             if ( notice === "login:auth" ) {
               // call login again with the username and password
-              login( args[ 0 ], args[ 1 ] )
+              self.login( args[ 0 ], args[ 1 ] )
                 .then( function loginGood( r ) {
                   _y.UI.globalNotifications.off( "login:auth*", authCheck );
                   _y.UI.globalNotifications.emit( "login:response", [ "" ] );
