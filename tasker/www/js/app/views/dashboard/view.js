@@ -21,7 +21,7 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-define( [ "yasmf", "app/templates/dashboardTemplate" ], function ( _y, dashboardTemplate ) {
+define( [ "yasmf", "./template" ], function ( _y, dashboardTemplate ) {
   "use strict";
   var _className = "DashboardView",
       DashboardView = function () {

@@ -21,7 +21,7 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-define( [ "yasmf", "hammer", "app/templates/colorKeyBarTemplate", "app/templates/taskStatsTemplate" ],
+define( [ "yasmf", "hammer", "../../templates/colorKeyBarTemplate", "app/templates/taskStatsTemplate" ],
         function ( _y, hammer, colorKeyBarTemplate, taskStatsTemplate ) {
   "use strict";
   _y.addTranslations( {

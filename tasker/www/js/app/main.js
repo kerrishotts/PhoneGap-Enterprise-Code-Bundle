@@ -21,7 +21,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 /*global define, device*/
-define( [ "yasmf", "app/views/loginView", "app/views/dashboardView",
+define( [ "yasmf", "app/views/login/view", "app/views/dashboard/view",
   "app/api/api"
 ], function ( _y, LoginView, DashboardView, API ) {
   "use strict";

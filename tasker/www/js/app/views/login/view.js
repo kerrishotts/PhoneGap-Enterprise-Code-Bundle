@@ -21,7 +21,7 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-define( [ "yasmf", "app/templates/loginTemplate" ], function ( _y, loginTemplate ) {
+define( [ "yasmf", "./template" ], function ( _y, loginTemplate ) {
   "use strict";
   _y.addTranslations( {
     "LOGIN:INVALID_USERNAME_OR_PASSWORD": {
