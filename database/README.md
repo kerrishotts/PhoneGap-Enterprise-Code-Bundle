@@ -208,6 +208,7 @@ Once the database has been installed (see above), follow the following steps to 
 
         grant create any context to tasker;
         grant execute on dbms_session to tasker;
+        grant create session to tasker;
 
 5. Copy the SQL files in this directory to your `/home/oracle` on your database server.
 
