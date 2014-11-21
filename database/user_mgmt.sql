@@ -57,6 +57,8 @@ AS
       p_user_id VARCHAR2,
       p_as_user VARCHAR2 DEFAULT NULL);
 END USER_MGMT;
+/
+
 CREATE OR REPLACE PACKAGE BODY "TASKER"."USER_MGMT"
 AS
   /*******************************************************************************
@@ -257,4 +259,5 @@ BEGIN
   END IF;
 END unlock_user;
 END USER_MGMT;
+/
 

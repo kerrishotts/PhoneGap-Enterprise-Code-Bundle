@@ -67,6 +67,9 @@ TYPE people_set IS TABLE OF tasker.person%ROWTYPE;
   ) RETURN people_set pipelined;
 
 END PERSON_MGMT;
+/
+
+
 CREATE OR REPLACE PACKAGE BODY "TASKER"."PERSON_MGMT"
 AS
   /*******************************************************************************
@@ -110,6 +113,7 @@ FUNCTION CAN_MODIFY_PERSON RETURN VARCHAR2 AS
 BEGIN
   RETURN 'CAN_MODIFY_PERSON';
 END CAN_MODIFY_PERSON;
+
 /******************************************************************************
 *
 * PUBLIC METHODS
@@ -222,4 +226,4 @@ BEGIN
 END get_person;
 
 END PERSON_MGMT;
-
+/

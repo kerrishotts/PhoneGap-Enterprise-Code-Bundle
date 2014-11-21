@@ -37,6 +37,7 @@ AS
       setting_id VARCHAR2,
       v          VARCHAR2 );
 END APP_SETTINGS;
+/
 CREATE OR REPLACE PACKAGE BODY "TASKER"."APP_SETTINGS"
 AS
   /*******************************************************************************
@@ -106,4 +107,4 @@ WHEN OTHERS THEN
   COMMIT;
 END SET;
 END APP_SETTINGS;
-
+/

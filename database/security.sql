@@ -64,6 +64,8 @@ AS
 
   PROCEDURE end_session( p_session_id NUMBER );
 END SECURITY;
+/
+
 CREATE OR REPLACE PACKAGE BODY "TASKER"."SECURITY"
 AS
   /*******************************************************************************
@@ -595,5 +597,6 @@ BEGIN
   RETURN 'N';
 END;
 END SECURITY;
+/
 
 

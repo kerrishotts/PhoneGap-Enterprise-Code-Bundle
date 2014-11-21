@@ -5,6 +5,7 @@ PROCEDURE set_ctx(p_name VARCHAR2, p_value VARCHAR2);
 PROCEDURE close_session(p_session_id NUMBER);
 
 END;
+/
 
 CREATE OR REPLACE PACKAGE BODY "TASKER"."SESSION_CONTEXT" IS
 -- from http://psoug.org/reference/sys_context.html
@@ -28,4 +29,5 @@ BEGIN
 END close_session;
 --===============================================
 END;
+/
 

@@ -96,6 +96,8 @@ PROCEDURE assign_task(
       p_as_user VARCHAR2 default null)
     RETURN task_comment_set pipelined;
 END TASK_MGMT;
+/
+
 CREATE OR REPLACE PACKAGE BODY "TASKER"."TASK_MGMT"
 AS
   /*******************************************************************************
@@ -574,4 +576,5 @@ BEGIN
   END LOOP;
 END get_comments_for_task;
 END TASK_MGMT;
+/
 
