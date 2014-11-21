@@ -207,8 +207,22 @@ Once the database has been installed (see above), follow the following steps to 
 4. Assign the following privileges to TASKER (from a SYSDBA):
 
         grant create any context to tasker;
-        grant execute on dbms_session to tasker;
         grant create session to tasker;
+        grant connect to tasker;
+        grant execute on sys.dbms_session to tasker
+        grant execute on sys.dbms_crypto to tasker
+        grant CREATE TABLE to tasker;
+        grant CREATE SYNONYM to tasker;
+        grant CREATE VIEW to tasker;
+        grant CREATE SEQUENCE to tasker;
+        grant CREATE PROCEDURE to tasker;
+        grant CREATE TRIGGER to tasker;
+        grant CREATE PROFILE to tasker;
+        grant CREATE MATERIALIZED VIEW to tasker;
+        grant CREATE TYPE to tasker;
+        grant CREATE INDEXTYPE to tasker;
+        grant CREATE ANY CONTEXT to tasker;
+        grant CREATE JOB to tasker;
 
 5. Copy the SQL files in this directory to your `/home/oracle` on your database server.
 
