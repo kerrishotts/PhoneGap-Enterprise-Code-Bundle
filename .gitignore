@@ -5,7 +5,8 @@ node_modules/*
 */platforms
 */plugins
 */logs
-*/_certs
+*/_certs/*.key
+*/_certs/*.cer
 .idea/*
 tasker/.idea/*
 tasker-srv/npm-debug.log
