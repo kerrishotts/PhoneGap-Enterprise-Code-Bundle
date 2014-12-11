@@ -39,6 +39,6 @@
     "mocha": "*",
     "supertest": "*",
     "chai-as-promised": "*",
-    "jshint": "~2.5.1"
+    "jshint": "*"
   }
 }
