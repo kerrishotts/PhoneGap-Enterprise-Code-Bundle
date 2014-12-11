@@ -1,3 +1,10 @@
+(function ( global, define ) {
+// check for amd loader on global namespace
+  var globalDefine = global.define;
+/////////START
+
+var library =
+
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 module.exports = window.Q;
 
@@ -8246,3 +8253,20 @@ var Router = {
 module.exports = Router;
 
 },{}]},{},[2]);
+
+
+//////END
+library = library(2);
+if ( typeof module !== 'undefined' && module.exports ) {
+// export library for node
+  module.exports = library;
+} else if ( globalDefine ) {
+// define library for global amd loader that is already present
+  (function ( define ) {
+    define( function () { return library; } );
+  }( globalDefine ));
+} else {
+// define library on global namespace for inline script loading
+  global['_y'] = library;
+}
+} (this) ) ;
