@@ -21,51 +21,59 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-define( [ "yasmf", "./template" ], function ( _y, dashboardTemplate ) {
-  "use strict";
-  var _className = "DashboardView",
-      DashboardView = function () {
-        // we descend from a simple ViewContainer
+define(function (require, exports, module) {
+    "use strict";
+    var _y = require("yasmf"),
+        dashboardTemplate = require("./template"),
+        _className = "DashboardView";
+
+    module.exports = function DashboardView() {
         var self = new _y.UI.ViewContainer();
-        // always subclass
-        self.subclass( _className );
-        //
-        // reference to unordered list where we can put list bar graphs
-        self.defineObservableProperty( "taskList", {
-          default: ""
-        } );
-        //
-        // the template will attach event handlers to our methods
-        // submit and forgot
-        self.doLogInOut = function doLogInOut( e ) {
-          _y.UI.globalNotifications.emit( "APP:needsLogin" );
+        self.subclass(_className);
+
+        /**
+         * Handle log in/out
+         * @param e
+         */
+        self.doLogInOut = function doLogInOut(e) {
+            _y.UI.globalNotifications.emit("APP:needsLogin");
         };
-        //
-        // return the login template when the view is rendered
-        // `self` is both the view and controller
-        self.override( function render() {
-          return dashboardTemplate( self, self );
-        } );
-        //
-        // init
-        self.override( function init( theParentElement ) {
-          self.super( _className, "init", [ undefined, "div", "dashboardView ui-container",
-                                            theParentElement
-          ] );
-        } );
-        //
-        // initWithOptions
-        self.override( function initWithOptions( options ) {
-          var theParentElement;
-          if ( typeof options !== "undefined" ) {
-            if ( typeof options.parent !== "undefined" ) {
-              theParentElement = options.parent;
+
+        /**
+         * @method render
+         * Render the dashboard template
+         */
+        self.override(function render() {
+            return dashboardTemplate(self, self, {});
+        });
+
+        /**
+         * Initialize the view
+         * @method init
+         * @param {*} theParentElement
+         */
+        self.override(function init(theParentElement) {
+            return self.$super(undefined, "div", "dashboardView ui-container", theParentElement);
+        });
+
+        /**
+         * Initialize the view (with options)
+         * @method initWithOptions
+         * @param options
+         */
+        self.override(function initWithOptions(options) {
+            var theParentElement;
+            if (options !== undefined) {
+                if (options.parent !== undefined) {
+                    theParentElement = options.parent;
+                }
             }
-          }
-          self.init( theParentElement );
-        } );
-        self._autoInit.apply( self, arguments );
+            return self.init(theParentElement);
+        });
+
+        // boilerplate for auto init
+        self._autoInit.apply(self, arguments);
+
         return self;
-      };
-  return DashboardView;
-} );
+    };
+});

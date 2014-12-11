@@ -21,111 +21,151 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-define( [ "yasmf", "./template" ], function ( _y, loginTemplate ) {
-  "use strict";
-  _y.addTranslations( {
-    "LOGIN:INVALID_USERNAME_OR_PASSWORD": {
-      "EN": "Invalid username or password.\nPlease try again."
-    },
-    "LOGIN:PROBLEM": {
-      "EN": "Login Failed"
-    },
-    "LOGIN:TRY_AGAIN": {
-      "EN": "Try Again"
-    },
-    "LOGIN:CANCEL": {
-      "EN": "Cancel"
-    }
-  } );
-  var _className = "LoginView",
-    LoginView = function () {
-      // we descend from a simple ViewContainer
-      var self = new _y.UI.ViewContainer();
-      // always subclass
-      self.subclass( _className );
-      //
-      // we need access to the username and password; in order to bind
-      // they need to be observable
-      self.defineObservableProperty( "username", {
-        default: ""
-      } );
-      self.defineObservableProperty( "password", {
-        default: ""
-      } );
-      //
-      // the template will attach event handlers to our methods
-      // submit and forgot
-      self.doAuthentication = function doAuthentication( e ) {
-        _y.UI.globalNotifications.emit( "login:auth", [ self.username, self.password ] );
-        _y.UI.globalNotifications.once( "login:response", function ( sender, notice, args ) {
-          if ( args[ 0 ] !== "" ) {
-            _y.UI.globalNotifications.emit( "login:fail" );
-            var alert = new _y.UI.Alert();
-            alert.initWithOptions( {
-              title: _y.T( "LOGIN:PROBLEM" ),
-              text: _y.T( args[ 0 ] ),
-              promise: true,
-              buttons: [
-                _y.UI.Alert.button( _y.T( "LOGIN:TRY_AGAIN" ) ),
-                _y.UI.Alert.button( _y.T( "LOGIN:CANCEL" ), {
-                  type: "bold",
-                  tag: -1
-                } )
-              ]
-            } );
-            alert.show()
-              .then( function ( idx ) {
-                // we actually do nothing; the login screen is still visible
-                return;
-              } )
-              .catch( function ( e ) {
-                // let the world know we're canceling the attempt
-                _y.UI.globalNotifications.emit( "login:authCancel" );
-                self.navigationController.dismissModalController();
-              } )
-              .done();
-            // alert it
-          } else {
-            _y.UI.globalNotifications.emit( "login:good" );
-            // close us
-            self.navigationController.dismissModalController();
-          }
-        } );
-        e.preventDefault();
-        return false;
-      };
-      self.doForgotPassword = function doForgetPassword( e ) {
-        self.emit( "login:forgot" );
-      };
-      //
-      // return the login template when the view is rendered
-      // `self` is both the view and controller
-      self.override( function render() {
-        return loginTemplate( self, self, {
-          "username": "username",
-          "password": "password"
-        } );
-      } );
-      //
-      // init
-      self.override( function init( theParentElement ) {
-        self.super( _className, "init", [ undefined, "div", "loginView ui-container",
-          theParentElement
-        ] );
-      } );
-      //
-      // initWithOptions
-      self.override( function initWithOptions( options ) {
-        var theParentElement;
-        if ( typeof options !== "undefined" ) {
-          if ( typeof options.parent !== "undefined" ) {
-            theParentElement = options.parent;
-          }
-        }
-        self.init( theParentElement );
-      } );
-      self._autoInit.apply( self, arguments );
-      return self;
+define(function (require, exports, module) {
+    "use strict";
+    var _y = require("yasmf"),
+        loginTemplate = require("./template");
+    _y.addTranslations({
+        "LOGIN:INVALID_USERNAME_OR_PASSWORD": {"EN": "Invalid username or password. Please try again."},
+        "LOGIN:PROBLEM":                      {"EN": "Login Failed"},
+        "LOGIN:TRY_AGAIN":                    {"EN": "Try Again"},
+        "LOGIN:CANCEL":                       {"EN": "Cancel"}
+    });
+    var _className = "LoginView";
+    module.exports = function LoginView() {
+        var self = new _y.UI.ViewContainer();
+        self.subclass(_className);
+
+        /**
+         * @property username
+         * @type string
+         * @default blank
+         * @observable
+         */
+        self.defineObservableProperty("username", {default: ""});
+
+        /**
+         * @property password
+         * @type string
+         * @default blank
+         * @observable
+         */
+        self.defineObservableProperty("password", {default: ""});
+
+        /**
+         * Block the UI and send the login request; when the response is returned, handle appropriately
+         * @param e
+         * @returns {boolean}
+         */
+        self.doAuthentication = function doAuthentication(e) {
+
+            // block the UI; this has the side effect of the letting the user know we're doing something
+            _y.UI.globalNotifications.emit("APP:block");
+
+            // send the login request. APP will pick it up and send it to the API
+            _y.UI.globalNotifications.emit("login:auth", [self.username, self.password]);
+
+            // Wait for the response, but only once
+            _y.UI.globalNotifications.once("login:response", function (sender, notice, args) {
+
+                // unblock the UI -- we're about to do something
+                _y.UI.globalNotifications.emit("APP:unblock");
+
+                // if args[0] isn't blank, we've got an error. If it is blank, the login was good
+                if (args[0] !== "") {
+                    // let the rest of the app know about the failure
+                    _y.UI.globalNotifications.emit("login:fail");
+
+                    // create an alert allowing the user to decide what they want to do
+                    var alert = new _y.UI.Alert();
+                    alert.initWithOptions({
+                        title:   _y.T("LOGIN:PROBLEM"),
+                        text:    _y.T(args[0]),
+                        promise: true,
+                        buttons: [
+                            _y.UI.Alert.button(_y.T("LOGIN:TRY_AGAIN")),
+                            _y.UI.Alert.button(_y.T("LOGIN:CANCEL"), {
+                                type: "bold",
+                                tag:  -1
+                            })
+                        ]
+                    });
+                    // and show
+                    alert.show()
+                        .then(function (idx) {
+                            // we actually do nothing; the login screen is still visible
+                            return;
+                        })
+                        .catch(function (e) {
+                            // let the world know we're canceling the attempt
+                            _y.UI.globalNotifications.emit("login:authCancel");
+
+                            // and dismiss
+                            self.navigationController.dismissModalController();
+                        })
+                        .done();
+                } else {
+                    // let the rest of the app know we have a good login
+                    _y.UI.globalNotifications.emit("login:good");
+                    // close us
+                    self.navigationController.dismissModalController();
+                }
+            });
+
+            // we don't want to actually submit the form
+            e.preventDefault();
+            return false;
+        };
+
+        /**
+         * Called when the user clicks "Forgot?" on the login screen. Doesn't do much (DEMO!)
+         * @param e
+         * @stub
+         */
+        self.doForgotPassword = function doForgetPassword(e) {
+            self.emit("login:forgot");
+        };
+
+        /**
+         * Render our login view template when requested. `self` is both the view and controller.
+         * The last object passed to `loginTemplate` maps the properties the template expects to our
+         * own. Could be eliminated technically, but we're being explicit about the mapping here.
+         * @method render
+         */
+        self.override(function render() {
+            return loginTemplate(self, self, {
+                "username": "username",
+                "password": "password"
+            });
+        });
+
+        /**
+         * Initialize the view
+         * @method init
+         * @param {*} theParentElement
+         */
+        self.override(function init(theParentElement) {
+            self.$super(undefined, "div", "loginView ui-container", theParentElement);
+        });
+
+        /**
+         * Initialize the view (with options)
+         * @method initWithOptions
+         * @param {*} options
+         */
+        self.override(function initWithOptions(options) {
+            var theParentElement;
+            if (options !== undefined) {
+                if (options.parent !== undefined) {
+                    theParentElement = options.parent;
+                }
+            }
+            self.init(theParentElement);
+        });
+
+        // boilerplate for auto init
+        self._autoInit.apply(self, arguments);
+
+        return self;
     };
-  return LoginView;
-} );
+});

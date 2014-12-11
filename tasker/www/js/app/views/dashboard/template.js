@@ -21,71 +21,62 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-define( [ "yasmf", "hammer", "../../templates/colorKeyBarTemplate", "app/templates/taskStatsTemplate" ],
-        function ( _y, hammer, colorKeyBarTemplate, taskStatsTemplate ) {
-  "use strict";
-  _y.addTranslations( {
-                        "TASKER":           {
-                          "EN": "Tasker"
-                        },
-                        "DASHBOARD:TITLE":  {
-                          "EN": "Dashboard"
-                        },
-                        "DASHBOARD:LOGIN":  {
-                          "EN": "Log in"
-                        },
-                        "DASHBOARD:LOGOUT": {
-                          "EN": "Log out"
-                        }
-                      } );
-  /**
-   * @method dashboardTemplate
-   * @param {*} v      view to bind to
-   * @param {*) c      controller (for events)
-   * @param {*} map    map "password" and "username" to view fields
-   */
-  function dashboardTemplate( v, c, map ) {
-    var h = _y.h;
-    return [
-      //
-      // navigation bar; includes title
-      h.el( "div.ui-navigation-bar",
-            [ h.el( "div.ui-title", _y.T( "DASHBOARD:TITLE" ) ),
-              h.el( "div.ui-bar-button-group ui-align-right",
-                    h.el( "div.ui-bar-button ui-tint-color", _y.T( "DASHBOARD:LOGIN" ),
-                          { hammer: {
-                            tap:    { handler: c.doLogInOut },
-                            hammer: hammer
-                          } } )
-              )
-            ]
-      ),
-      // key bar
-      colorKeyBarTemplate(),
-      //
-      // scroll container containing login form and text; avoid the navigation bar
-      h.el( "div.ui-scroll-container",
-            h.el( "ul.ui-list ui-avoid-navigation-bar", {
-              storeTo: { object: v, keyPath: "taskList"}
-            }, [
-                    h.el( "li.ui-list-heading",
-                          h.el( "div.ui-list-item-flex-contents",
-                                [
-                                  h.el( "div.ui-label", "Tasks Owned By Me" ),
-                                  h.el( "div.ui-indicator ui-arrow-direction-right" )
-                                ] ) ),
-                    taskStatsTemplate ( { inProgress: 0.12, onHold: 0.25, complete: 0.63, unknown: 0.0 } ),
-                    h.el( "li.ui-list-heading",
-                          h.el( "div.ui-list-item-flex-contents",
-                                [
-                                  h.el( "div.ui-label", "Tasks Assigned to Others" ),
-                                  h.el( "div.ui-indicator ui-arrow-direction-right" )
-                                ] ) ),
-                    taskStatsTemplate ( { inProgress: 0.12, onHold: 0.0, complete: 0.25, unknown: 0.63 } )
-                  ] )
-      )
-    ];
-  }
+define(function (require, exports, module) {
+    "use strict";
 
-  return dashboardTemplate;
-} );
+    var _y = require("yasmf"),
+        hammer = require("hammer"),
+        colorKeyBarTemplate = require("app/templates/colorKeyBarTemplate"),
+        taskStatsTemplate = require("app/templates/taskStatsTemplate");
+
+    _y.addTranslations({
+        "TASKER":           {"EN": "Tasker"},
+        "DASHBOARD:TITLE":  {"EN": "Dashboard"},
+        "DASHBOARD:LOGIN":  {"EN": "Log in"},
+        "DASHBOARD:LOGOUT": {"EN": "Log out"}
+    });
+    /**
+     * @method dashboardTemplate
+     * @param {*} v      view to bind to
+     * @param {*} c      controller
+     * @param {*} map
+     */
+    module.exports = function dashboardTemplate(v, c, map) {
+        var h = _y.h;
+        return [
+            //
+            // navigation bar; includes title
+            h.el("div.ui-navigation-bar",
+                [h.el("div.ui-title", _y.T("DASHBOARD:TITLE")),
+                    h.el("div.ui-bar-button-group ui-align-right",
+                        h.el("div.ui-bar-button ui-tint-color", _y.T("DASHBOARD:LOGIN"),
+                            {
+                                hammer: {
+                                    tap:    {handler: c.doLogInOut},
+                                    hammer: hammer
+                                }
+                            })
+                    )
+                ]
+            ),
+            // key bar
+            colorKeyBarTemplate(),
+            //
+            // scroll container containing login form and text; avoid the navigation bar
+            h.el("div.ui-scroll-container",
+                h.el("ul.ui-list ui-avoid-navigation-bar", [
+                    h.el("li.ui-list-heading",
+                        h.el("div.ui-list-item-flex-contents",
+                            h.el("div.ui-label", "Tasks Owned By Me")
+                        )),
+                    taskStatsTemplate({inProgress: 0.12, onHold: 0.25, complete: 0.63, unknown: 0.0}),
+                    h.el("li.ui-list-heading",
+                        h.el("div.ui-list-item-flex-contents",
+                            h.el("div.ui-label", "Tasks Assigned to Others")
+                        )),
+                    taskStatsTemplate({inProgress: 0.12, onHold: 0.0, complete: 0.25, unknown: 0.63})
+                ])
+            )
+        ];
+    }
+});

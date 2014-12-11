@@ -21,60 +21,61 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-define( [ "app/lib/objUtils" ], function ( ObjUtils ) {
-  "use strict";
+define(function (require, exports, module) {
+    "use strict";
+    var ObjUtils = require("app/lib/objUtils");
 
-  function storeResponseToContext( r, context ) {
-    var selfStore = ObjUtils.valueForKeyPath( r, "body._links.self.store" );
-    if ( selfStore === undefined ) {
-      return;
-    }
-
-    Object.keys( selfStore )
-      .forEach( function ( prop ) {
-        var o = selfStore[ prop ];
-        o.forEach( function ( item ) {
-          context[ item.name ] = ObjUtils.valueForKeyPath( r[ prop ], item.key );
-        } );
-      } );
-  }
-
-  function map( o, usingTemplate ) {
-    var newO = {};
-    Object.keys( usingTemplate )
-      .forEach( function ( prop ) {
-        var v = usingTemplate[ prop ];
-        if ( o[ prop ] !== undefined ) {
-          newO[ v.key ] = o[ prop ];
+    function storeResponseToContext(r, context) {
+        var selfStore = ObjUtils.valueForKeyPath(r, "body._links.self.store");
+        if (selfStore === undefined) {
+            return;
         }
-      } );
-    return newO;
-  }
 
-  function buildHeadersAttachment( headers, context ) {
-    var returnHeaders = [];
-    if ( typeof headers === "undefined" ) {
-      return returnHeaders;
+        Object.keys(selfStore)
+            .forEach(function (prop) {
+                var o = selfStore[prop];
+                o.forEach(function (item) {
+                    context[item.name] = ObjUtils.valueForKeyPath(r[prop], item.key);
+                });
+            });
     }
-    headers.forEach( function ( header ) {
-      if ( typeof header.templated === "undefined" || !header.templated ) {
-        returnHeaders.push( {
-          headerName: header.key,
-          headerValue: header.value
-        } );
-      } else {
-        returnHeaders.push( {
-          headerName: header.key,
-          headerValue: ObjUtils.interpolate( header.value, context )
-        } );
-      }
-    } );
-    return returnHeaders;
-  }
 
-  return {
-    storeResponseToContext: storeResponseToContext,
-    map: map,
-    buildHeadersAttachment: buildHeadersAttachment
-  };
-} );
+    function map(o, usingTemplate) {
+        var newO = {};
+        Object.keys(usingTemplate)
+            .forEach(function (prop) {
+                var v = usingTemplate[prop];
+                if (o[prop] !== undefined) {
+                    newO[v.key] = o[prop];
+                }
+            });
+        return newO;
+    }
+
+    function buildHeadersAttachment(headers, context) {
+        var returnHeaders = [];
+        if (typeof headers === "undefined") {
+            return returnHeaders;
+        }
+        headers.forEach(function (header) {
+            if (typeof header.templated === "undefined" || !header.templated) {
+                returnHeaders.push({
+                    headerName:  header.key,
+                    headerValue: header.value
+                });
+            } else {
+                returnHeaders.push({
+                    headerName:  header.key,
+                    headerValue: ObjUtils.interpolate(header.value, context)
+                });
+            }
+        });
+        return returnHeaders;
+    }
+
+    module.exports = {
+        storeResponseToContext: storeResponseToContext,
+        map:                    map,
+        buildHeadersAttachment: buildHeadersAttachment
+    };
+});

@@ -21,23 +21,24 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-define( [ "yasmf", "hammer" ], function ( _y, hammer ) {
-  "use strict";
-  function taskListItemTemplate( task, tapHandler ) {
-    var h = _y.h;
-    return h.el( "li.ui-list-item", { hammer: { tap: { handler: tapHandler }, hammer: hammer } },
-                 [
-                   h.el( "div.ui-list-item-flex-contents",
-                         [
-                           h.el( "div.ui-label task-status " + task.status ),
-                           h.el( "div.ui-fill", [
-                             h.el( "div.ui-label task-title", task.title ),
-                             h.el( "div.ui-label task-description", task.description )
-                           ] ),
-                           h.el( "div.ui-indicator ui-arrow-direction-right" )
-                         ] )
-                 ] );
-  }
+define(function (require, exports, module) {
+    "use strict";
+    var _y = require("yasmf"),
+        hammer = require("hammer");
 
-  return taskListItemTemplate;
-} );
+    module.exports = function taskListItemTemplate(task, tapHandler) {
+        var h = _y.h;
+        return h.el("li.ui-list-item", {hammer: {tap: {handler: tapHandler}, hammer: hammer}},
+            [
+                h.el("div.ui-list-item-flex-contents",
+                    [
+                        h.el("div.ui-label task-status " + task.status),
+                        h.el("div.ui-fill", [
+                            h.el("div.ui-label task-title", task.title),
+                            h.el("div.ui-label task-description", task.description)
+                        ]),
+                        h.el("div.ui-indicator ui-arrow-direction-right")
+                    ])
+            ]);
+    }
+});

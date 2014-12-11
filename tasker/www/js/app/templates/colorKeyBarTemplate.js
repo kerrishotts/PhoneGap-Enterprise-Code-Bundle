@@ -21,28 +21,24 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-define( [ "yasmf", "hammer" ], function ( _y, hammer ) {
-  "use strict";
-  _y.addTranslations( {
-                        "KEY:INPROGRESS": {
-                          "EN": "In Progress"
-                        },
-                        "KEY:ONHOLD":     {
-                          "EN": "On Hold"
-                        },
-                        "KEY:COMPLETE":   {
-                          "EN": "Complete"
-                        }
-                      } );
-  function colorKeyBarTemplate() {
-    var h = _y.h;
-    return h.el( "div.color-key-bar",
-                 [
-                   h.el( "span.inProgress", _y.T( "KEY:INPROGRESS" ) ),
-                   h.el( "span.onHold", _y.T( "KEY:ONHOLD" ) ),
-                   h.el( "span.complete", _y.T( "KEY:COMPLETE" ) )
-                 ] );
-  }
+define(function (require, exports, module) {
+    "use strict";
+    var _y = require("yasmf"),
+        hammer = require("hammer");
+    _y.addTranslations({
+        "KEY:INPROGRESS": {"EN": "In Progress"},
+        "KEY:ONHOLD":     {"EN": "On Hold"},
+        "KEY:COMPLETE":   {"EN": "Complete"}
+    });
+    function colorKeyBarTemplate() {
+        var h = _y.h;
+        return h.el("div.color-key-bar",
+            [
+                h.el("span.inProgress", _y.T("KEY:INPROGRESS")),
+                h.el("span.onHold", _y.T("KEY:ONHOLD")),
+                h.el("span.complete", _y.T("KEY:COMPLETE"))
+            ]);
+    }
 
-  return colorKeyBarTemplate;
-} );
+    module.exports = colorKeyBarTemplate;
+});

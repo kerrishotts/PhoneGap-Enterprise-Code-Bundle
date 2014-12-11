@@ -19,56 +19,128 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRA
 OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 */
+.ui-container modalWindow {
+  background-color: transparent;
+}
+
+.ui-tint-color {
+  color: #37B;
+}
+
+.android .ui-tint-color {
+  color: #E8E8E8;
+}
+
+.ui-background-tint-color {
+  color: #37B;
+}
+
+.android .ui-background-tint-color {
+  color: #E8E8E8;
+}
+
+.ui-disabled .ui-tint-color {
+
+}
+
+.android .ui-disabled .ui-tint-color {
+  color: #37B;
+}
+
+.android .ui-disabled .ui-background-tint-color {
+  background-color: #37B;
+}
+
+.android .ui-navigation-bar {
+  background-color: #37B;
+  border-bottom: 0;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.5);
+  line-height: 50px;
+}
 
 /*
  * form layouts
  * ============
  */
+
+form.vertical-layout {
+  padding-bottom: 4em;
+}
 form.vertical-layout div.text {
   padding:     1em;
   line-height: 1.25em;
 }
 
-form.vertical-layout div.field {
+form.vertical-layout div.field label {
   background-color: white;
   height:           44px;
-  line-height:      44px;
-  padding-left:     1em;
+  padding:          0 1em;
   border-bottom:    1px solid rgba(0, 0, 0, .25);
+  display:          -webkit-box;
+  display:          -moz-box;
+  display:          -webkit-flex;
+  display:          -moz-flex;
+  display:          -ms-flex;
+  display:          -o-flex;
+  display:          flex;
 }
 
-form.vertical-layout div.field span {
-  display:    inline-block;
-  box-sizing: border-box;
-  width:      33%;
+form.vertical-layout div.field label span {
+  box-sizing:       border-box;
+  min-width:        90px;
+  max-width:        240px;
+  overflow:         hidden;
+  text-overflow:    ellipsis;
+  white-space:      nowrap;
+  font-size:        85%;
+  font-weight:      bold;
+  padding-right:    0.5em;
+  -webkit-box-flex: 1;
+  -webkit-flex:     1;
+  -moz-flex:        1;
+  -ms-flex:         1;
+  -o-flex:          1;
+  flex:             1;
+  line-height:      44px;
 }
 
-form.vertical-layout div.field input {
-  display:            inline-block;
+form.vertical-layout div.field label input {
   -webkit-appearance: none;
   -moz-appearance:    none;
   border:             0;
-  height:             43px;
+  height:             100%;
   background-color:   transparent;
-  width:              66%;
   box-sizing:         border-box;
   outline:            none;
   font-size:          18px;
   margin:             0;
   padding:            0;
+  -webkit-box-flex:   2;
+  -webkit-flex:       2;
+  -moz-flex:          2;
+  -ms-flex:           2;
+  -o-flex:            2;
+  flex:               2;
 }
 
-form.vertical-layout div.button-group {
-  padding: 0.5em;
-  display: -webkit-box;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: -webkit-flex;
-  display: flex;
+form.vertical-layout div.field label input:focus {
+  background-color: #F0F7FF;
 }
 
-form.vertical-layout div.button-group input,
-form.vertical-layout div.button-group button {
+div.button-group {
+  padding:  0.5em;
+  display:  -webkit-box;
+  display:  -moz-box;
+  display:  -ms-flexbox;
+  display:  -webkit-flex;
+  display:  flex;
+  position: absolute;
+  bottom:   0px;
+  width:    100%;
+}
+
+div.button-group input,
+div.button-group button {
   -webkit-box-flex:   1;
   -moz-box-flex:      1;
   -webkit-flex:       1;
@@ -86,12 +158,23 @@ form.vertical-layout div.button-group button {
   outline:            0;
 }
 
+div.button-group input:active,
+div.button-group button:active {
+  opacity: 0.5;
+}
+
 /*
  * view background colors
  * ======================
  */
-.loginView, .dashboardView {
-  background-color: #ee6232;
+.android .loginView, .loginView {
+  background-color: #37B;
+}
+
+.android .loginView .ui-navigation-bar {
+  background-color: white;
+  color: #33373B;
+  visibility: hidden;
 }
 
 /*
@@ -103,31 +186,30 @@ form.vertical-layout div.button-group button {
   font-size:      300%;
   line-height:    2em;
   font-weight:    100;
-  letter-spacing: 1px;
+  letter-spacing: 5px;
 }
 
 .loginView form.vertical-layout div.text {
   color:       #E0E0E0;
-  font-weight: 100;
 }
 
-.loginView form.vertical-layout div.field span {
-  color:      #888;
+.loginView form.vertical-layout div.field label span {
+  color:      #99A5B1;
   text-align: right;
 }
 
-.loginView form.vertical-layout div.field input {
-  color: #333;
+.loginView form.vertical-layout div.field label input {
+  color: #33373B;
 }
 
-.loginView form.vertical-layout div.button-group {
-  background-color: rgba(255, 255, 255, .25);
+.loginView div.button-group {
+  background-color: #37B;
 }
 
-.loginView form.vertical-layout div.button-group input,
-.loginView form.vertical-layout div.button-group button {
-  background-color:   rgba(255, 255, 255, .5);
-  color:              #333;
+.loginView div.button-group input,
+.loginView div.button-group button {
+  background-color:   #E8E8E8;
+  color:              #33373B;
   -webkit-appearance: none;
   -moz-appearance:    none;
 }
@@ -140,29 +222,42 @@ form.vertical-layout div.button-group button {
  * dashboard styles
  * ================
  */
+.android .dashboardView,
+.dashboardView {
+  background-color: #D8E4E8;
+}
 
 .dashboardView .ui-list-heading,
 .dashboardView .ui-list-item {
   background-color: transparent;
-  color:            #E8E8E8;
+  color:            #37B;
   border-bottom:    1px solid transparent;
 }
 
 .dashboardView .ui-list-heading {
   margin-bottom: 1em;
   margin-top:    1em;
-  border-bottom: 1px solid #E8E8E8;
+  border-bottom: 1px solid #37B;
 }
 
 .dashboardView .ui-list-heading .ui-indicator,
 .dashboardView .ui-list-item .ui-indicator {
-  background-color: #E8E8E8;
+  background-color: #FFF;
+  position: absolute;
+  font-size: 85%;
+  height: 5em;
+  right: 10px;
+  width: 32px;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center center;
+  mask-position: center center;
 }
 
 .dashboardView .ui-list-heading:active,
 .dashboardView .ui-list-item:active {
   color:            white;
-  background-color: rgba(255, 255, 255, .25);
+  background-color: #37B;
   border-bottom:    1px solid white;
 }
 
@@ -219,23 +314,28 @@ form.vertical-layout div.button-group button {
   height:      64px;
 }
 
+.android .color-key-bar {
+  height:      48px;
+  line-height: 56px;
+}
+
 .color-key-bar span {
   margin:       0 0.5em;
   padding-left: 0.5em;
   border-left:  1em solid black;
-  color:        #484848;
+  color:        #666E72;
 }
 
 .color-key-bar span.inProgress {
-  border-left-color: #393;
+  border-left-color: #7B3;
 }
 
 .color-key-bar span.onHold {
-  border-left-color: #933;
+  border-left-color: #B37;
 }
 
 .color-key-bar span.complete {
-  border-left-color: #339;
+  border-left-color: #37B;
 }
 
 .color-key-bar ~ * .ui-avoid-navigation-bar {
@@ -244,6 +344,10 @@ form.vertical-layout div.button-group button {
 
 .iosM .color-key-bar ~ * .ui-avoid-navigation-bar {
   padding-top: 108px !important;
+}
+
+.android .color-key-bar ~ * .ui-avoid-navigation-bar {
+  padding-top: 92px !important;
 }
 
 .ui-list .task-status {
@@ -255,19 +359,19 @@ form.vertical-layout div.button-group button {
 }
 
 .ui-list .inProgress {
-  background-color: #62ee32;
+  background-color: #7B3;
 }
 
 .ui-list .onHold {
-  background-color: #ee3262;
+  background-color: #B37;
 }
 
 .ui-list .complete {
-  background-color: #3262ee;
+  background-color: #37B;
 }
 
 .ui-list .unknown {
-  background-color: #333;
+  background-color: #33373B;
 }
 
 .ui-list .task-title {
@@ -284,11 +388,12 @@ form.vertical-layout div.button-group button {
 .ui-list .task-stat-part {
   color:          white;
   text-align:     center;
-  font-size:      80%;
+  font-size:      85%;
   line-height:    5em;
   font-weight:    100;
-  letter-spacing: 2px;
+  letter-spacing: 0px;
   min-width:      4em;
+  outline: 1px solid rgba(255,255,255,0.5);
 }
 
 .ui-list .task-stat-part.unknown {

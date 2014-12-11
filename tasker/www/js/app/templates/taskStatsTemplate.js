@@ -21,26 +21,27 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-define( [ "yasmf", "hammer" ], function ( _y, hammer ) {
-  "use strict";
-  function taskStatsTemplate( stats, tapHandler ) {
-    var h = _y.h;
-    return h.el( "li.ui-list-item",
-                 [
-                   h.el( "div.ui-list-item-flex-contents", { hammer: { tap: { handler: tapHandler }, hammer: hammer } },
-                         [
-                           h.el( "div.task-stat-part inProgress", _y.PCT( stats.inProgress,0 ),
-                                 { styles: { width: "" + (stats.inProgress*100) + "%" } } ),
-                           h.el( "div.task-stat-part onHold", _y.PCT( stats.onHold, 0 ),
-                                 { styles: { width: "" + (stats.onHold*100) + "%" } } ),
-                           h.el( "div.task-stat-part complete", _y.PCT( stats.complete, 0 ),
-                                 { styles: { width: "" + (stats.complete*100) + "%" } } ),
-                           h.el( "div.task-stat-part unknown", "",
-                                 { styles: { width: "" + (stats.unknown*100) + "%" } } ),
-                           h.el( "div.ui-indicator ui-arrow-direction-right" )
-                         ] )
-                 ] );
-  }
+define(function (require, exports, module) {
+    "use strict";
+    var _y = require("yasmf"),
+        hammer = require("hammer");
 
-  return taskStatsTemplate;
-} );
+    module.exports = function taskStatsTemplate(stats, tapHandler) {
+        var h = _y.h;
+        return h.el("li.ui-list-item",
+            [
+                h.el("div.ui-list-item-flex-contents", {hammer: {tap: {handler: tapHandler}, hammer: hammer}},
+                    [
+                        h.el("div.task-stat-part inProgress", _y.PCT(stats.inProgress, 0),
+                            {styles: {width: "" + (stats.inProgress * 100) + "%"}}),
+                        h.el("div.task-stat-part onHold", _y.PCT(stats.onHold, 0),
+                            {styles: {width: "" + (stats.onHold * 100) + "%"}}),
+                        h.el("div.task-stat-part complete", _y.PCT(stats.complete, 0),
+                            {styles: {width: "" + (stats.complete * 100) + "%"}}),
+                        h.el("div.task-stat-part unknown", "",
+                            {styles: {width: "" + (stats.unknown * 100) + "%"}}),
+                        h.el("div.ui-indicator ui-arrow-direction-right")
+                    ])
+            ]);
+    }
+});
