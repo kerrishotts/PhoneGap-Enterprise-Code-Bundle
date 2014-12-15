@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE "TASKER"."PERSON_MGMT"
+PACKAGE PERSON_MGMT
 AS
   /*******************************************************************************
   *
@@ -66,11 +66,16 @@ TYPE people_set IS TABLE OF tasker.person%ROWTYPE;
     p_person_id NUMBER
   ) RETURN people_set pipelined;
 
+  FUNCTION get_person_id_by_user_id(
+    p_user_id VARCHAR2
+  )
+  RETURN NUMBER;
+
 END PERSON_MGMT;
 /
 
 
-CREATE OR REPLACE PACKAGE BODY "TASKER"."PERSON_MGMT"
+PACKAGE BODY PERSON_MGMT
 AS
   /*******************************************************************************
   *
@@ -113,7 +118,6 @@ FUNCTION CAN_MODIFY_PERSON RETURN VARCHAR2 AS
 BEGIN
   RETURN 'CAN_MODIFY_PERSON';
 END CAN_MODIFY_PERSON;
-
 /******************************************************************************
 *
 * PUBLIC METHODS
@@ -225,5 +229,22 @@ BEGIN
   END LOOP;
 END get_person;
 
+/**
+ * return a person specified by the user ID
+ */
+FUNCTION get_person_id_by_user_id(
+  p_user_id VARCHAR2
+)
+RETURN NUMBER
+AS
+  person TASKER.person%ROWTYPE;
+BEGIN
+  SELECT * INTO person FROM tasker.person WHERE user_id = p_user_id;
+  RETURN person.id;
+EXCEPTION WHEN OTHERS THEN
+  RETURN NULL;
+END get_person_id_by_user_id;
+
 END PERSON_MGMT;
 /
+

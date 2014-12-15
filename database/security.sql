@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE "TASKER"."SECURITY"
+PACKAGE SECURITY
 AS
   /*******************************************************************************
   *
@@ -37,12 +37,12 @@ AS
   FUNCTION authenticate_user(
       p_user_id   VARCHAR2, p_candidate VARCHAR2,
       p_session_id OUT NUMBER, p_next_token OUT VARCHAR2,
-      p_hmac_secret OUT VARCHAR2 ) RETURN VARCHAR2;
+      p_hmac_secret OUT VARCHAR2, p_person_id OUT NUMBER ) RETURN VARCHAR2;
 
   FUNCTION verify_token(
       p_session_id NUMBER, p_token      VARCHAR2,
       p_auth_user OUT VARCHAR2, p_next_token OUT VARCHAR2,
-      p_hmac_token OUT VARCHAR2)
+      p_hmac_token OUT VARCHAR2, p_person_id OUT NUMBER)
     RETURN VARCHAR2;
 
   FUNCTION verify_password(
@@ -66,7 +66,7 @@ AS
 END SECURITY;
 /
 
-CREATE OR REPLACE PACKAGE BODY "TASKER"."SECURITY"
+PACKAGE BODY SECURITY
 AS
   /*******************************************************************************
   *
@@ -444,7 +444,8 @@ FUNCTION authenticate_user(
     p_candidate VARCHAR2,
     p_session_id OUT NUMBER,
     p_next_token OUT VARCHAR2,
-    p_hmac_secret OUT VARCHAR2 )
+    p_hmac_secret OUT VARCHAR2,
+    p_person_id OUT NUMBER)
   RETURN VARCHAR2
 AS
   PRAGMA AUTONOMOUS_TRANSACTION;
@@ -489,6 +490,7 @@ BEGIN
   -- return the necessary information back out the OUTparams
   p_session_id := session_id;
   p_next_token := client_token;
+  p_person_id := tasker.PERSON_MGMT.get_person_id_by_user_id(p_user_id);
 
   -- also, set up the session context
   TASKER.SESSION_CONTEXT.set_session_id ( p_session_id );
@@ -520,7 +522,8 @@ FUNCTION verify_token(
     p_token      VARCHAR2,
     p_auth_user OUT VARCHAR2,
     p_next_token OUT VARCHAR2,
-    p_hmac_token OUT VARCHAR2)
+    p_hmac_token OUT VARCHAR2,
+    p_person_id OUT NUMBER)
   RETURN VARCHAR2
 AS
   PRAGMA AUTONOMOUS_TRANSACTION;
@@ -585,6 +588,7 @@ BEGIN
         COMMIT;
       end if;
       p_hmac_token := current_session.hmac_secret;
+      p_person_id := tasker.PERSON_MGMT.get_person_id_by_user_id(p_auth_user);
 
       -- restore the session context
       TASKER.SESSION_CONTEXT.set_session_id ( p_session_id );
@@ -598,5 +602,3 @@ BEGIN
 END;
 END SECURITY;
 /
-
-
