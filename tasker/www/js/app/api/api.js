@@ -25,7 +25,7 @@
 define(function (require, exports, module) {
     "use strict";
 
-    var Session = require("app/models/session"),
+    var Session = require("app/models/session/model"),
         ObjUtils = require("app/lib/objUtils"),
         XHR = require("app/lib/xhr"),
         CryptoJS = require("app/lib/cryptojs"),
@@ -247,6 +247,7 @@ define(function (require, exports, module) {
                             context["session-id"] = self._session.sessionId;
                             context["user-id"] = self._session.userId;
                             context["next-token"] = self._session.nextToken;
+                            context["person-id"] = self._session.personId;
                         }
 
                         // the action may also require an HMAC...
@@ -399,7 +400,8 @@ define(function (require, exports, module) {
                             userId:     context["user-id"],
                             sessionId:  context["session-id"],
                             hmacSecret: context["hmac-secret"],
-                            nextToken:  context["next-token"]
+                            nextToken:  context["next-token"],
+                            personId:   context["person-id"]
                         });
                         deferred.resolve(r);
                     })

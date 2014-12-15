@@ -7,6 +7,7 @@ define(function (require, exports, module) {
             this.userId = data.userId;
             this.hmacSecret = data.hmacSecret;
             this.nextToken = data.nextToken;
+            this.personId = data.personId;
         }
     }
 
