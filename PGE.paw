@@ -5,7 +5,7 @@
     <databaseInfo>
         <version>134481920</version>
         <UUID>13E8FAE1-2A86-4E36-9913-093DEE18B251</UUID>
-        <nextObjectID>228</nextObjectID>
+        <nextObjectID>229</nextObjectID>
         <metadata>
             <plist version="1.0">
                 <dict>
@@ -249,12 +249,12 @@
         <attribute name="redirectauthorization" type="bool">0</attribute>
         <attribute name="method" type="string">POST</attribute>
         <attribute name="followredirects" type="bool">0</attribute>
-        <attribute name="body" type="string">["{\\"userId\\": \\"JDOE\\",\\"candidatePassword\\": \\"password\\"}"]</attribute>
+        <attribute name="body" type="string">["{\\"userId\\": \\"BSMITH\\",\\"candidatePassword\\": \\"password\\"}"]</attribute>
         <attribute name="order" type="int64">0</attribute>
         <attribute name="name" type="string">PGE: Login</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM" idrefs="z227"></relationship>
         <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
-        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z153 z192 z196 z222 z156 z185 z193"></relationship>
+        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z193 z185 z222 z196 z153 z156 z192"></relationship>
     </object>
     <object type="LMREQUEST" id="z114">
         <attribute name="uuid" type="string">CFE0DFB2-50BF-46ED-AB4E-8699C0F02AE4</attribute>
@@ -295,7 +295,7 @@
         <relationship name="variablesvalues" type="0/0" destination="LMENVIRONMENTVARIABLEVALUE" idrefs="z119 z123 z121"></relationship>
     </object>
     <object type="LMENVIRONMENTVARIABLEVALUE" id="z118">
-        <attribute name="value" type="string">8000</attribute>
+        <attribute name="value" type="string">4443</attribute>
         <relationship name="environment" type="1/1" destination="LMENVIRONMENT" idrefs="z116"></relationship>
         <relationship name="variable" type="1/1" destination="LMENVIRONMENTVARIABLE" idrefs="z224"></relationship>
     </object>
@@ -1364,5 +1364,10 @@
         <relationship name="bodyparameters" type="0/0" destination="LMKEYVALUE"></relationship>
         <relationship name="headers" type="0/0" destination="LMKEYVALUE"></relationship>
         <relationship name="urlparameters" type="0/0" destination="LMKEYVALUE"></relationship>
+    </object>
+    <object type="LMCOOKIEJAR" id="z229">
+        <attribute name="uuid" type="string">1DD2E1C4-EA6A-43B1-858C-3C8478A770E6</attribute>
+        <attribute name="order" type="int64">1</attribute>
+        <attribute name="name" type="string">Default Cookie Jar</attribute>
     </object>
 </database>
