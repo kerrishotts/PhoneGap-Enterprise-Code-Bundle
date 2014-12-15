@@ -155,7 +155,7 @@ app.use( function ( req, res, next ) {
 // static content -- if you have it
 app.use( express.static( path.join( __dirname, "public" ) ) );
 app.use( helmet.csp( {
-                       defaultSrc: [ "'self'", "pge-as.acmecorp.com" ],
+                       defaultSrc: [ "'self'", "pge-as.photokandy.com" ],
                        safari5:    false // safari5 has buggy behavior
                      } ) );
 //
