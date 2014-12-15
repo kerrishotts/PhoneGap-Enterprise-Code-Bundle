@@ -3310,6 +3310,9 @@ function merge() {
   var t = {},
     args = Array.prototype.slice.call( arguments, 0 );
   args.forEach( function ( s ) {
+    if (s === undefined || s === null) {
+      return; // no keys, why bother!
+    }
     Object.keys( s ).forEach( function ( prop ) {
       var e = s[prop];
       if ( e instanceof Array ) {

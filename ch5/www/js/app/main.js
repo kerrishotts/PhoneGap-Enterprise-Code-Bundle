@@ -118,7 +118,7 @@ define( [ "yasmf", "app/lib/xhr",
   // define our app object
   var APP = {};
   APP.start = function () {
-    var baseURI = "https://localhost:4443";
+    var baseURI = "https://pge-as.photokandy.com:4443";
     var session;
     var context = {};
 
@@ -128,7 +128,7 @@ define( [ "yasmf", "app/lib/xhr",
     XHR.checkIfSecure( baseURI, [ "27 02 A5 EB 95 91 41 66 C3 9F 82 D3 59 14 13 0E 13 B5 13 9E" ] )
       .then( function ( msg ) {
         // example straight from http://socket.io/docs/
-        var socket = io( 'https://pge-as.acmecorp.com:4443' );
+        var socket = io( 'https://pge-as.photokandy.com:4443' );
         socket.on( 'news', function ( data ) {
           console.log( data );
           socket.emit( 'my other event', {

@@ -464,7 +464,10 @@ div {
   -ms-flex-order: 2;
   -webkit-order: 2;
   order: 2;
-  position: initial; }
+  position: initial;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden; }
 
 /* Android left-aligns the title */
 .android .ui-navigation-bar .ui-title {
