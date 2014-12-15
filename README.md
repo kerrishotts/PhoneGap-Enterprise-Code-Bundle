@@ -111,8 +111,16 @@ $ cordova prepare
 
 By default, the app will attempt to communicate with `pge-as.photokandy.com`, which is the host I used for testing. For
 your own testing, you'll want to redirect this to your web server. You should alter the hostname contained within the
-code in `my-ch5/www/js/app/main.js` to point to your web server instead. If you don't, you'll inadvertently contact
+code in `my-ch5/www/js/app/main.js` to point to your web server instead (lines 121 and 131). If you don't, you'll inadvertently contact
 my server... which is probably not your intent.
+
+You'll also need to modify the certificate fingerprint in `main.js` (line 128) to match the fingerprint of any certificates you may have created. Otherwise, the app will generate an error when it is run.
+
+To actually build and run the project:
+
+```
+$ cordova run android # or ios; if emulating use emulate instead of run
+```
 
 ### [Chapter 6: Application Events and Storage](ch6)
 
@@ -138,6 +146,8 @@ $ cordova prepare
 
 As with Chapter 5, this project does not implement a complete application, but is simply a demo app showing some of the
 technologies discussed in the chapter.
+
+As with Chapter 5, be sure to update `main.js` to point to your server and update the certificate fingerprint prior to building and running.
 
 ### [Chapter 7: Push Notifications](ch7)
 
@@ -216,7 +226,9 @@ $ cordova plugin add https://github.com/boxcar/PushPlugin
 $ cordova prepare
 ```
 
-> Be sure to follow the BoxCar integration steps from Chapter 7, and modify the hostname as in Chapter 5.
+> Be sure to follow the BoxCar integration steps from Chapter 7, and modify the hostname and SSL certificate fingerprints in `www/js/app/config.js`.
+
+Be sure to update `config.js` to point to your server and update the certificate fingerprint prior to building and running.
 
 [License](id:license)
 ---------------------
