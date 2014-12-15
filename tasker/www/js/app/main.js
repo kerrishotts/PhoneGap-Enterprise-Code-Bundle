@@ -26,12 +26,13 @@ define(function (require, exports, module) {
     var _y = require("yasmf"),
         LoginView = require("app/views/login/view"),
         DashboardView = require("app/views/dashboard/view"),
-        API = require("app/api/api");
+        API = require("app/api/api"),
+        config = require("app/config");
 
     // define our app object
     var APP = new _y.BaseObject();
     APP.subclass("APP");
-    APP.API = new API({baseURL: "https://pge-as.photokandy.com:4443"});
+    APP.API = new API({baseURL: config.baseURL});
     /**
      * stores our global event listeners
      */
@@ -175,7 +176,7 @@ define(function (require, exports, module) {
     APP.hideSpinner = function hideSpinner() {
         if (APP._spinner) {
             APP._spinnerCount--;
-            if (APP._spinnerCount<1) {
+            if (APP._spinnerCount < 1) {
                 APP._spinnerCount = 0;
                 APP._spinner.hide();
             }

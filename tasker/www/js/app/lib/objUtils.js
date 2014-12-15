@@ -51,6 +51,28 @@ define(function (require, exports, module) {
         merge:           _y.merge,
 
         /**
+         * Merge multiple objects into the specified target object.
+         *
+         * @param {*} sources...    source objects
+         * @param {*} target        target object
+         */
+        mergeInto:     function mergeInto() {
+            var target, source, args = [].splice.call(arguments,0);
+            if (args.length<2) {
+                throw new Error("Not enough arguments for MergeInto");
+            }
+            target = args.pop();
+            if (args.length>1) {
+                source = _y.merge.apply(undefined, args);
+            } else {
+                source = args[0];
+            }
+            Object.keys(source).forEach(function copyValue(key) {
+                target[key] = source[key];
+            });
+        },
+
+        /**
          * Iterates over the keys in an object
          * @param  {Object|Array}   o  Object or array to iterate over
          * @param  {Function} fn Function to call with each item (value, key, object)
