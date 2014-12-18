@@ -20,23 +20,23 @@ OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 OTHER DEALINGS IN THE SOFTWARE.
 */
 .ui-container modalWindow {
-  background-color: transparent;
+    background-color: transparent;
 }
 
 .ui-tint-color {
-  color: #37B;
+    color: #37B;
 }
 
 .android .ui-tint-color {
-  color: #E8E8E8;
+    color: #E8E8E8;
 }
 
 .ui-background-tint-color {
-  color: #37B;
+    background-color: #37B;
 }
 
 .android .ui-background-tint-color {
-  color: #E8E8E8;
+    color: #E8E8E8;
 }
 
 .ui-disabled .ui-tint-color {
@@ -44,17 +44,35 @@ OTHER DEALINGS IN THE SOFTWARE.
 }
 
 .android .ui-disabled .ui-tint-color {
-  color: #37B;
+    color: #37B;
 }
 
 .android .ui-disabled .ui-background-tint-color {
-  background-color: #37B;
+    background-color: #37B;
+}
+
+.ui-back-button::before,
+.android .ui-back-button::before {
+    background-color: #37B;
 }
 
 .android .ui-navigation-bar {
-  background-color: #37B;
-  border-bottom: 0;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.5);
+    background-color: #37B;
+    border-bottom: 0;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+}
+
+.needAuth, .noNetwork, .noItems {
+    margin-top: 5em;
+    text-align: center;
+}
+
+.needAuth, .noItems {
+    color: #69B;
+}
+
+.noNetwork {
+    color: #B66;
 }
 
 /*
@@ -63,103 +81,104 @@ OTHER DEALINGS IN THE SOFTWARE.
  */
 
 form.vertical-layout {
-  padding-bottom: 4em;
+    padding-bottom: 4em;
 }
+
 form.vertical-layout div.text {
-  padding:     1em;
-  line-height: 1.25em;
+    padding: 1em;
+    line-height: 1.25em;
 }
 
 form.vertical-layout div.field label {
-  background-color: white;
-  height:           44px;
-  padding:          0 1em;
-  border-bottom:    1px solid rgba(0, 0, 0, .25);
-  display:          -webkit-box;
-  display:          -moz-box;
-  display:          -webkit-flex;
-  display:          -moz-flex;
-  display:          -ms-flex;
-  display:          -o-flex;
-  display:          flex;
+    background-color: white;
+    height: 44px;
+    padding: 0 1em;
+    border-bottom: 1px solid rgba(0, 0, 0, .25);
+    display: -webkit-box;
+    display: -moz-box;
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flex;
+    display: -o-flex;
+    display: flex;
 }
 
 form.vertical-layout div.field label span {
-  box-sizing:       border-box;
-  min-width:        90px;
-  max-width:        240px;
-  overflow:         hidden;
-  text-overflow:    ellipsis;
-  white-space:      nowrap;
-  font-size:        85%;
-  font-weight:      bold;
-  padding-right:    0.5em;
-  -webkit-box-flex: 1;
-  -webkit-flex:     1;
-  -moz-flex:        1;
-  -ms-flex:         1;
-  -o-flex:          1;
-  flex:             1;
-  line-height:      44px;
+    box-sizing: border-box;
+    min-width: 90px;
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 85%;
+    font-weight: bold;
+    padding-right: 0.5em;
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -moz-flex: 1;
+    -ms-flex: 1;
+    -o-flex: 1;
+    flex: 1;
+    line-height: 44px;
 }
 
 form.vertical-layout div.field label input {
-  -webkit-appearance: none;
-  -moz-appearance:    none;
-  border:             0;
-  height:             100%;
-  background-color:   transparent;
-  box-sizing:         border-box;
-  outline:            none;
-  font-size:          18px;
-  margin:             0;
-  padding:            0;
-  -webkit-box-flex:   2;
-  -webkit-flex:       2;
-  -moz-flex:          2;
-  -ms-flex:           2;
-  -o-flex:            2;
-  flex:               2;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border: 0;
+    height: 100%;
+    background-color: transparent;
+    box-sizing: border-box;
+    outline: none;
+    font-size: 18px;
+    margin: 0;
+    padding: 0;
+    -webkit-box-flex: 2;
+    -webkit-flex: 2;
+    -moz-flex: 2;
+    -ms-flex: 2;
+    -o-flex: 2;
+    flex: 2;
 }
 
 form.vertical-layout div.field label input:focus {
-  background-color: #F0F7FF;
+    background-color: #F0F7FF;
 }
 
 div.button-group {
-  padding:  0.5em;
-  display:  -webkit-box;
-  display:  -moz-box;
-  display:  -ms-flexbox;
-  display:  -webkit-flex;
-  display:  flex;
-  position: absolute;
-  bottom:   0px;
-  width:    100%;
+    padding: 0.5em;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
 }
 
 div.button-group input,
 div.button-group button {
-  -webkit-box-flex:   1;
-  -moz-box-flex:      1;
-  -webkit-flex:       1;
-  -ms-flex:           1;
-  flex:               1;
-  -webkit-appearance: none;
-  -moz-appearance:    none;
-  border:             0;
-  background-color:   blue;
-  color:              white;
-  margin:             0.5em;
-  line-height:        44px;
-  height:             44px;
-  font-size:          18px;
-  outline:            0;
+    -webkit-box-flex: 1;
+    -moz-box-flex: 1;
+    -webkit-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border: 0;
+    background-color: blue;
+    color: white;
+    margin: 0.5em;
+    line-height: 44px;
+    height: 44px;
+    font-size: 18px;
+    outline: 0;
 }
 
 div.button-group input:active,
 div.button-group button:active {
-  opacity: 0.5;
+    opacity: 0.5;
 }
 
 /*
@@ -167,13 +186,13 @@ div.button-group button:active {
  * ======================
  */
 .android .loginView, .loginView {
-  background-color: #37B;
+    background-color: #37B;
 }
 
 .android .loginView .ui-navigation-bar {
-  background-color: white;
-  color: #33373B;
-  visibility: hidden;
+    background-color: white;
+    color: #33373B;
+    visibility: hidden;
 }
 
 /*
@@ -181,40 +200,40 @@ div.button-group button:active {
  * ===========================
  */
 .loginView form.vertical-layout div.text h1 {
-  text-align:     center;
-  font-size:      300%;
-  line-height:    2em;
-  font-weight:    100;
-  letter-spacing: 5px;
+    text-align: center;
+    font-size: 300%;
+    line-height: 2em;
+    font-weight: 100;
+    letter-spacing: 5px;
 }
 
 .loginView form.vertical-layout div.text {
-  color:       #E0E0E0;
+    color: #E0E0E0;
 }
 
 .loginView form.vertical-layout div.field label span {
-  color:      #99A5B1;
-  text-align: right;
+    color: #99A5B1;
+    text-align: right;
 }
 
 .loginView form.vertical-layout div.field label input {
-  color: #33373B;
+    color: #33373B;
 }
 
 .loginView div.button-group {
-  background-color: #37B;
+    background-color: #37B;
 }
 
 .loginView div.button-group input,
 .loginView div.button-group button {
-  background-color:   #E8E8E8;
-  color:              #33373B;
-  -webkit-appearance: none;
-  -moz-appearance:    none;
+    background-color: #E8E8E8;
+    color: #33373B;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 }
 
 .loginView form.vertical-layout div.text h1 {
-  text-transform: uppercase;
+    text-transform: uppercase;
 }
 
 /*
@@ -223,50 +242,50 @@ div.button-group button:active {
  */
 .android .dashboardView,
 .dashboardView {
-  background-color: #D8E4E8;
+    background-color: #D8E4E8;
 }
 
 .dashboardView .ui-list-heading,
 .dashboardView .ui-list-item {
-  background-color: transparent;
-  color:            #37B;
-  border-bottom:    1px solid transparent;
+    background-color: transparent;
+    color: #37B;
+    border-bottom: 1px solid transparent;
 }
 
 .dashboardView .ui-list-heading {
-  margin-bottom: 1em;
-  margin-top:    1em;
-  border-bottom: 1px solid #37B;
+    margin-bottom: 1em;
+    margin-top: 1em;
+    border-bottom: 1px solid #37B;
 }
 
 .dashboardView .ui-list-heading .ui-indicator,
 .dashboardView .ui-list-item .ui-indicator {
-  background-color: #FFF;
-  position: absolute;
-  font-size: 85%;
-  height: 5em;
-  right: 10px;
-  width: 32px;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center center;
-  mask-position: center center;
+    background-color: #FFF;
+    position: absolute;
+    font-size: 85%;
+    height: 5em;
+    right: 10px;
+    width: 32px;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center center;
+    mask-position: center center;
 }
 
 .dashboardView .ui-list-heading:active,
 .dashboardView .ui-list-item:active {
-  color:            white;
-  background-color: #37B;
-  border-bottom:    1px solid white;
+    color: white;
+    background-color: #37B;
+    border-bottom: 1px solid white;
 }
 
 .dashboardView .ui-list-item:active {
-  border-bottom: 1px solid transparent;
+    border-bottom: 1px solid transparent;
 }
 
 .dashboardView .ui-list-heading:active .ui-indicator,
 .dashboardView .ui-list-item:active .ui-indicator {
-  background-color: white;
+    background-color: white;
 }
 
 /*
@@ -298,103 +317,122 @@ div.button-group button:active {
    [ ] In Progress  [ ] On Hold  [ ] Complete
  */
 .color-key-bar {
-  margin-top:       44px;
-  height:           44px;
-  line-height:      44px;
-  border-bottom:    1px solid rgba(0, 0, 0, .25);
-  background-color: rgba(255, 255, 255, .75);
-  text-align:       center;
-  font-size:        75%;
-  z-index:          5;
+    margin-top: 44px;
+    height: 44px;
+    line-height: 44px;
+    border-bottom: 1px solid rgba(0, 0, 0, .25);
+    background-color: rgba(255, 255, 255, .75);
+    text-align: center;
+    font-size: 75%;
+    z-index: 5;
 }
 
 .iosM .color-key-bar {
-  padding-top: 20px;
-  height:      64px;
+    padding-top: 20px;
+    height: 64px;
 }
 
 .android .color-key-bar {
-  height:      48px;
-  line-height: 56px;
+    height: 48px;
+    line-height: 56px;
 }
 
 .color-key-bar span {
-  margin:       0 0.5em;
-  padding-left: 0.5em;
-  border-left:  1em solid black;
-  color:        #666E72;
+    margin: 0 0.5em;
+    padding-left: 0.5em;
+    border-left: 1em solid black;
+    color: #666E72;
 }
 
 .color-key-bar span.inProgress {
-  border-left-color: #7B3;
+    border-left-color: #7B3;
 }
 
 .color-key-bar span.onHold {
-  border-left-color: #B37;
+    border-left-color: #B37;
 }
 
 .color-key-bar span.complete {
-  border-left-color: #37B;
+    border-left-color: #37B;
 }
 
 .color-key-bar ~ * .ui-avoid-navigation-bar {
-  padding-top: 88px !important;
+    padding-top: 88px !important;
 }
 
 .iosM .color-key-bar ~ * .ui-avoid-navigation-bar {
-  padding-top: 108px !important;
+    padding-top: 108px !important;
 }
 
 .android .color-key-bar ~ * .ui-avoid-navigation-bar {
-  padding-top: 92px !important;
+    padding-top: 92px !important;
 }
 
 .ui-list .task-status {
-  margin:           -10px;
-  margin-right:     10px;
-  background-color: black;
-  min-width:        30px;
-  max-width:        30px;
+    margin: -10px;
+    margin-right: 10px;
+    background-color: black;
+    min-width: 30px;
+    max-width: 30px;
 }
 
 .ui-list .inProgress {
-  background-color: #7B3;
+    background-color: #7B3;
 }
 
 .ui-list .onHold {
-  background-color: #B37;
+    background-color: #B37;
 }
 
 .ui-list .complete {
-  background-color: #37B;
+    background-color: #37B;
 }
 
 .ui-list .unknown {
-  background-color: #33373B;
+    background-color: #33373B;
 }
 
 .ui-list .task-title {
-  font-weight: bold;
-  line-height: 1.25em;
+    font-weight: bold;
+    line-height: 1.25em;
 }
 
 .ui-list .task-description {
-  font-size:   80%;
-  line-height: 1.25em;
-  color:       #666;
+    font-size: 80%;
+    line-height: 1.25em;
+    color: #666;
+}
+
+.ui-list .task-assignee, .ui-list .task-owner {
+    width: 50%;
+    display: inline-block;
+    font-size: 80%;
+    color: #888;
+}
+
+.ui-list .task-owner {
+    text-align: right;
+}
+
+.ui-label.task-status {
+    color: white;
+    text-align: center;
+    font-size: 80%;
+    line-height: 5em;
+    font-weight: 100;
 }
 
 .ui-list .task-stat-part {
-  color:          white;
-  text-align:     center;
-  font-size:      85%;
-  line-height:    5em;
-  font-weight:    100;
-  letter-spacing: 0px;
-  min-width:      4em;
-  outline: 1px solid rgba(255,255,255,0.5);
+    color: white;
+    text-align: center;
+    font-size: 85%;
+    line-height: 5em;
+    font-weight: 100;
+    letter-spacing: 0px;
+    min-width: 4em;
+    outline: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .ui-list .task-stat-part.unknown {
-  min-width: 0;
+    min-width: 0;
 }

@@ -32,6 +32,7 @@ define(function (require, exports, module) {
         Hateoas = require("app/lib/hateoas"),
         _y = require("yasmf"),
         Q = require("Q"),
+        GLOBALS = require("app/lib/globals"),
         _className = "API";
 
     function pad2(v) {
@@ -53,7 +54,6 @@ define(function (require, exports, module) {
         });
 
         // private variables
-        self._session = null; // we'll store a session object here
         self._api = null; // we'll use this to store information about the API
 
         // some typical XHR options
@@ -78,7 +78,10 @@ define(function (require, exports, module) {
             if (self._api !== null) {
                 deferred.resolve();
             } else {
-                XHR.send("GET", self.baseURL + "/", self._xhrOptions)
+                XHR.checkIfSecure(self.baseURL, GLOBALS.config.certificateFingerprints)
+                    .then(function send() {
+                        return XHR.send("GET", self.baseURL + "/", self._xhrOptions);
+                    })
                     .then(function (r) {
                         // response contains everything we need to know about the API
                         // STORE IT.
@@ -223,7 +226,7 @@ define(function (require, exports, module) {
 
                     // if the resource is secured, we also need to ask for a login
                     if (apiAction["secured-by"] !== undefined) {
-                        if (self._session === null) {
+                        if (GLOBALS.session === null) {
                             promise = promise.then(self.login.bind(self));
                         }
                     }
@@ -237,17 +240,21 @@ define(function (require, exports, module) {
                         var context = {},
                             apiHeaders;
 
+                        if (r && r._context) {
+                            context = r._context;
+                        }
+
                         // if we have a response, it's a CSRF token
                         if (r !== undefined) {
                             Hateoas.storeResponseToContext(r, context);
                         }
 
                         // merge in our session as well
-                        if (self._session !== null) {
-                            context["session-id"] = self._session.sessionId;
-                            context["user-id"] = self._session.userId;
-                            context["next-token"] = self._session.nextToken;
-                            context["person-id"] = self._session.personId;
+                        if (GLOBALS.session !== null) {
+                            context["session-id"] = GLOBALS.session.sessionId;
+                            context["user-id"] = GLOBALS.session.userId;
+                            context["next-token"] = GLOBALS.session.nextToken;
+                            context["person-id"] = GLOBALS.session.personId;
                         }
 
                         // the action may also require an HMAC...
@@ -269,7 +276,7 @@ define(function (require, exports, module) {
                             if (body !== undefined && body !== null) {
                                 stringToHmac += "." + JSON.stringify(options.data);
                             }
-                            hmacString = CryptoJS.HmacSHA256(stringToHmac, self._session.hmacSecret)
+                            hmacString = CryptoJS.HmacSHA256(stringToHmac, GLOBALS.session.hmacSecret)
                                 .toString(CryptoJS.enc.Base64);
 
                             context["hmac-token"] = hmacString;
@@ -285,18 +292,30 @@ define(function (require, exports, module) {
                         url = encodeURI(self.baseURL + url);
 
                         // and after all that, send!
-                        return XHR.send(apiAction.verb, url, options);
+                        return XHR.checkIfSecure(self.baseURL, GLOBALS.config.certificateFingerprints)
+                            .then(function send() {
+                                return XHR.send(apiAction.verb, url, options);
+                            });
                     });
 
                     return promise;
                 })
                 .then(function resolveRequest(r) {
+                    var context = {};
+                    Hateoas.storeResponseToContext(r, context);
+                    if (context["next-token"]) {
+                        if (GLOBALS.session) {
+                            GLOBALS.session.setNextToken(context["next-token"])
+                        }
+                    }
+                    r._context = context;
                     deferred.resolve(r);
                     // process the next request
                     self._busy = false;
                     setTimeout(self._processQueue, 0);
                 })
                 .catch(function rejectRequest(err) {
+                    console.error(err);
                     deferred.reject(err);
                     // process the next request
                     self._busy = false;
@@ -396,7 +415,7 @@ define(function (require, exports, module) {
                     .then(function loginSucceeded(r) {
                         var context = {};
                         Hateoas.storeResponseToContext(r, context);
-                        self._session = new Session({
+                        GLOBALS.session = new Session({
                             userId:     context["user-id"],
                             sessionId:  context["session-id"],
                             hmacSecret: context["hmac-secret"],
@@ -458,7 +477,7 @@ define(function (require, exports, module) {
         [
             ["tasks", "tasks"],
             ["people", "people"]
-        ].forEach(function curryAction(parms) {
+        ].forEach(function bindAction(parms) {
                 var collection = parms[0], action = parms[1],
                     properCase = collection.substr(0, 1).toUpperCase() + collection.substr(1);
                 self["get" + properCase] = self.getCollection.bind(self, action);
@@ -511,7 +530,7 @@ define(function (require, exports, module) {
         [
             ["task", "taskId"],
             ["person", "personId"]
-        ].forEach(function curryAction(parms) {
+        ].forEach(function bindAction(parms) {
                 var entity = parms[0], keyPath = parms[1],
                     properCase = parms[0].substr(0, 1).toUpperCase() + parms[0].substr(1);
                 self["get" + properCase] = self.getEntityById.bind(self, entity, keyPath);

@@ -1,6 +1,6 @@
 /**
  *
- * session.js
+ * person/model.js
  * @author Kerri Shotts
  * @version 3.0.0
  *
@@ -23,39 +23,24 @@
 define(function (require, exports, module) {
     "use strict";
 
-    function Session(data) {
-        if (data !== undefined) {
-            this.sessionId = data.sessionId;
-            this.userId = data.userId;
-            this.hmacSecret = data.hmacSecret;
-            this.nextToken = data.nextToken;
-            this.personId = data.personId;
+    var ObjUtils = require("app/lib/objUtils");
+
+    function Person(data) {
+        var defaultPerson = {
+            id:             null,
+            userId:         "",
+            fullName:       "",
+            prefName:       "",
+            administeredBy: 0,
+            changeDate:     new Date(),
+            changeUser:     null
+        };
+
+        ObjUtils.mergeInto(defaultPerson, data, this);
+        if (!(this.changeDate instanceof Date)) {
+            this.changeDate = new Date(this.changeDate);
         }
-        this.save();
     }
 
-    Session.prototype.save = function save() {
-        //TODO: use keychain if available
-        localStorage.setItem("auth", JSON.stringify(this));
-    };
-
-    Session.load = function load() {
-        //TODO: use keychain if available
-        return new Session(JSON.parse(localStorage.getItem("auth")));
-    };
-
-    Session.clear = function clear() {
-        // TODO: use keychain
-        localStorage.removeItem("auth");
-        return null;
-    };
-
-    Session.prototype.setNextToken = function setNextToken(nextToken) {
-        if (nextToken !== undefined && nextToken !== null & nextToken !== "") {
-            this.nextToken = nextToken;
-            this.save();
-        }
-    };
-
-    module.exports = Session;
+    module.exports = Person;
 });

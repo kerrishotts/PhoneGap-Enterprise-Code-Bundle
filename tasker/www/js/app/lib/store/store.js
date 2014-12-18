@@ -1,6 +1,6 @@
 /**
  *
- * session.js
+ * store.js
  * @author Kerri Shotts
  * @version 3.0.0
  *
@@ -20,42 +20,26 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
+/*global define, device, PKLocalStorage*/
 define(function (require, exports, module) {
     "use strict";
 
-    function Session(data) {
-        if (data !== undefined) {
-            this.sessionId = data.sessionId;
-            this.userId = data.userId;
-            this.hmacSecret = data.hmacSecret;
-            this.nextToken = data.nextToken;
-            this.personId = data.personId;
-        }
-        this.save();
-    }
+    // could have a mocks here too
+    var
+        backend = require("./backend"),
+        mock = require("./mock");
 
-    Session.prototype.save = function save() {
-        //TODO: use keychain if available
-        localStorage.setItem("auth", JSON.stringify(this));
-    };
-
-    Session.load = function load() {
-        //TODO: use keychain if available
-        return new Session(JSON.parse(localStorage.getItem("auth")));
-    };
-
-    Session.clear = function clear() {
-        // TODO: use keychain
-        localStorage.removeItem("auth");
-        return null;
-    };
-
-    Session.prototype.setNextToken = function setNextToken(nextToken) {
-        if (nextToken !== undefined && nextToken !== null & nextToken !== "") {
-            this.nextToken = nextToken;
-            this.save();
+    var store = {
+        MOCK:      false,
+        getTasks:  function getTasks(options) {
+            return this.MOCK ? mock.getTasks(options) : backend.getTasks(options);
+        },
+        getPeople: function getPeople(options) {
+            return this.MOCK ? mock.getPeople(options) : backend.getPeople(options);
         }
     };
 
-    module.exports = Session;
+
+    module.exports = store;
+
 });

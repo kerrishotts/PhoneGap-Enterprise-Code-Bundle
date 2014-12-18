@@ -24,18 +24,24 @@
 define(function (require, exports, module) {
     "use strict";
     var _y = require("yasmf"),
-        hammer = require("hammer");
+        hammer = require("hammer"),
+        Task = require("app/models/task/model");
 
-    module.exports = function taskListItemTemplate(task, tapHandler) {
+    module.exports = function taskListItemTemplate(task, people, tapHandler) {
         var h = _y.h;
-        return h.el("li.ui-list-item", {hammer: {tap: {handler: tapHandler}, hammer: hammer}},
+        return h.el("li.ui-list-item", {
+                attrs:  {"data-task-id": task.id},
+                hammer: {tap: {handler: tapHandler}, hammer: hammer}
+            },
             [
                 h.el("div.ui-list-item-flex-contents",
                     [
-                        h.el("div.ui-label task-status " + task.status),
+                        h.el("div.ui-label task-status " + Task.CODE_DESCRIPTION[task.status], task.pctComplete),
                         h.el("div.ui-fill", [
                             h.el("div.ui-label task-title", task.title),
-                            h.el("div.ui-label task-description", task.description)
+                            h.el("div.ui-label task-description", task.description),
+                            h.el("div.ui-label task-assignee", _y.T("TO_%PERSON%", {person: _y.valueForKeyPath(people.getPersonById(task.assignedTo), "fullName", _y.T("NO_ONE"))})),
+                            h.el("div.ui-label task-owner", _y.T("FROM_%PERSON%", {person: _y.valueForKeyPath(people.getPersonById(task.owner), "fullName", _y.T("NO_ONE"))}))
                         ]),
                         h.el("div.ui-indicator ui-arrow-direction-right")
                     ])

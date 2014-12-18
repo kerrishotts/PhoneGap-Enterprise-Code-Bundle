@@ -10,7 +10,7 @@ node_modules/*
 .idea/*
 tasker/.idea/*
 tasker-srv/npm-debug.log
-
+tasker/.todo/*
 *.espressostorage
 
 tasker-srv/cookies.txt
@@ -42,3 +42,7 @@ ch7/www/.zedstate
 
 tasker-srv/pge-tasker-srv.colt
 pge-tasker-srv.colt
+
+.todo/todo
+
+.todo/todo

@@ -30,10 +30,17 @@ define(function (require, exports, module) {
         taskStatsTemplate = require("app/templates/taskStatsTemplate");
 
     _y.addTranslations({
-        "TASKER":           {"EN": "Tasker"},
-        "DASHBOARD:TITLE":  {"EN": "Dashboard"},
-        "DASHBOARD:LOGIN":  {"EN": "Log in"},
-        "DASHBOARD:LOGOUT": {"EN": "Log out"}
+        "TASKER":                      {"EN": "Tasker"},
+        "DASHBOARD:TITLE":             {"EN": "Dashboard"},
+        "DASHBOARD:LOGIN":             {"EN": "Log in"},
+        "DASHBOARD:LOGOUT":            {"EN": "Log out"},
+        "CATEGORY:ASSIGNED_TO_ME":     {"EN": "Assigned to me"},
+        "CATEGORY:ASSIGNED_TO_OTHERS": {"EN": "Assigned to others"},
+        "NO_NETWORK":                  {"EN": "No Internet Connection."},
+        "NEEDS_AUTH":                  {"EN": "Please log in."},
+        "LOADING":                     {"EN": "Loading..."},
+        "CANCEL":                      {"EN": "Cancel"},
+        "OK":                          {"EN": "Ok"}
     });
     /**
      * @method dashboardTemplate
@@ -41,7 +48,7 @@ define(function (require, exports, module) {
      * @param {*} c      controller
      * @param {*} map
      */
-    module.exports = function dashboardTemplate(v, c, map) {
+    module.exports = function dashboardTemplate(v, c, map, session, networkStatus) {
         var h = _y.h;
         return [
             //
@@ -49,13 +56,16 @@ define(function (require, exports, module) {
             h.el("div.ui-navigation-bar",
                 [h.el("div.ui-title", _y.T("DASHBOARD:TITLE")),
                     h.el("div.ui-bar-button-group ui-align-right",
-                        h.el("div.ui-bar-button ui-tint-color", _y.T("DASHBOARD:LOGIN"),
-                            {
-                                hammer: {
-                                    tap:    {handler: c.doLogInOut},
-                                    hammer: hammer
-                                }
-                            })
+                        networkStatus ? (
+                            h.el("div.ui-bar-button ui-tint-color", _y.T(session ? "DASHBOARD:LOGOUT" : "DASHBOARD:LOGIN"),
+                                {
+                                    hammer: {
+                                        tap:    {handler: c.doLogInOut},
+                                        hammer: hammer
+                                    }
+                                })) : (
+                            undefined
+                        )
                     )
                 ]
             ),
@@ -64,19 +74,27 @@ define(function (require, exports, module) {
             //
             // scroll container containing login form and text; avoid the navigation bar
             h.el("div.ui-scroll-container",
-                h.el("ul.ui-list ui-avoid-navigation-bar", [
-                    h.el("li.ui-list-heading",
-                        h.el("div.ui-list-item-flex-contents",
-                            h.el("div.ui-label", "Tasks Owned By Me")
-                        )),
-                    taskStatsTemplate({inProgress: 0.12, onHold: 0.25, complete: 0.63, unknown: 0.0}),
-                    h.el("li.ui-list-heading",
-                        h.el("div.ui-list-item-flex-contents",
-                            h.el("div.ui-label", "Tasks Assigned to Others")
-                        )),
-                    taskStatsTemplate({inProgress: 0.12, onHold: 0.0, complete: 0.25, unknown: 0.63})
-                ])
+                networkStatus ? (
+                    session ? (
+                        h.el("ul.ui-list ui-avoid-navigation-bar", [
+                            h.el("li.ui-list-heading",
+                                h.el("div.ui-list-item-flex-contents",
+                                    h.el("div.ui-label", _y.T("CATEGORY:ASSIGNED_TO_ME"))
+                                )),
+                            taskStatsTemplate(v[h.mapTo("statsForMe", map)], c.showMyTasks),
+                            h.el("li.ui-list-heading",
+                                h.el("div.ui-list-item-flex-contents",
+                                    h.el("div.ui-label", _y.T("CATEGORY:ASSIGNED_TO_OTHERS"))
+                                )),
+                            taskStatsTemplate(v[h.mapTo("statsForOthers", map)], c.showOtherTasks)
+                        ])) : (
+                        h.el("div.needAuth ui-avoid-navigation-bar", _y.T("NEEDS_AUTH"))
+                    )
+                ) : (
+                    h.el("div.noNetwork ui-avoid-navigation-bar", _y.T("NO_NETWORK"))
+                )
             )
         ];
     }
-});
+})
+;

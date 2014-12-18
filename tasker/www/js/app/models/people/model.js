@@ -1,6 +1,6 @@
 /**
  *
- * session.js
+ * people/model.js
  * @author Kerri Shotts
  * @version 3.0.0
  *
@@ -23,39 +23,39 @@
 define(function (require, exports, module) {
     "use strict";
 
-    function Session(data) {
-        if (data !== undefined) {
-            this.sessionId = data.sessionId;
-            this.userId = data.userId;
-            this.hmacSecret = data.hmacSecret;
-            this.nextToken = data.nextToken;
-            this.personId = data.personId;
+    var ObjUtils = require("app/lib/objUtils"),
+        Person = require("app/models/person/model");
+
+    function People(data) {
+        this.items = [];
+        if (data instanceof Array) {
+            this.items = data.map(function (item) {
+                return new Person(item);
+            });
         }
-        this.save();
     }
 
-    Session.prototype.save = function save() {
-        //TODO: use keychain if available
-        localStorage.setItem("auth", JSON.stringify(this));
-    };
-
-    Session.load = function load() {
-        //TODO: use keychain if available
-        return new Session(JSON.parse(localStorage.getItem("auth")));
-    };
-
-    Session.clear = function clear() {
-        // TODO: use keychain
-        localStorage.removeItem("auth");
-        return null;
-    };
-
-    Session.prototype.setNextToken = function setNextToken(nextToken) {
-        if (nextToken !== undefined && nextToken !== null & nextToken !== "") {
-            this.nextToken = nextToken;
-            this.save();
+    People.prototype.getPersonById = function getPersonById(id) {
+        var candidates = this.items.filter(function testCandidate(candidate) {
+            return candidate.id === id;
+        });
+        if (candidates.length === 1) {
+            return candidates[0];
+        } else if (candidates.length < 1) {
+            return null;
         }
+        throw new Error("Multiple people found for id ", id);
     };
 
-    module.exports = Session;
+    People.prototype.getCount = function count() {
+        return this.items.length;
+    };
+
+    People.prototype.getKeys = function keys() {
+        return this.items.map(function makeKey(item) {
+            return item.id
+        });
+    };
+
+    module.exports = People;
 });

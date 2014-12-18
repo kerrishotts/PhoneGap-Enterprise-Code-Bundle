@@ -207,7 +207,7 @@ FUNCTION get_people_administered_by(
 AS
 BEGIN
   FOR r IN
-  ( SELECT * FROM tasker.person WHERE administrator_id = p_administrator_id )
+  ( SELECT * FROM tasker.person WHERE administrator_id = nvl(p_administrator_id,administrator_id) )
   LOOP
     pipe row (r);
   END LOOP;

@@ -24,91 +24,41 @@
 define(function (require, exports, module) {
     "use strict";
     var _y = require("yasmf"),
+        GLOBALS = require("app/lib/globals"),
+        Session = require("app/models/session/model"),
         LoginView = require("app/views/login/view"),
         DashboardView = require("app/views/dashboard/view"),
-        API = require("app/api/api"),
-        config = require("app/config");
+        TaskListView = require("app/views/taskList/view"),
+        API = require("app/api/api")
 
     // define our app object
-    var APP = new _y.BaseObject();
-    APP.subclass("APP");
-    APP.API = new API({baseURL: config.baseURL});
-    /**
-     * stores our global event listeners
-     */
-    var globalEventListeners = {};
-    /**
-     * Adds a listener for our global events
-     * @param event {String} The event name to add (case-insensitive)
-     * @param listener {Function} the listener; receives the name of the event
-     */
-    APP.addGlobalEventListener = function addGlobalEventListener(event, listener) {
-        var EVENT = event.toUpperCase();
-        if (typeof globalEventListeners[EVENT] === "undefined") {
-            globalEventListeners[EVENT] = [];
-        }
-        globalEventListeners[EVENT].push(listener);
-    };
-    /**
-     * Removes a listener (if previously added) from a global event
-     * @param event {String} the event name (case-insensitive)
-     * @param listener {Function} the listener to remove
-     */
-    APP.removeGlobalEventListener = function removeGlobalEventListener(event, listener) {
-        var EVENT = event.toUpperCase();
-        var i = -1;
-        if (typeof globalEventListeners[EVENT] !== "undefined") {
-            i = globalEventListeners[EVENT].indexOf(listener);
-            if (i > -1) {
-                globalEventListeners[EVENT].splice(i, 1);
-            }
-        }
-    };
-    /**
-     * Dispatches a global event asynchronously unless sync is true.
-     * @param event {String} the event name (case-insensitive)
-     * @param [sync] {Boolean} if true, dispatch synchronously, otherwise async.
-     */
-    APP.dispatchGlobalEvent = function dispatchGlobalEvent(event, sync) {
-        var EVENT = event.toUpperCase();
-        var doSynchronously = false;
-        if (typeof sync !== "undefined") {
-            doSynchronously = sync;
-        }
-        if (typeof globalEventListeners[EVENT] !== "undefined") {
-            globalEventListeners[EVENT].forEach(function dispatchToListener(listener) {
-                if (doSynchronously) {
-                    try {
-                        listener(EVENT);
-                    } catch (err) {
-                        console.log("dispatchGlobalEvent caught error: " + JSON.stringify(err));
-                    }
-                } else {
-                    setTimeout(function asyncDispatch() {
-                        listener(EVENT);
-                    }, 0);
-                }
-            });
-        }
-    };
+    var APP = new _y.BaseObject(),
+        self = APP;
+
+    self.subclass("APP");
+
+    // we want the API instance available from anywhere
+    GLOBALS.api = new API({baseURL: GLOBALS.config.baseURL});
+    window.GLOBALS = GLOBALS; // <-- FOR TESTING ONLY!
+
     /**
      * Dispatches a applicationPausing or applicationResuming event synchronously, based on appState
      * @param appState {String} Pausing or Resuming
      * @private
      */
     function dispatchStateEvent(appState) {
-        APP.dispatchGlobalEvent("application" + appState, true);
+        GLOBALS.events.emit("application" + appState);
         console.log("Application " + appState.toUpperCase());
     }
 
     /**
      * Dispatches the applicationPausing event synchronously
      */
-    var dispatchPauseEvent = dispatchStateEvent.bind(null, "Pausing");
+    var dispatchPauseEvent = dispatchStateEvent.bind(undefined, "Pausing");
     /**
      * Dispatches the applicationResuming event synchronously
      */
-    var dispatchResumeEvent = dispatchStateEvent.bind(null, "Resuming");
+    var dispatchResumeEvent = dispatchStateEvent.bind(undefined, "Resuming");
 
     /**
      * Dispatches a networkOnline or networkOffline event, based on status
@@ -116,24 +66,25 @@ define(function (require, exports, module) {
      * @private
      */
     function dispatchNetworkEvent(status) {
-        APP.dispatchGlobalEvent("network" + status);
+        GLOBALS._networkStatus = status;
+        GLOBALS.events.emit("network" + status);
         console.log("Network is now " + status.toUpperCase());
     }
 
     /**
      * Dispatches a networkOnlineEvent
      */
-    var dispatchOnlineEvent = dispatchNetworkEvent.bind(null, "Online");
+    var dispatchOnlineEvent = dispatchNetworkEvent.bind(undefined, "Online");
     /**
      * Dispatches a networkOfflineEvent
      */
-    var dispatchOfflineEvent = dispatchNetworkEvent.bind(null, "Offline");
+    var dispatchOfflineEvent = dispatchNetworkEvent.bind(undefined, "Offline");
 
 
     /**
      * presents a login UI
      */
-    APP.presentLoginUI = function presentLoginUI() {
+    self.presentLoginUI = function presentLoginUI() {
         var loginView = new LoginView({});
         APP.loginView = loginView;
         var navigationController = new _y.UI.NavigationController({
@@ -147,47 +98,90 @@ define(function (require, exports, module) {
      * @returns {Promise}
      * @private
      */
-    APP._loginViaAPI = function _loginViaAPI() {
-        return APP.API.login()
+    self._loginViaAPI = function _loginViaAPI() {
+        return GLOBALS.api.login()
             .catch(function (err) {
                 console.log("got a login error", err);
             })
             .done();
     };
 
-    APP._spinner = null;
-    APP._spinnerCount = 0;
+    self._logout = function _logout() {
+        GLOBALS.api.logout()
+            .finally(function logout() {
+                // this happens no matter what, even if we error on logging out
+                GLOBALS.session = Session.clear();
+                GLOBALS.events.emit("login:logout");
+            })
+            .done();
+    };
+
+    self._spinner = null;
+    self._spinnerCount = 0;
     /**
      * Show a blocking spinner; this will block all user interaction!
      */
-    APP.showSpinner = function showSpinner() {
-        if (!APP._spinner) {
-            APP._spinner = new _y.UI.Spinner({});
+    self.showSpinner = function showSpinner() {
+        if (!self._spinner) {
+            self._spinner = new _y.UI.Spinner({});
         }
-        if (!APP._spinner.visible) {
-            APP._spinner.show();
+        if (!self._spinner.visible) {
+            self._spinner.show();
         }
-        APP._spinnerCount++;
+        self._spinnerCount++;
     };
 
     /**
      * Hide any visible blocking spinner, but only if the spinnerCount < 1
      */
-    APP.hideSpinner = function hideSpinner() {
-        if (APP._spinner) {
-            APP._spinnerCount--;
-            if (APP._spinnerCount < 1) {
-                APP._spinnerCount = 0;
-                APP._spinner.hide();
+    self.hideSpinner = function hideSpinner() {
+        if (self._spinner) {
+            self._spinnerCount--;
+            if (self._spinnerCount < 1) {
+                self._spinnerCount = 0;
+                self._spinner.hide();
             }
         }
     };
 
+    self.handleNavigation = function handleNavigation(sender, notice, args) {
+        switch (notice) {
+            case "APP:NAV:back":
+                if (self.navigationController.rootView !== self.navigationController.topView) {
+                    self.navigationController.popView();
+                } else {
+                    if (_y.device.platform() === "android") {
+                        navigator.app.exitApp();
+                    }
+                }
+                break;
+            case "APP:NAV:home":
+                self.navigationController.rootView = self.navigationController.rootView;
+                break;
+            case "APP:NAV:viewTasks":
+                self.navigationController.pushView(
+                    new TaskListView({filter: args[0]})
+                );
+                break;
+            default:
+                console.info("Unhandled navigation", sender, notice, args);
+        }
+    };
+
     // APP.start will load the first view and kick us off
-    APP.start = function () {
+    self.start = function () {
         // listen for online/offline network events
-        document.addEventListener("online", dispatchOnlineEvent, false);
-        document.addEventListener("offline", dispatchOfflineEvent, false);
+        if (_y.underCordova) {
+            document.addEventListener("online", dispatchOnlineEvent, false);
+            document.addEventListener("offline", dispatchOfflineEvent, false);
+        } else {
+            // browser has other event listeners
+            window.addEventListener("online", dispatchOnlineEvent, false);
+            window.addEventListener("offline", dispatchOfflineEvent, false);
+            if (!navigator.onLine) {
+                dispatchOfflineEvent();
+            }
+        }
         // start listening for resume/pause events
         /*
          if (typeof device !== "undefined" && device.platform === "ios") {
@@ -237,29 +231,32 @@ define(function (require, exports, module) {
         [
             "APP:needsLogin", "APP:needsLoginUI", "login:auth", "login:authCancel",
             "login:response", "login:good", "login:fail", "login:dismiss",
-            "APP:block", "APP:unblock"
+            "login:logout", "APP:block", "APP:unblock"
         ].forEach(function (n) {
-                _y.UI.globalNotifications.registerNotification(n);
+                GLOBALS.events.registerNotification(n);
             });
 
         // when APP:needLogin is posted, we will attempt a login through the API
-        _y.UI.globalNotifications.on("APP:needsLogin", APP._loginViaAPI);
+        GLOBALS.events.on("APP:needsLogin", APP._loginViaAPI);
+        GLOBALS.events.on("APP:logout", APP._logout);
 
         // when APP:needsLoginUI is posted, we display the login UI
-        _y.UI.globalNotifications.on("APP:needsLoginUI", APP.presentLoginUI);
+        GLOBALS.events.on("APP:needsLoginUI", APP.presentLoginUI);
 
-        _y.UI.globalNotifications.on("APP:block", APP.showSpinner);
-        _y.UI.globalNotifications.on("APP:unblock", APP.hideSpinner);
+        GLOBALS.events.on("APP:block", APP.showSpinner);
+        GLOBALS.events.on("APP:unblock", APP.hideSpinner);
 
-        // register routes
-        var router = _y.Router;
-        router.addURL("/", "Home")
-            .addURL("/task", "List of Tasks")
-            .addURL("/task/:taskId", "View/Edit Task")
-            .addURL("/task/:taskId/comment", "View comments")
-            .addURL("/task/:taskId/comment/add", "Add comment");
-        router.listen();
-        router.replace("/", 1);
+        _y.UI.backButton.on("backButtonPressed", function backButtonPressed() {
+            GLOBALS.events.emit("APP:NAV:back");
+        });
+
+        // these are largely equivalent to routes, but done via events
+        // instead
+        ["APP:NAV:viewTasks", "APP:NAV:editTask", "APP:NAV:createTask", "APP:NAV:viewComments",
+            "APP:NAV:addComment", "APP:NAV:home", "APP:NAV:back"].forEach(function (i) {
+                GLOBALS.events.on(i, self.handleNavigation);
+            });
+
     };
     module.exports = APP;
 });

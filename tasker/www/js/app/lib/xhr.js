@@ -352,6 +352,7 @@ define(function (require, exports, module) {
             if (typeof NetworkActivity !== "undefined") {
                 NetworkActivity.activityStart();
             }
+
             xhr.send(sendingData);
         }
 
