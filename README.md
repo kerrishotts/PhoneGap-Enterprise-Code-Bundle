@@ -152,6 +152,8 @@ technologies discussed in the chapter.
 
 ### [Chapter 7: Push Notifications](ch7)
 
+> NOTE: Boxcar recently released a new version of their SDK. The app will be updated (if necessary) to work with the new API.
+
 This chapter focuses on sending and receiving push notifications with Cordova. It is not a complete project; it displays
 a very simple `alert` upon receipt of a push notification. In order to send push notifications, you'll need to follow
 the directions present in Chapter 7 in order to set up a <http://boxcar.io> account. In order to send an example push,
