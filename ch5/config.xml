@@ -11,5 +11,5 @@
     </author>
     <content src="index.html" />
     <!-- the below domain needs to be modified to the domain of your web server -->
-    <access origin="pge-as.acmecorp.com" />
+    <access origin="pge-as.photokandy.com" />
 </widget>
