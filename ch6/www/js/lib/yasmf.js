@@ -1,3 +1,10 @@
+(function ( global, define ) {
+// check for amd loader on global namespace
+  var globalDefine = global.define;
+/////////START
+
+var library =
+
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 module.exports = window.Q;
 
@@ -61,9 +68,15 @@ _y.UI.SplitViewController = require( "./yasmf/ui/splitViewController" );
 _y.UI.TabViewController = require( "./yasmf/ui/tabViewController" );
 _y.UI.Alert = require( "./yasmf/ui/alert" );
 _y.UI.Spinner = require( "./yasmf/ui/spinner" );
+
+/* TEMPLATES */
+_y.UI.templates = {};
+_y.UI.templates.uiBarButton = require( "./yasmf/ui/templates/uiBarButton" );
+_y.UI.templates.uiNavigationBar = require( "./yasmf/ui/templates/uiNavigationBar" );
+
 module.exports = _y;
 
-},{"./yasmf/ui/alert":3,"./yasmf/ui/core":4,"./yasmf/ui/event":5,"./yasmf/ui/navigationController":6,"./yasmf/ui/spinner":7,"./yasmf/ui/splitViewController":8,"./yasmf/ui/tabViewController":9,"./yasmf/ui/viewContainer":10,"./yasmf/util/core":11,"./yasmf/util/datetime":12,"./yasmf/util/device":13,"./yasmf/util/fileManager":14,"./yasmf/util/filename":15,"./yasmf/util/h":16,"./yasmf/util/misc":17,"./yasmf/util/object":18,"./yasmf/util/router":19}],3:[function(require,module,exports){
+},{"./yasmf/ui/alert":3,"./yasmf/ui/core":4,"./yasmf/ui/event":5,"./yasmf/ui/navigationController":6,"./yasmf/ui/spinner":7,"./yasmf/ui/splitViewController":8,"./yasmf/ui/tabViewController":9,"./yasmf/ui/templates/uiBarButton":10,"./yasmf/ui/templates/uiNavigationBar":11,"./yasmf/ui/viewContainer":12,"./yasmf/util/core":13,"./yasmf/util/datetime":14,"./yasmf/util/device":15,"./yasmf/util/fileManager":16,"./yasmf/util/filename":17,"./yasmf/util/h":18,"./yasmf/util/misc":19,"./yasmf/util/object":20,"./yasmf/util/router":21}],3:[function(require,module,exports){
 /**
  *
  * Provides native-like alert methods, including prompts and messages.
@@ -540,7 +553,7 @@ Alert.Confirm = function ( options ) {
 };
 module.exports = Alert;
 
-},{"../../q":1,"../util/core":11,"../util/device":13,"../util/h":16,"../util/object":18,"./core":4,"./event":5}],4:[function(require,module,exports){
+},{"../../q":1,"../util/core":13,"../util/device":15,"../util/h":18,"../util/object":20,"./core":4,"./event":5}],4:[function(require,module,exports){
 /**
  *
  * Core of YASMF-UI; defines the version and basic UI  convenience methods.
@@ -1287,7 +1300,7 @@ if ( typeof document.body !== "undefined" && document.body !== null ) {
 Node.prototype.$s = UI.styleElement;
 module.exports = UI;
 
-},{"../util/device":13,"../util/object":18}],5:[function(require,module,exports){
+},{"../util/device":15,"../util/object":20}],5:[function(require,module,exports){
 /**
  *
  * Basic cross-platform mobile Event Handling for YASMF
@@ -1456,7 +1469,7 @@ event.removeListener = function ( theElement, theEvent, theFunction ) {
 };
 module.exports = event;
 
-},{"../util/device":13}],6:[function(require,module,exports){
+},{"../util/device":15}],6:[function(require,module,exports){
 /**
  *
  * Navigation Controllers provide basic support for view stack management (as in push, pop)
@@ -1997,7 +2010,7 @@ var _className = "NavigationController",
   };
 module.exports = NavigationController;
 
-},{"../util/core":11,"./core":4,"./viewContainer":10}],7:[function(require,module,exports){
+},{"../util/core":13,"./core":4,"./viewContainer":12}],7:[function(require,module,exports){
 /**
  *
  * Provides native-like alert methods, including prompts and messages.
@@ -2105,7 +2118,7 @@ function Spinner() {
 }
 module.exports = Spinner;
 
-},{"../util/core":11,"../util/h":16,"../util/object":18,"./core":4}],8:[function(require,module,exports){
+},{"../util/core":13,"../util/h":18,"../util/object":20,"./core":4}],8:[function(require,module,exports){
 /**
  *
  * Split View Controllers provide basic support for side-by-side views
@@ -2454,7 +2467,7 @@ var SplitViewController = function () {
 };
 module.exports = SplitViewController;
 
-},{"./core":4,"./viewContainer":10}],9:[function(require,module,exports){
+},{"./core":4,"./viewContainer":12}],9:[function(require,module,exports){
 /**
  *
  * Tab View Controllers provide basic support for tabbed views
@@ -2779,7 +2792,126 @@ TabViewController.BAR_ALIGNMENT = {
 };
 module.exports = TabViewController;
 
-},{"./core":4,"./event":5,"./viewContainer":10}],10:[function(require,module,exports){
+},{"./core":4,"./event":5,"./viewContainer":12}],10:[function(require,module,exports){
+/**
+ *
+ * ui Bar Button Template
+ *
+ * @module uiBarButton.js
+ * @author Kerri Shotts
+ * @version 0.4
+ *
+ * ```
+ * Copyright (c) 2015 Kerri Shotts, photoKandy Studios LLC
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+ * software and associated documentation files (the "Software"), to deal in the Software
+ * without restriction, including without limitation the rights to use, copy, modify,
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following
+ * conditions:
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
+ * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ * ```
+ */
+/*global module*/
+"use strict";
+
+var
+  h = require( "../../util/h" );
+
+/**
+ * Return a UI Bar Button node
+ *
+ * Options should look like this:
+ *
+ * {
+ *   [regular h options],
+ *   glyph: "clock", // mutually exclusive with text
+ *   text: "tap me!", // mutually exclusive with glyph
+ *   backButton: false, // or true; if true, requires text
+ * }
+ *
+ * @method uiBarButton
+ * @param {{[glyph]: string, [text]: string, [backButton]: boolean}} options
+ * @returns {Node}
+ */
+module.exports = function uiBarButton( options ) {
+  var buttonClass = "ui-bar-button",
+    isButtonGlyph = false;
+  if ( options ) {
+    if ( options.glyph ) {
+      buttonClass += ["", "ui-glyph", "ui-glyph-" + options.glyph, "ui-background-tint-color"].join( " " );
+      isButtonGlyph = true;
+    }
+    if (options.backButton) {
+      buttonClass += " ui-back-button";
+    }
+  }
+
+  if ( !isButtonGlyph ) {
+    buttonClass += " ui-tint-color";
+  }
+
+  return h.el( "div." + buttonClass, options, options && options.text );
+};
+
+},{"../../util/h":18}],11:[function(require,module,exports){
+/**
+ *
+ * ui Navigation Bar Template
+ *
+ * @module uiNavigationBar.js
+ * @author Kerri Shotts
+ * @version 0.4
+ *
+ * ```
+ * Copyright (c) 2015 Kerri Shotts, photoKandy Studios LLC
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+ * software and associated documentation files (the "Software"), to deal in the Software
+ * without restriction, including without limitation the rights to use, copy, modify,
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following
+ * conditions:
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
+ * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ * ```
+ */
+/*global module*/
+"use strict";
+var
+  h = require( "../../util/h" );
+
+function scrollToTop() {
+  var scroller = this.parentNode.parentNode.$( ".ui-scroll-container" );
+  if ( scroller ) {
+    scroller.scrollTop = 0; // scroll to top, please!
+  }
+}
+
+module.exports = function uiNavigationBar( options ) {
+  return h.el( "div.ui-navigation-bar",
+               [
+                 options && options.leftGroup ? h.el( "div.ui-bar-button-group ui-align-left", options.leftGroup ) : undefined,
+                 options && options.title ? h.el( "div.ui-title", options.title, options.titleOptions ) : undefined,
+                 options && options.centerGroup ? h.el( "div.ui-bar-button-group ui-align-center", options.centerGroup ) : undefined,
+                 options && options.rightGroup ? h.el( "div.ui-bar-button-group ui-align-right", options.rightGroup ) : undefined
+               ]
+  );
+};
+
+},{"../../util/h":18}],12:[function(require,module,exports){
 /**
  *
  * View Containers are simple objects that provide very basic view management with
@@ -2830,8 +2962,8 @@ var ViewContainer = function () {
   self.registerNotification( "viewWillDisappear" );
   self.registerNotification( "viewDidAppear" );
   self.registerNotification( "viewDidDisappear" );
-  self.registerNotification( "willRender" );
-  self.registerNotification( "didRender" );
+  self.registerNotification( "willRender", false );
+  self.registerNotification( "didRender", false );
   // private properties used to manage the corresponding DOM element
   self._element = null;
   self._elementClass = "ui-container"; // default; can be changed to any class for styling purposes
@@ -3068,7 +3200,7 @@ var ViewContainer = function () {
 // return the new factory
 module.exports = ViewContainer;
 
-},{"../util/h":16,"../util/object":18}],11:[function(require,module,exports){
+},{"../util/h":18,"../util/object":20}],13:[function(require,module,exports){
 /**
  *
  * Core of YASMF-UTIL; defines the version, DOM, and localization convenience methods.
@@ -4014,7 +4146,7 @@ var _y = {
 };
 module.exports = _y;
 
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /**
  *
  * Provides date/time convenience methods
@@ -4100,7 +4232,7 @@ module.exports = {
   }
 };
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 /**
  *
  * Provides basic device-handling convenience functions for determining if the device
@@ -4346,7 +4478,7 @@ var PKDEVICE = {
 };
 module.exports = PKDEVICE;
 
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /**
  *
  * FileManager implements methods that interact with the HTML5 API
@@ -5590,7 +5722,7 @@ return (function ( Q, BaseObject, globalContext, module ) {
   }
 })( Q, BaseObject, ( typeof IN_YASMF !== "undefined" ) ? undefined : window, module );
 
-},{"../../q":1,"./object.js":18}],15:[function(require,module,exports){
+},{"../../q":1,"./object.js":20}],17:[function(require,module,exports){
 /**
  *
  * Provides convenience methods for parsing unix-style path names. If the
@@ -5735,7 +5867,7 @@ var PKFILE = {
 };
 module.exports = PKFILE;
 
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 /**
  *
  * # h - simple DOM templating
@@ -6492,7 +6624,7 @@ h.DF = h.el.bind( h, "@DF" );
 h.dF = h.DF;
 module.exports = h;
 
-},{"./object":18}],17:[function(require,module,exports){
+},{"./object":20}],19:[function(require,module,exports){
 /**
  *
  * Provides miscellaneous functions that had no other category.
@@ -6539,7 +6671,7 @@ module.exports = {
   }
 };
 
-},{}],18:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 /**
  *
  * # Base Object
@@ -7726,15 +7858,16 @@ var _className = "BaseObject",
                 el.checked = v;
               }
             } else if ( typeof el.value !== "undefined" ) {
-              if ( el.value != v ) {
+              if ( el.value != v || (v !== "" && el.value === "") ) {
                 el.value = v;
               }
+              el.setAttribute("value", v);
             } else if ( typeof el.textContent !== "undefined" ) {
-              if ( el.textContent != v ) {
+              if ( el.textContent != v || (v !== "" && el.textContent !== "") ) {
                 el.textContent = v;
               }
             } else if ( typeof el.innerText !== "undefined" ) {
-              if ( el.innerText != v ) {
+              if ( el.innerText != v || (v !== "" && el.innerText !== "") ) {
                 el.innerText = v;
               }
             } else {
@@ -7921,7 +8054,7 @@ BaseObject.meta = {
 };
 module.exports = BaseObject;
 
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 /**
  *
  * # simple routing
@@ -8249,3 +8382,20 @@ var Router = {
 module.exports = Router;
 
 },{}]},{},[2]);
+
+
+//////END
+library = library(2);
+if ( typeof module !== 'undefined' && module.exports ) {
+// export library for node
+  module.exports = library;
+} else if ( globalDefine ) {
+// define library for global amd loader that is already present
+  (function ( define ) {
+    define( function () { return library; } );
+  }( globalDefine ));
+} else {
+// define library on global namespace for inline script loading
+  global['_y'] = library;
+}
+} (this) ) ;
