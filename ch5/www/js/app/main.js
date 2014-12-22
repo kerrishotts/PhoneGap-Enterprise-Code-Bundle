@@ -125,9 +125,10 @@ define( [ "yasmf", "app/lib/xhr",
     console.log = logMore;
 
     // to be really secure, this should be checked before EVERY XHR. For the demo, once is sufficient.
-    XHR.checkIfSecure( baseURI, [ "27 02 A5 EB 95 91 41 66 C3 9F 82 D3 59 14 13 0E 13 B5 13 9E" ] )
+    XHR.checkIfSecure( baseURI, [ "A6 23 05 42 A6 D5 D7 99 DA 1C 43 1E E8 57 01 6C 4B FA EB 21" ] )
       .then( function ( msg ) {
         // example straight from http://socket.io/docs/
+          /*
         var socket = io( 'https://pge-as.photokandy.com:4443' );
         socket.on( 'news', function ( data ) {
           console.log( data );
@@ -135,6 +136,7 @@ define( [ "yasmf", "app/lib/xhr",
             my: 'data'
           } );
         } );
+        */
 
         return XHR.send( "GET", baseURI + "/" );
       } )

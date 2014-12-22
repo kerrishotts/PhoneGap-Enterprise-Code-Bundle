@@ -21,84 +21,85 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-define( [ "yasmf" ], function ( _y ) {
-  "use strict";
+define(function (require, exports, module) {
+    "use strict";
+    var _y = require("yasmf");
 
-  var ObjUtils = {
-    /**
-     * Returns a value in an object for a given keypath. A keypath can drill into the
-     * object to an arbitrary number of levels, which makes this incredibly useful.
-     * If any portion of the keypath evaluates to undefined or null, that is the final
-     * result. Essentially this is a quick way to obtain values deep in an object
-     * hierarchy without knowing (or caring) if there are intervening undefined/null
-     * values.
-     *
-     * A keypath looks like this: "field1.field2.field3[index1].field4"
-     *
-     * @param {*} o        object
-     * @param {string} k   keypath
-     * @param {*} d        default
-     * @return {*}         value at keypath or default if keypath undefined or null
-     */
-    valueForKeyPath: _y.valueForKeyPath,
-    /**
-     * Merge multiple objects into one. For more information, see
-     * https://gist.github.com/kerrishotts/12c86d2a57f8b5bc1aca
-     *
-     * @return {*} merged objects
-     */
-    merge: function merge() {
-      var t = {},
-        args = Array.prototype.slice.call( arguments, 0 );
+    var ObjUtils = {
+        /**
+         * Returns a value in an object for a given keypath. A keypath can drill into the
+         * object to an arbitrary number of levels, which makes this incredibly useful.
+         * If any portion of the keypath evaluates to undefined or null, that is the final
+         * result. Essentially this is a quick way to obtain values deep in an object
+         * hierarchy without knowing (or caring) if there are intervening undefined/null
+         * values.
+         *
+         * A keypath looks like this: "field1.field2.field3[index1].field4"
+         *
+         * @param {*} o        object
+         * @param {string} k   keypath
+         * @param {*} d        default
+         * @return {*}         value at keypath or default if keypath undefined or null
+         */
+        valueForKeyPath: _y.valueForKeyPath,
+        /**
+         * Merge multiple objects into one. For more information, see
+         * https://gist.github.com/kerrishotts/12c86d2a57f8b5bc1aca
+         *
+         * @return {*} merged objects
+         */
+        merge:           _y.merge,
 
-      args.forEach( function ( s ) {
-        Object.keys( s )
-          .forEach( function ( prop ) {
-            var e = s[ prop ];
-            if ( e instanceof Array ) {
-              if ( t[ prop ] instanceof Array ) {
-                t[ prop ] = t[ prop ].concat( e );
-              } else if ( !( t[ prop ] instanceof Object ) || !( t[ prop ] instanceof Array ) ) {
-                t[ prop ] = e;
-              }
-            } else if ( e instanceof Object && t[ prop ] instanceof Object ) {
-              t[ prop ] = merge( t[ prop ], e );
-            } else {
-              t[ prop ] = e;
+        /**
+         * Merge multiple objects into the specified target object.
+         *
+         * @param {*} sources...    source objects
+         * @param {*} target        target object
+         */
+        mergeInto:     function mergeInto() {
+            var target, source, args = [].splice.call(arguments,0);
+            if (args.length<2) {
+                throw new Error("Not enough arguments for MergeInto");
             }
-          } );
-      } );
-      return t;
-    },
+            target = args.pop();
+            if (args.length>1) {
+                source = _y.merge.apply(undefined, args);
+            } else {
+                source = args[0];
+            }
+            Object.keys(source).forEach(function copyValue(key) {
+                target[key] = source[key];
+            });
+        },
 
-    /**
-     * Iterates over the keys in an object
-     * @param  {Object|Array}   o  Object or array to iterate over
-     * @param  {Function} fn Function to call with each item (value, key, object)
-     */
-    forEach: function forEach( o, fn ) {
-      if ( typeof o === "object" ) {
-        if ( typeof o.forEach !== "undefined" ) {
-          o.forEach( fn );
-          return;
-        }
-      }
-      if ( typeof o !== "object" ) {
-        return;
-      }
-      if ( typeof fn !== "function" ) {
-        return;
-      }
-      Object.keys( o )
-        .forEach( function ( prop ) {
-          fn( o[ prop ], prop, o ); // mimic value, idx, array on Array forEach
-        } );
-    },
-    /**
-     * Interpolates a string
-     */
-    interpolate: _y.interpolate
-  };
+        /**
+         * Iterates over the keys in an object
+         * @param  {Object|Array}   o  Object or array to iterate over
+         * @param  {Function} fn Function to call with each item (value, key, object)
+         */
+        forEach:     function forEach(o, fn) {
+            if (typeof o === "object") {
+                if (typeof o.forEach !== "undefined") {
+                    o.forEach(fn);
+                    return;
+                }
+            }
+            if (typeof o !== "object") {
+                return;
+            }
+            if (typeof fn !== "function") {
+                return;
+            }
+            Object.keys(o)
+                .forEach(function (prop) {
+                    fn(o[prop], prop, o); // mimic value, idx, array on Array forEach
+                });
+        },
+        /**
+         * Interpolates a string
+         */
+        interpolate: _y.interpolate
+    };
 
-  return ObjUtils;
-} );
+    module.exports = ObjUtils;
+});
