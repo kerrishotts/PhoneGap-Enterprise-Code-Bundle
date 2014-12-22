@@ -1,16 +1,16 @@
 # PhoneGap Enterprise Code Bundle
 
-> The book this repository is for is undergoing active development. As such, this repository 
-> should not to be considered stable.
-
-This repository stores the code for the book entitled *PhoneGap Enterprise* published by Packt Publishing. You can 
+This repository stores the code for the book entitled *PhoneGap Enterprise* published by Packt Publishing. You can
 purchase the book at [Pack's Site](http://www.packtpub.com/phonegap-enterprise/book). If you obtained this code package 
-from Packt, you may wish to download the package from GitHub in order receive the most recent changes. The package is 
+from Packt, you may wish to download the package from GitHub in order receive the most recent changes. The package is
 available at <https://github.com/kerrishotts/PhoneGap-Enterprise-Code-Bundle>.
 
-> Note: This book does not cover the basics of PhoneGap, rather it covers issues specific to the enterprise. If you 
-> need to learn about the basics of PhoneGap, you may want to purchase PhoneGap 3.x Mobile Application Development Hotshot 
-> from [Packt Publishing](http://www.packtpub.com/phonegap-3-x-mobile-application-development-hotshot/book).
+> The package is receiving updates to add additional functionality to the example application. You may want to revisit
+> the repository on a periodic basis to get the latest updates.
+
+Note: This book does not cover the basics of PhoneGap, rather it covers issues specific to the enterprise. If you
+need to learn about the basics of PhoneGap, you may want to purchase PhoneGap 3.x Mobile Application Development Hotshot
+from [Packt Publishing](http://www.packtpub.com/phonegap-3-x-mobile-application-development-hotshot/book).
 
 There are several directories in this code package -- they are described in further detail below:
 
@@ -20,7 +20,7 @@ There are several directories in this code package -- they are described in furt
 - `ch5`: chapter 5 project: communication between PhoneGap and the backend
 - `ch6`: chapter 6 project: responding to application events / storage options
 - `ch7`: chapter 7 project: push notifications
-- `tasker`: chapter 8 project: final Tasker version with full presentation, push notifications, etc.
+- `tasker`: chapter 8 project: final Tasker version with full presentation, backend communication, etc.
 
 ## Cordova / PhoneGap Requirements
 
@@ -90,7 +90,7 @@ upon (`npm install`). In order to do so, you'll need to install the Oracle Insta
 server can communicate with your Oracle database. You'll also need to generate an SSL certificate for your server
 as explained in Chapter 3.
 
-Installation instructions are available in the `README.md` file in the `tasker-srv` directory.
+> See [README.md](./tasker-srv/README.md) for installation instructions.
 
 ### [Chapter 5: Communicating between the Mobile and Middle Tier](ch5)
 
@@ -112,7 +112,7 @@ $ cordova prepare
 By default, the app will attempt to communicate with `pge-as.photokandy.com`, which is the host I used for testing. For
 your own testing, you'll want to redirect this to your web server. You should alter the hostname contained within the
 code in `my-ch5/www/js/app/main.js` to point to your web server instead (lines 121 and 131). If you don't, you'll inadvertently contact
-my server... which is probably not your intent.
+my server... which is probably not your intent. Also be sure to update `config.xml`'s whitelist, or you'll get a 401 error.
 
 You'll also need to modify the certificate fingerprint in `main.js` (line 128) to match the fingerprint of any certificates you may have created. Otherwise, the app will generate an error when it is run.
 
@@ -147,13 +147,14 @@ $ cordova prepare
 As with Chapter 5, this project does not implement a complete application, but is simply a demo app showing some of the
 technologies discussed in the chapter.
 
-As with Chapter 5, be sure to update `main.js` to point to your server and update the certificate fingerprint prior to building and running.
+> Note: This app really doesn't do anything visually. You'll need to connect a debugger in order to see the output. If
+> You can't connect a debugger in time, issue `window.location.reload();` in order to trigger a reload.
 
 ### [Chapter 7: Push Notifications](ch7)
 
 This chapter focuses on sending and receiving push notifications with Cordova. It is not a complete project; it displays
 a very simple `alert` upon receipt of a push notification. In order to send push notifications, you'll need to follow
-the directions present in Chapter 7 in order to set up a <boxcar.io> account. In order to send an example push,
+the directions present in Chapter 7 in order to set up a <http://boxcar.io> account. In order to send an example push,
 see `ch7/sendPush.py`.
 
 The project as delivered in this code package is *not* a complete Cordova project. You'll need to execute the following
@@ -203,6 +204,26 @@ As per Boxcar's documentation:
 >
 > directly in the `<widget>` element.
 
+#### API Keys
+
+We don't provide our own API keys. You'll need to provide your own in `ch7/www/js/app/APIKeys.js`. It should be of the form:
+
+```
+define( function() {
+  return {
+    ios: {
+      clientKey: "...",
+      secret: "..."
+    },
+    android: {
+      clientkey: "...",
+      secret: "...",
+      androidSenderID: "..."
+    }
+  };
+} );
+```
+
 ### [Chapter 8: Presentation Techniques](ch8)
 
 This chapter focuses on the varied components that go into a final Cordova app. This app is the final project, and
@@ -229,6 +250,8 @@ $ cordova prepare
 > Be sure to follow the BoxCar integration steps from Chapter 7, and modify the hostname and SSL certificate fingerprints in `www/js/app/config.js`.
 
 Be sure to update `config.js` to point to your server and update the certificate fingerprint prior to building and running.
+
+> Note: be sure to look at the [README.md](./tasker/README.md) file for further information.
 
 [License](id:license)
 ---------------------
