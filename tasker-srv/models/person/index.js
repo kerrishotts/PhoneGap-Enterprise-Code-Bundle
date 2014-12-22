@@ -25,7 +25,7 @@
  *
  ******************************************************************************/
 "use strict";
-var objUtils = require( "../../obj-utils" );
+var objUtils = require("../../obj-utils");
 
 /**
  * Person -
@@ -33,32 +33,36 @@ var objUtils = require( "../../obj-utils" );
  * @param  {*} props            object containing values to assign
  * @return {Person}             A person
  */
-function Person( props ) {
-  "use strict";
-  var def = {
-    "id":            undefined,
-    "administrator": undefined,
-    "fullName":      "",
-    "prefName":      "",
-    "userId":        "",
-    "changeDate":    new Date(),
-    "changeUser":    undefined
-  };
-  var dbFieldMap = {
-    "ID":            { key: "id" },
-    "ADMINISTRATOR": { key: "administrator" },
-    "FULL_NAME":     { key: "fullName" },
-    "PREF_NAME":     { key: "prefName" },
-    "USER_ID":       { key: "userId" },
-    "CHANGE_DATE":   { key: "changeDate", cvt: function ( v ) { return new Date( v ); } },
-    "CHANGE_USER":   { key: "changeUser" }
-  };
+function Person(props) {
+    "use strict";
+    var def = {
+        "id":            undefined,
+        "administrator": undefined,
+        "fullName":      "",
+        "prefName":      "",
+        "userId":        "",
+        "changeDate":    new Date(),
+        "changeUser":    undefined
+    };
+    var dbFieldMap = {
+        "ID":               {key: "id"},
+        "ADMINISTRATOR_ID": {key: "administrator"},
+        "FULL_NAME":        {key: "fullName"},
+        "PREF_NAME":        {key: "prefName"},
+        "USER_ID":          {key: "userId"},
+        "CHANGE_DATE":      {
+            key: "changeDate", cvt: function (v) {
+                return new Date(v);
+            }
+        },
+        "CHANGE_USER":      {key: "changeUser"}
+    };
 
-  return objUtils.mergeIntoUsingMap( props, def, dbFieldMap );
+    return objUtils.mergeIntoUsingMap(props, def, dbFieldMap);
 }
 
 Person.prototype.copy = function () {
-  return new Person( this );
+    return new Person(this);
 };
 
 module.exports = Person;
