@@ -336,5 +336,5 @@ The following roles are recognized:
 When data is changed on an exiting task or a comment is added to a task, a push notification is automatically generated.
 For this reason, the following permissions must be run once:
 
-TODO: fill in.
+> Note: Push notifications in the database server are coming shortly. Please check back soon.
 
