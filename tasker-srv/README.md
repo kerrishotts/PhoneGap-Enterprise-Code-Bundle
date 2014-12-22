@@ -183,3 +183,9 @@ If you must use self-signed certificates, you should perform the following steps
 To verify that the Tasker Server is working, just access the server in a browser. For example, if your server is
 running on `pge-as.photokandy.com:4443`, just navigate to <https://pge-as.photokandy.com:4443> in your browser. You
 should receive formatted API documentation in response.
+
+## Known Issues
+
+Like all software, this has bugs. Here are the bugs I know about at the moment, and will rectify in the future:
+
+* `patch-task` fails for some reason on a lot of attempts. Looking into it.
