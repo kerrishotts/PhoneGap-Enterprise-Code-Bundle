@@ -71,7 +71,7 @@ XE is free and somewhat limited in enterprise features, but it works just fine a
 small production server. You'll need to install the database server first, and then run the scripts in the specified
 order to recreate the system.
 
-For instructions on how to install the data store and business logic, see the `README.md` file located within the
+For instructions on how to install the data store and business logic, see the [README.md](./database/README.md) file located within the
 `/database` folder.
 
 ### [Chapter 3: Securing PhoneGap Apps](ch3)
