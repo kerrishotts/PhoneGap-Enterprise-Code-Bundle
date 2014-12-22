@@ -51,24 +51,18 @@ define(function (require, exports, module) {
     module.exports = function dashboardTemplate(v, c, map, session, networkStatus) {
         var h = _y.h;
         return [
+            _y.UI.templates.uiNavigationBar({
+                title:      _y.T("DASHBOARD:TITLE"),
+                rightGroup: networkStatus ? [_y.UI.templates.uiBarButton({
+                    text:   _y.T(session ? "DASHBOARD:LOGOUT" : "DASHBOARD:LOGIN"),
+                    hammer: {
+                        tap:    {handler: c.doLogInOut},
+                        hammer: hammer
+                    }
+                })] : undefined
+            }),
             //
             // navigation bar; includes title
-            h.el("div.ui-navigation-bar",
-                [h.el("div.ui-title", _y.T("DASHBOARD:TITLE")),
-                    h.el("div.ui-bar-button-group ui-align-right",
-                        networkStatus ? (
-                            h.el("div.ui-bar-button ui-tint-color", _y.T(session ? "DASHBOARD:LOGOUT" : "DASHBOARD:LOGIN"),
-                                {
-                                    hammer: {
-                                        tap:    {handler: c.doLogInOut},
-                                        hammer: hammer
-                                    }
-                                })) : (
-                            undefined
-                        )
-                    )
-                ]
-            ),
             // key bar
             colorKeyBarTemplate(),
             //

@@ -36,7 +36,30 @@ define(function (require, exports, module) {
             changeUser:     null
         };
 
-        ObjUtils.mergeInto(defaultPerson, data, this);
+        var contextMap = {
+            "id":             "person-id",
+            "userId":         "user-id",
+            "fullName":       "full-name",
+            "prefName":       "pref-name",
+            "administeredBy": "administrator",
+            "changeDate":     "change-date",
+            "changeUser":     "change-user"
+        };
+
+        Object.keys(defaultPerson).forEach(function copyValue(prop) {
+            if (data) {
+                if (data[prop] !== undefined && data[prop] !== null) {
+                    this[prop] = data[prop];
+                } else if (data[contextMap[prop]] !== undefined && data[contextMap[prop]] !== null) {
+                    this[prop] = data[contextMap[prop]]
+                } else {
+                    this[prop] = defaultPerson[prop];
+                }
+            } else {
+                this[prop] = defaultPerson[prop];
+            }
+        }, this);
+
         if (!(this.changeDate instanceof Date)) {
             this.changeDate = new Date(this.changeDate);
         }

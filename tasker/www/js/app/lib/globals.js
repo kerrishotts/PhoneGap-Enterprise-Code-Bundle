@@ -31,12 +31,6 @@ define(function (require, exports, module) {
         events = _y.UI.globalNotifications,
         session = null;
 
-    // load in any stored session
-    // TODO: use keychain
-    if (localStorage.getItem("auth")) {
-        session = new Session(JSON.parse(localStorage.getItem("auth")));
-    }
-
     // register global events so that they can be listened to later
 
     // application state, must be synchronous (hence false)
@@ -62,6 +56,14 @@ define(function (require, exports, module) {
             return this._networkStatus !== "Offline"
         }
     };
+
+    // load in any stored session
+    Session.load()
+        .then(function (session) {
+            GLOBALS.session = session;
+            GLOBALS.events.emit("login:sessionLoaded");
+        })
+        .done();
 
     module.exports = GLOBALS;
 });

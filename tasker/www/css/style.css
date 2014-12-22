@@ -19,7 +19,17 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRA
 OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 */
-.ui-container modalWindow {
+
+.ios .ui-container,
+.mac .ui-container,
+.android .ui-container {
+    background-color: #E8E8E8;
+    color: #333;
+}
+
+.ios .ui-container.ui-transparent,
+.mac .ui-container.ui-transparent,
+.android .ui-container.ui-transparent {
     background-color: transparent;
 }
 
@@ -31,16 +41,24 @@ OTHER DEALINGS IN THE SOFTWARE.
     color: #E8E8E8;
 }
 
+.ios .ui-navigation-bar .ui-tint-color,
+.mac .ui-navigation-bar .ui-tint-color,
+.android .ui-navigation-bar .ui-tint-color {
+    color: white;
+}
+
 .ui-background-tint-color {
     background-color: #37B;
 }
 
-.android .ui-background-tint-color {
-    color: #E8E8E8;
+.ios .ui-navigation-bar .ui-background-tint-color,
+.mac .ui-navigation-bar .ui-background-tint-color,
+.android .ui-navigation-bar .ui-background-tint-color {
+    background-color: white;
 }
 
 .ui-disabled .ui-tint-color {
-
+    color: #888;
 }
 
 .android .ui-disabled .ui-tint-color {
@@ -53,13 +71,16 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 .ui-back-button::before,
 .android .ui-back-button::before {
-    background-color: #37B;
+    background-color: white;
 }
 
+.ios .ui-navigation-bar,
+.mac .ui-navigation-bar,
 .android .ui-navigation-bar {
     background-color: #37B;
+    background-image: none;
     border-bottom: 0;
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+    color: white;
 }
 
 .needAuth, .noNetwork, .noItems {
@@ -91,15 +112,11 @@ form.vertical-layout div.text {
 
 form.vertical-layout div.field label {
     background-color: white;
-    height: 44px;
     padding: 0 1em;
     border-bottom: 1px solid rgba(0, 0, 0, .25);
     display: -webkit-box;
     display: -moz-box;
     display: -webkit-flex;
-    display: -moz-flex;
-    display: -ms-flex;
-    display: -o-flex;
     display: flex;
 }
 
@@ -120,9 +137,12 @@ form.vertical-layout div.field label span {
     -o-flex: 1;
     flex: 1;
     line-height: 44px;
+    text-align: right;
 }
 
-form.vertical-layout div.field label input {
+form.vertical-layout div.field label input,
+form.vertical-layout div.field label textarea,
+form.vertical-layout div.field label select {
     -webkit-appearance: none;
     -moz-appearance: none;
     border: 0;
@@ -139,10 +159,70 @@ form.vertical-layout div.field label input {
     -ms-flex: 2;
     -o-flex: 2;
     flex: 2;
+    line-height: 44px;
 }
 
-form.vertical-layout div.field label input:focus {
+form.vertical-layout div.field label input[type=range] {
+    height: 44px;
+}
+
+form.vertical-layout div.field label input[type=range]::before {
+    content: attr(value) "%";
+    display: inline-block;
+    width: 4em;
+    text-align: left;
+    color: #333;
+}
+
+form.vertical-layout div.field label ::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 36px;
+    width: 36px;
+    margin-top: -2px;
+    background-color: #E8E8E8;
+    border: 4px solid white;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    color: white;
+    border-radius: 22px;
+}
+
+form.vertical-layout div.field label input[type=range]:focus::-webkit-slider-thumb,
+form.vertical-layout div.field label input[type=range]:active::-webkit-slider-thumb {
+    background-color: #37B;
+}
+
+form.vertical-layout div.field label input[type=range]:invalid::-webkit-slider-thumb {
+    background-color: #B33;
+}
+
+form.vertical-layout div.field label ::-webkit-slider-runnable-track {
+    height: 36px;
+    background-color: #E8E8E8;
+    border-radius: 36px;
+}
+
+form.vertical-layout div.field label textarea {
+    line-height: normal;
+    padding: 11px 0;
+    height: 10em;
+}
+
+form.vertical-layout div.field label input:focus,
+form.vertical-layout div.field label textarea:focus {
     background-color: #F0F7FF;
+}
+
+form.vertical-layout div.field label input[type=range]:focus {
+    background-color: inherit;
+}
+
+form.vertical-layout div.field label input:invalid,
+form.vertical-layout div.field label textarea:invalid {
+    background-color: #FFE8E8;
+}
+
+form.vertical-layout div.field label input[type=range]:invalid {
+    background-color: inherit;
 }
 
 div.button-group {
@@ -153,7 +233,7 @@ div.button-group {
     display: -webkit-flex;
     display: flex;
     position: absolute;
-    bottom: 0px;
+    bottom: 0;
     width: 100%;
 }
 
@@ -185,6 +265,8 @@ div.button-group button:active {
  * view background colors
  * ======================
  */
+.ios .loginView, .loginView,
+.mac .loginView, .loginView,
 .android .loginView, .loginView {
     background-color: #37B;
 }
@@ -293,6 +375,58 @@ div.button-group button:active {
  * ================
  */
 
+.taskListView .ui-list-item-flex-contents {
+    position: static;
+}
+
+.taskListView div.task-pct {
+    margin: auto auto;
+    -webkit-transform: rotate(-90deg);
+    -webkit-transform-origin: center center;
+    -moz-transform: rotate(-90deg);
+    -moz-transform-origin: center center;
+    -ms-transform: rotate(-90deg);
+    -ms-transform-origin: center center;
+    transform: rotate(-90deg);
+    transform-origin: center center;
+    width: 2em;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.taskListView .ui-list .task-title {
+    font-weight: bold;
+    line-height: 1.25em;
+}
+
+.taskListView .ui-list .task-description {
+    font-size: 80%;
+    line-height: 1.25em;
+    color: #666;
+}
+
+.taskListView .ui-list .task-assignee, .ui-list .task-owner {
+    width: 50%;
+    display: inline-block;
+    font-size: 80%;
+    color: #888;
+}
+
+.taskListView .ui-list .task-owner {
+    text-align: right;
+}
+
+.taskListView .ui-label.task-status {
+    color: white;
+    text-align: center;
+    font-size: 80%;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -webkit-flex;
+    display: flex;
+    position: static;
+}
+
 /*
  * task edit styles
  * ================
@@ -392,43 +526,13 @@ div.button-group button:active {
     background-color: #33373B;
 }
 
-.ui-list .task-title {
-    font-weight: bold;
-    line-height: 1.25em;
-}
-
-.ui-list .task-description {
-    font-size: 80%;
-    line-height: 1.25em;
-    color: #666;
-}
-
-.ui-list .task-assignee, .ui-list .task-owner {
-    width: 50%;
-    display: inline-block;
-    font-size: 80%;
-    color: #888;
-}
-
-.ui-list .task-owner {
-    text-align: right;
-}
-
-.ui-label.task-status {
-    color: white;
-    text-align: center;
-    font-size: 80%;
-    line-height: 5em;
-    font-weight: 100;
-}
-
 .ui-list .task-stat-part {
     color: white;
     text-align: center;
     font-size: 85%;
     line-height: 5em;
     font-weight: 100;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     min-width: 4em;
     outline: 1px solid rgba(255, 255, 255, 0.5);
 }

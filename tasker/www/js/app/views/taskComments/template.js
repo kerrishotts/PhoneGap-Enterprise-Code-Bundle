@@ -1,6 +1,6 @@
 /**
  *
- * task list template
+ * task comments template
  *
  * @author Kerri Shotts
  * @version 1.0.0

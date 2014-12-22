@@ -36,7 +36,7 @@ define(function (require, exports, module) {
             [
                 h.el("div.ui-list-item-flex-contents",
                     [
-                        h.el("div.ui-label task-status " + Task.CODE_DESCRIPTION[task.status], task.pctComplete),
+                        h.el("div.ui-label task-status " + Task.CODE_DESCRIPTION[task.status], h.el("div.task-pct", _y.PCT(task.pctComplete/100, "0"))),
                         h.el("div.ui-fill", [
                             h.el("div.ui-label task-title", task.title),
                             h.el("div.ui-label task-description", task.description),

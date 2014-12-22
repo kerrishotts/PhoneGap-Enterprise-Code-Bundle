@@ -1,6 +1,6 @@
 /**
  *
- * task list view
+ * task comments view
  *
  * @author Kerri Shotts
  * @version 1.0.0
@@ -28,7 +28,7 @@ define(function (require, exports, module) {
         GLOBALS = require("app/lib/globals"),
         _className = "TaskListView";
 
-    module.exports = function TaskListView() {
+    module.exports = function TaskCommentsView() {
         var self = new _y.UI.ViewContainer();
         self.subclass(_className);
 
@@ -126,7 +126,7 @@ define(function (require, exports, module) {
                     })
                     .done();
             } else {
-                self.message = _y.T("NEEDS_AUTH");
+                self.message = _y.T("TASKLIST:NO_TASKS");
                 self.renderToElement();
             }
         };
@@ -172,6 +172,7 @@ define(function (require, exports, module) {
             GLOBALS.events.off("network*", self.renderToElement);
             self.off("filterChanged", self.getData);
             self.off("viewDidAppear", self.getData);
+            self.off("filterChanged", self.getData);
             self.off("viewWasPopped", self.destroy);
             self.$super();
         });

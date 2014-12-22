@@ -25,8 +25,10 @@ define(function (require, exports, module) {
     "use strict";
 
     var
+        Task = require("app/models/task/model"),
         Tasks = require("app/models/tasks/model"),
         People = require("app/models/people/model"),
+        //GLOBALS = require("../globals"),
         _y = require("yasmf");
 
     /*
@@ -42,7 +44,7 @@ define(function (require, exports, module) {
          * @param {[ownedBy], [assignedTo]} opt
          * @returns {*} Promise
          */
-        getTasks:  function getTasks(opt) {
+        getTasks:   function getTasks(opt) {
             var ownedBy = _y.valueForKeyPath(opt, "ownedBy"),
                 assignedTo = _y.valueForKeyPath(opt, "assignedTo"),
                 options = {},
@@ -65,7 +67,7 @@ define(function (require, exports, module) {
                     return new Tasks(serverTasks);
                 });
         },
-        getPeople: function getPeople(opt) {
+        getPeople:  function getPeople(opt) {
             var administeredBy = _y.valueForKeyPath(opt, "administeredBy"),
                 options = {},
                 api = GLOBALS.api;
@@ -80,6 +82,35 @@ define(function (require, exports, module) {
                             return embedded[key];
                         });
                     return new People(serverPeople);
+                });
+        },
+        getTask:    function getTask(taskId) {
+            var api = GLOBALS.api;
+            return api.getTask(taskId)
+                .then(function transformTask(r) {
+                    return new Task(r._context);
+                });
+        },
+        createTask: function createTask(task) {
+            var api = GLOBALS.api;
+            return api.createTask({
+                "task-title":       task.title,
+                "task-description": task.description
+            });
+        },
+        patchTask:  function patchTask(task) {
+            var api = GLOBALS.api,
+                o = {};
+            o["status"] = task.status;
+            o["pct-complete"] = task.pctComplete;
+            if (GLOBALS.session.personId === task.owner) {
+                if (task.assignedTo !== null && task.assignedTo !== undefined && task.assignedTo !== "") {
+                    o["assigned-to"] = task.assignedTo;
+                }
+            }
+            return api.patchTask(task.id, o)
+                .then(function (r) {
+                    return task.id;
                 });
         }
 

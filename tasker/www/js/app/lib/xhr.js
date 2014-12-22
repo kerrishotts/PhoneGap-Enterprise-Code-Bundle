@@ -330,8 +330,12 @@ define(function (require, exports, module) {
                         case "application/json":
                         case "text/json":
                             try {
-                                response.body = JSON.parse(this.responseText);
-                                deferred.resolve(response);
+                                if (this.responseText !== "") {
+                                    response.body = JSON.parse(this.responseText);
+                                    deferred.resolve(response);
+                                } else {
+                                    deferred.resolve({});
+                                }
                             } catch (err) {
                                 deferred.reject(new JSONParseError(this.responseText));
                             }

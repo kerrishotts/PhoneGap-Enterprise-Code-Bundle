@@ -29,7 +29,10 @@ define(function (require, exports, module) {
         LoginView = require("app/views/login/view"),
         DashboardView = require("app/views/dashboard/view"),
         TaskListView = require("app/views/taskList/view"),
-        API = require("app/api/api")
+        TaskView = require("app/views/taskView/view"),
+        API = require("app/api/api"),
+        Hammer = require("hammer");
+    Hammer.defaults.stop_browser_behavior.touchAction = "pan-y";
 
     // define our app object
     var APP = new _y.BaseObject(),
@@ -39,7 +42,11 @@ define(function (require, exports, module) {
 
     // we want the API instance available from anywhere
     GLOBALS.api = new API({baseURL: GLOBALS.config.baseURL});
-    window.GLOBALS = GLOBALS; // <-- FOR TESTING ONLY!
+
+    // <-- Yes, bad. But we have some circular dependencies, and RequireJS doesn't
+    // want to resolve them. So, we do this. If we were using Browserify, this wouldn't be an issue.
+    // TODO: change to browserify! ;-)
+    window.GLOBALS = GLOBALS;
 
     /**
      * Dispatches a applicationPausing or applicationResuming event synchronously, based on appState
@@ -163,6 +170,12 @@ define(function (require, exports, module) {
                     new TaskListView({filter: args[0]})
                 );
                 break;
+            case "APP:NAV:createTask":
+            case "APP:NAV:editTask":
+                self.navigationController.pushView(
+                    new TaskView({taskId: (args && args[0] !== null && args[0] !== undefined) ? args[0] : null})
+                );
+                break;
             default:
                 console.info("Unhandled navigation", sender, notice, args);
         }
@@ -182,41 +195,6 @@ define(function (require, exports, module) {
                 dispatchOfflineEvent();
             }
         }
-        // start listening for resume/pause events
-        /*
-         if (typeof device !== "undefined" && device.platform === "ios") {
-         // if we want to persist localStorage, we need to use PKLocalStorage plugin
-         window.PKLocalStorage.addPauseHandler(dispatchPauseEvent);
-         window.PKLocalStorage.addResumeHandler(dispatchResumeEvent);
-         } else {
-         // add the proper pause/resume handlers
-         document.addEventListener("pause", dispatchPauseEvent, false);
-         document.addEventListener("resume", dispatchResumeEvent, false);
-         }
-         // sample pause/resume handlers
-         function saveDataBeforePause() {
-         localStorage.pauseInProgress = "true";
-         localStorage.dataToSave = JSON.stringify({
-         "name":    "Bob Smith",
-         "manager": "John Doe"
-         });
-         }
-
-         APP.addGlobalEventListener("applicationPausing", saveDataBeforePause);
-
-         function cleanUpAfterResume() {
-         localStorage.removeItem("pauseInProgress");
-         localStorage.removeItem("dataToSave");
-         }
-
-         APP.addGlobalEventListener("applicationResuming", cleanUpAfterResume);
-         // check if we have data to restore
-         if (typeof localStorage.pauseInProgress !== "undefined") {
-         var savedData = JSON.parse(localStorage.dataToSave);
-         alert(JSON.stringify(savedData));
-         cleanUpAfterResume();
-         }
-         */
 
         // find the rootContainer DOM element, make a new login view and show it
         var rootContainer = _y.$("#rootContainer"),
@@ -231,6 +209,7 @@ define(function (require, exports, module) {
         [
             "APP:needsLogin", "APP:needsLoginUI", "login:auth", "login:authCancel",
             "login:response", "login:good", "login:fail", "login:dismiss",
+            "login:sessionLoaded", "login:sessionSaved", "login:sessionCleared",
             "login:logout", "APP:block", "APP:unblock"
         ].forEach(function (n) {
                 GLOBALS.events.registerNotification(n);

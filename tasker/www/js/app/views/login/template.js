@@ -50,7 +50,7 @@ define(function (require, exports, module) {
         return [
             //
             // navigation bar; includes title
-            h.el("div.ui-navigation-bar", h.el("div.ui-title", _y.T("LOGIN:TITLE"))),
+            _y.UI.templates.uiNavigationBar({title: _y.T("LOGIN:TITLE")}),
             //
             // scroll container containing login form and text; avoid the navigation bar
             h.el("div.ui-scroll-container", h.el("form.vertical-layout ui-avoid-navigation-bar",

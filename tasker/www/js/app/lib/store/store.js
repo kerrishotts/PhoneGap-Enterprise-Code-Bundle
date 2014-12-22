@@ -24,21 +24,33 @@
 define(function (require, exports, module) {
     "use strict";
 
-    // could have a mocks here too
     var
         backend = require("./backend"),
         mock = require("./mock");
 
-    var store = {
-        MOCK:      false,
-        getTasks:  function getTasks(options) {
-            return this.MOCK ? mock.getTasks(options) : backend.getTasks(options);
-        },
-        getPeople: function getPeople(options) {
-            return this.MOCK ? mock.getPeople(options) : backend.getPeople(options);
+    function doAction ( task, options ) {
+        var whichOne;
+        whichOne = this.MOCK ? mock : backend;
+        if (whichOne[task]) {
+            return whichOne[task](options);
+        } else {
+            throw new Error ("Unsupported action", task);
         }
+    }
+
+    var store = {
+        MOCK:      false
     };
 
+    // partially apply the methods that exist on the backend to the store (we assume the mock has them too)
+    var methods = Object.keys(backend);
+    methods.forEach( function addMethod (methodName) {
+        store[methodName] = doAction.bind(store, methodName);
+        if (!mock[methodName]) {
+            // we won't die, but let the console know
+            console.info("Mock is missing action", methodName);
+        }
+    });
 
     module.exports = store;
 

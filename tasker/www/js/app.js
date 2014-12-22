@@ -36,7 +36,7 @@
 requirejs.config( {
                     baseUrl: './js/lib',
                     paths: {
-                      "yasmf": "./yasmf.amd",
+                      "yasmf": "./yasmf",
                       'app': '../app',
                       'html': '../../html',
                       'Q': 'q',

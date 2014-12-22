@@ -9,4 +9,28 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
+    <preference name="permissions" value="none" />
+    <preference name="fullscreen" value="false"/>
+    <preference name="orientation" value="default"/>
+    <preference name="stay-in-webview" value="false"/>
+    <preference name="show-splash-screen-spinner" value="false"/>
+    <preference name="auto-hide-splash-screen" value="true"/>
+    <preference name="disable-cursor" value="false"/>
+
+    <preference name="KeyboardDisplayRequiresUserAction" value="false"/>
+    <preference name="target-device" value="universal"/>
+    <preference name="webviewbounce" value="false"/>
+    <preference name="DisallowOverscroll" value="true"/>
+    <preference name="exit-on-suspend" value="false"/>
+    <preference name="deployment-target" value="6.0"/>
+    <preference name="detect-data-types" value="false"/>
+    <preference name="KeyboardShrinksView" value="true"/>
+    <preference name="SuppressesIncrementalRendering" value="true"/>
+
+    <preference name="android-minSdkVersion" value="14"/>
+    <preference name="android-installLocation" value="auto"/>
+    <preference name="android-windowSoftInputMode" value="adjustResize"/>
+
+    <!-- the below domain needs to be modified to the domain of your web server -->
+    <access origin="pge-as.photokandy.com" />
 </widget>

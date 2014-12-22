@@ -46,18 +46,43 @@ define(function (require, exports, module) {
 
     function Task(data) {
         var defaultTask = {
-            id: null,
-            title: "",
+            id:          null,
+            title:       "",
             description: "",
             pctComplete: 0,
-            status: TASK_DESCRIPTION_CODE.inProgress,
-            owner: null,
-            assignedTo: null,
-            changeDate: new Date(),
-            changeUser: null
+            status:      TASK_DESCRIPTION_CODE.inProgress,
+            owner:       null,
+            assignedTo:  null,
+            changeDate:  new Date(),
+            changeUser:  null
         };
 
-        ObjUtils.mergeInto(defaultTask, data, this);
+        var contextMap = {
+            "id":          "task-id",
+            "title":       "title",
+            "description": "description",
+            "pctComplete": "pct-complete",
+            "status":      "status",
+            "assignedTo":  "assigned-to",
+            "owner":       "owned-by",
+            "changeDate":  "change-date",
+            "changeUser":  "change-user"
+        };
+
+        Object.keys(defaultTask).forEach(function copyValue(prop) {
+            if (data) {
+                if (data[prop] !== undefined && data[prop] !== null) {
+                    this[prop] = data[prop];
+                } else if (data[contextMap[prop]] !== undefined && data[contextMap[prop]] !== null) {
+                    this[prop] = data[contextMap[prop]]
+                } else {
+                    this[prop] = defaultTask[prop];
+                }
+            } else {
+                this[prop] = defaultTask[prop];
+            }
+        }, this);
+
         if (!(this.changeDate instanceof Date)) {
             this.changeDate = new Date(this.changeDate);
         }
